@@ -15,16 +15,6 @@ public class GpsPozicia {
 		this.orientacia = Orientacia.getOrientacia(String.valueOf(sirka).trim() + String.valueOf(dlzka).trim());
 	}
 
-	public GpsPozicia(Double X, Double Y) {
-		this.X = X;
-		this.Y = Y;
-	}
-
-	public GpsPozicia() {
-		this.X = 0.0;
-		this.Y = 0.0;
-	}
-
 	public Double getX() {
 		return this.X;
 	}

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.aus.prva_semestralka.objekty.GpsPozicia;
 import com.aus.prva_semestralka.objekty.IPozemok;
@@ -16,16 +17,18 @@ public class QTNode {
 	private Integer primarnyKluc;
 	private List<GpsPozicia> sekundarnyKluc;
 	private List<QTNode> synovia;
+	private IPozemok pozemok_data;
 	private List<IPozemok> pozemky;
 	private List<IPozemok> pozemkySPrekrocenouHlbkou;
 	private boolean jeList;
 	private Integer hlbka;
+	private int pocetSynov = 0;
 	private final Integer MAX_POCET_SYNOV = 4;
 
 	public QTNode(Integer primarnyKluc, List<GpsPozicia> sekundarnyKluc, Integer hlbka) {
 		this.primarnyKluc = primarnyKluc;
 		this.sekundarnyKluc = sekundarnyKluc;
-		this.synovia = new ArrayList<>(4);
+		this.synovia = new ArrayList<>(MAX_POCET_SYNOV);
 		this.pozemky = new ArrayList<>(10);
 		this.pozemkySPrekrocenouHlbkou = new ArrayList<>(20);
 		this.jeList = true;
@@ -72,78 +75,108 @@ public class QTNode {
 		synovia.add(3, syn);
 	}
 
-
-
 	public boolean pridajPozemok(IPozemok pozemok) {
-
 		QTNode currentNode = this; // Start with the current node as the root
 
-		// Traverse from the root to a leaf node
 		while (!currentNode.jeList) {
-			boolean propertyInserted = false;
+			boolean posunNaDalsiehoSyna = false;
+			// prejdeme vsetkych synov a najdeme toho, do ktoreho sa zmesti pozemok
 			for (QTNode syn : currentNode.synovia) {
 				if (syn.zmestiSa(pozemok)) {
-					currentNode = syn; // Move to the child node
-					propertyInserted = true;
+					currentNode = syn; // posunieme sa na syna do ktoreho sa zmesti pozemok
+					posunNaDalsiehoSyna = true;
 					break;
 				}
 			}
-
-			// If the property couldn't be inserted into any child node we will insert it into the overflow list
-			if (!propertyInserted) {
+			// presli sme vsetkych synov currentNode ale ani do jedneho sa nam nezmesti, tak ho pridame do tohto
+			if (!posunNaDalsiehoSyna) {
 				currentNode.pozemky.add(pozemok);
 				return true;
 			}
 		}
-
-		// The current node is now a leaf node; insert the property
-		if (currentNode.zmestiSa(pozemok)) {
-			currentNode.rozdel();
-			for (QTNode syn : currentNode.synovia) {
-				if (syn.zmestiSa(pozemok)) {
-					syn.getPozemky().add(pozemok);
-					return true;
-				}
-			}
-			currentNode.pozemky.add(pozemok);
-			return true;
+		// current node je list - nema synov
+		if (currentNode.pozemok_data == null) {
+			currentNode.pozemok_data = pozemok;
 		} else {
-			// The property doesn't fit in this leaf node, so it should be added to the overflow list
-			currentNode.pozemkySPrekrocenouHlbkou.add(pozemok);
-			return true;
+			// ak uz obsahuje nejake data, potom ideme delit node
+			if (Objects.equals(currentNode.hlbka, QuadTree.maxHlbka)) {
+				currentNode.pozemkySPrekrocenouHlbkou.add(pozemok);
+				return true;
+			}
+			currentNode.rozdel();
+			// najskor zaradime pozemok do kvadrantu
+			var jePriradenyKvadrat = zaradPozemokDoKvadratu(currentNode.pozemok_data, currentNode.synovia);
+			if (!jePriradenyKvadrat) {
+				currentNode.pozemky.add(currentNode.pozemok_data);
+			}
+			// zaradime novy pozemok do kvadrantu
+			var jeZaradenyAjPozemokNaVkladanie = zaradPozemokDoKvadratu(pozemok, currentNode.synovia);
+			if (!jeZaradenyAjPozemokNaVkladanie) {
+				currentNode.pozemky.add(pozemok);
+			}
 		}
+		return true;
+	}
 
-//		if (zmestiSaDoNode(pozemok)) {
-//			if (isJeList()) {
-//				rozdel();
-//			}
-			// podmienka ci uz neni taky pozemok v node - pridame ho do listu pozemkov
-			// ak je v node uz pozemok, ktory ma rovnake suradnice ako pridavany pozemok, tak ho pridame do listu pozemkov
+	private boolean zaradPozemokDoKvadratu(IPozemok pozemok_data, List<QTNode> synovia) {
+		// prechadzame novo vytvorene pozemky a hladame ten, ktory sa zmesti do kvadrantu
+		for (QTNode syn : synovia) {
+			// ak sa zmesti
+			if (syn.zmestiSa(pozemok_data)) {
+				// potom musime este zistit ci je prazdny
+				// ak je prazdny tak ho pridame na miesto pozemku
+				if (syn.getPozemok_data() == null) {
+					syn.setPozemok_data(pozemok_data);
+					return true;
+				} else {
+					var pozemokSyna = syn.getPozemok_data();
+					// inak musime rozdelit syna,
+					// tento scenar sa moze stat ak prvy pozemok ktory tento node mal ale nemal synov pridame napr do tretieho
+					// kvadratu a potom pridame dalsi pozemok, ktory sa ma zmestit do toho isteho
 
-//			var currentNodeIndex = 0;
-//			var currentNode = synovia.get(currentNodeIndex);
-//			var currentSynovia = synovia;
-//
-//			while (currentNode != null) {
-//				if (currentNode.zmestiSaDoKvadratu(pozemok, currentNode)) {
-//					currentSynovia = currentNode.getSynovia();
-//					if (currentSynovia != null) {
-//						currentNode.rozdel();
-//						currentNodeIndex = 0;
-//						currentNode = currentSynovia.get(currentNodeIndex);
-//					} else {
-//						currentNode.getPozemky().add(pozemok);
-//						currentNode = null;
-//					}
-//				} else {
-//					currentNodeIndex++;
-//					currentNode = currentSynovia.get(currentNodeIndex);
-//				}
-//				if (currentNodeIndex == 4) {
-//					currentNode.getPozemky().add(pozemok);
-//					currentNode = null;
-//				}
-//			}
+					// while oba sa zmestia do toho isteho kvadrantu
+					while (true) {
+						boolean zmestiaSaObaja = false;
+						boolean zmestilSaPrvy = false;
+						boolean zmestilSaDruhy = false;
+						if (Objects.equals(syn.hlbka, QuadTree.maxHlbka)) {
+							syn.pozemkySPrekrocenouHlbkou.add(pozemok_data);
+							syn.pozemkySPrekrocenouHlbkou.add(pozemokSyna);
+							return true;
+						}
+						syn.rozdel();
+						for (QTNode syn2 : syn.synovia) {
+							if (syn2.zmestiSa(pozemok_data) && syn2.zmestiSa(pozemokSyna)) {
+								syn = syn2;
+								zmestiaSaObaja = true;
+								break;
+							} else if (syn2.zmestiSa(pozemok_data)) {
+								zmestilSaPrvy = true;
+								syn2.pozemok_data = pozemok_data;
+								break;
+							} else if (syn2.zmestiSa(pozemokSyna)) {
+								zmestilSaDruhy = true;
+								syn2.pozemok_data = pozemokSyna;
+								break;
+							}
+						}
+						// ak sa zmestia obaja, tak pokracujeme v cykle
+						// ak sa nezmesti ani jeden, tak pridame oba pozemky do pozemkov aktualneho s
+						if (!zmestiaSaObaja) {
+							if (!zmestilSaPrvy) {
+								syn.pozemky.add(pozemok_data);
+							}
+							if (!zmestilSaDruhy) {
+								syn.pozemky.add(pozemokSyna);
+							}
+							break;
+						}
+					}
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void rozdel() {
@@ -192,25 +225,4 @@ public class QTNode {
 
 		return suradnicaX1 >= suradnicaNodeX1 && suradnicaX2 <= suradnicaNodeX2 && suradnicaY1 >= suradnicaNodeY1 && suradnicaY2 <= suradnicaNodeY2;
 	}
-
-//	public boolean zmestiSaDoKvadratu(IPozemok pozemok, QTNode kvadrat) {
-//
-//		if (!isJeList()) {
-//			var suradnica1 = pozemok.getGpsSuradnice().get(0);
-//			var suradnica2 = pozemok.getGpsSuradnice().get(1);
-//
-//			double suradnicaX1 = suradnica1.getX();
-//			double suradnicaX2 = suradnica2.getX();
-//			double suradnicaY1 = suradnica1.getY();
-//			double suradnicaY2 = suradnica2.getY();
-//
-//			double suradnicaKvadratX1 = kvadrat.getSekundarnyKluc().get(0).getX();
-//			double suradnicaKvadratX2 = kvadrat.getSekundarnyKluc().get(1).getX();
-//			double suradnicaKvadratY1 = kvadrat.getSekundarnyKluc().get(0).getY();
-//			double suradnicaKvadratY2 = kvadrat.getSekundarnyKluc().get(1).getY();
-//
-//			return suradnicaX1 >= suradnicaKvadratX1 && suradnicaX2 <= suradnicaKvadratX2 && suradnicaY1 >= suradnicaKvadratY1 && suradnicaY2 <= suradnicaKvadratY2;
-//		}
-//		return false;
-//	}
 }
