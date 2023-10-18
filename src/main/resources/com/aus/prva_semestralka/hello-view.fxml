@@ -1,16 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.aus.prva_semestralka.GeodetAppController">
-  <padding>
-    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-  </padding>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<GridPane alignment="TOP_CENTER" xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.aus.prva_semestralka.GeodetAppController" hgap="10" vgap="10" gridLinesVisible="true">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
 
-  <Label fx:id="welcomeText"/>
-  <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+    <columnConstraints>
+        <ColumnConstraints percentWidth="16.0" />
+        <ColumnConstraints percentWidth="16.0" />
+        <ColumnConstraints percentWidth="16.0" />
+        <ColumnConstraints percentWidth="16.0" />
+        <ColumnConstraints percentWidth="16.0" />
+        <ColumnConstraints percentWidth="16.0" />
+    </columnConstraints>
+
+    <Button text="Pridaj parcelu" GridPane.rowIndex="0" GridPane.columnIndex="0" onAction="#onPridajParceluClick" />
+    <Button text="Pridaj nehnuteľnost" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+    <Button text="Vymaž parcelu" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+    <Button text="Vymaž nehnuteľnosť" GridPane.rowIndex="0" GridPane.columnIndex="3" />
+    <Button text="Vypíš parcely" GridPane.rowIndex="0" GridPane.columnIndex="4" />
+    <Button text="Vypíš nehnuteľnosti" GridPane.rowIndex="0" GridPane.columnIndex="5" />
+
+<!--    <GridPane alignment="CENTER" xmlns:fx="http://javafx.com/fxml" hgap="10" vgap="10" GridPane.rowIndex="6" GridPane.columnIndex="0">-->
+<!--        <Label fx:id="pridajParceluLabel" GridPane.rowIndex="4" GridPane.columnIndex="0" />-->
+<!--        <TextArea fx:id="supisneCisloTextField" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowSpan="2" />-->
+<!--    </GridPane>-->
+
+    <Label fx:id="pridajParceluLabel" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+    <TextArea fx:id="supisneCisloTextField" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowSpan="2" />
+    <!--    <Label text="Welcome to GeodetApp" textFill="blue">-->
+    <!--        <font>-->
+    <!--            <Font name="Times New Roman bold" size="18.0" />-->
+    <!--        </font>-->
+    <!--    </Label>-->
+
+
+    <!--    <Button text="Hello!" onAction="#onHelloButtonClick" GridPane.columnIndex="3" GridPane.rowIndex="5"/>-->
+
+
+</GridPane>
+
+

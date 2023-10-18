@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ public class Parcela implements IPozemok {
 
 	private String popis;
 
+	@Getter
 	private List<Nehnutelnost> nehnutelnosti;
 	private List<GpsPozicia> gpsPozicie;
 
@@ -23,6 +25,7 @@ public class Parcela implements IPozemok {
 		this.supisneCislo = i;
 		this.popis = popis;
 		this.gpsPozicie = gpsPozicia1Parcela;
+		this.nehnutelnosti = new ArrayList<>();
 	}
 
 	@Override

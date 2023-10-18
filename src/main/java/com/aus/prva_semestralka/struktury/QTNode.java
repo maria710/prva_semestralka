@@ -9,6 +9,8 @@ import java.util.Objects;
 
 import com.aus.prva_semestralka.objekty.GpsPozicia;
 import com.aus.prva_semestralka.objekty.IPozemok;
+import com.aus.prva_semestralka.objekty.Nehnutelnost;
+import com.aus.prva_semestralka.objekty.Parcela;
 
 @Data
 @RequiredArgsConstructor
@@ -78,6 +80,9 @@ public class QTNode {
 	public boolean pridajPozemok(IPozemok pozemok) {
 		QTNode currentNode = this; // Start with the current node as the root
 
+		// pred pridanim skontrolujem ci sa prelinaju
+		pridajZavislostiNaPozemkoch(pozemok, currentNode);
+
 		while (!currentNode.jeList) {
 			boolean posunNaDalsiehoSyna = false;
 			// prejdeme vsetkych synov a najdeme toho, do ktoreho sa zmesti pozemok
@@ -116,6 +121,23 @@ public class QTNode {
 			}
 		}
 		return true;
+	}
+
+	private void pridajZavislostiNaPozemkoch(IPozemok pozemok, QTNode currentNode) {
+		for (IPozemok pozemok1 : currentNode.pozemky) {
+			if (pozemok instanceof Nehnutelnost && pozemok1 instanceof Parcela) {
+				if (prelinajuSaPozemky(pozemok1, pozemok)) {
+					((Parcela) pozemok1).getNehnutelnosti().add((Nehnutelnost) pozemok);
+					((Nehnutelnost) pozemok).getParcely().add((Parcela) pozemok1);
+				}
+			}
+			if (pozemok instanceof Parcela && pozemok1 instanceof Nehnutelnost) {
+				if (prelinajuSaPozemky(pozemok1, pozemok)) {
+					((Parcela) pozemok).getNehnutelnosti().add((Nehnutelnost) pozemok1);
+					((Nehnutelnost) pozemok1).getParcely().add((Parcela) pozemok);
+				}
+			}
+		}
 	}
 
 	private boolean zaradPozemokDoKvadratu(IPozemok pozemok_data, List<QTNode> synovia) {
@@ -225,4 +247,22 @@ public class QTNode {
 
 		return suradnicaX1 >= suradnicaNodeX1 && suradnicaX2 <= suradnicaNodeX2 && suradnicaY1 >= suradnicaNodeY1 && suradnicaY2 <= suradnicaNodeY2;
 	}
+
+	public boolean prelinajuSaPozemky(IPozemok nehnutelnost, IPozemok parcela) {
+		// Get the GPS coordinates of the first property (nehnutelnost)
+		GpsPozicia nehnutelnostBL = nehnutelnost.getGpsSuradnice().get(0); // Bottom-left corner
+		GpsPozicia nehnutelnostTR = nehnutelnost.getGpsSuradnice().get(1); // Top-right corner
+
+		// Get the GPS coordinates of the second property (parcela)
+		GpsPozicia parcelaBL = parcela.getGpsSuradnice().get(0); // Bottom-left corner
+		GpsPozicia parcelaTR = parcela.getGpsSuradnice().get(1); // Top-right corner
+
+		// Check if rectangles overlap
+		boolean xOverlap = nehnutelnostBL.getX() <= parcelaTR.getX() && parcelaBL.getX() <= nehnutelnostTR.getX();
+		boolean yOverlap = nehnutelnostBL.getY() <= parcelaTR.getY() && parcelaBL.getY() <= nehnutelnostTR.getY();
+
+		// If both x and y dimensions overlap, the rectangles intersect
+		return xOverlap && yOverlap;
+	}
+
 }

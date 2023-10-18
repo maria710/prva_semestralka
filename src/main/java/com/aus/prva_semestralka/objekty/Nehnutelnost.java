@@ -3,6 +3,7 @@ package com.aus.prva_semestralka.objekty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -13,6 +14,7 @@ public class Nehnutelnost implements IPozemok {
 	private Integer supisneCislo;
 	private String popis;
 
+	@Getter
 	private List<Parcela> parcely;
 	private List<GpsPozicia> gpsPozicie;
 
@@ -20,6 +22,7 @@ public class Nehnutelnost implements IPozemok {
 		this.supisneCislo = i;
 		this.popis = popis;
 		this.gpsPozicie = gpsPozicia1Parcela;
+		this.parcely = new ArrayList<>();
 	}
 
 	public void pridajParcelu(Parcela parcela) {
@@ -40,4 +43,5 @@ public class Nehnutelnost implements IPozemok {
 	public List<GpsPozicia> getGpsSuradnice() {
 		return this.gpsPozicie;
 	}
+
 }
