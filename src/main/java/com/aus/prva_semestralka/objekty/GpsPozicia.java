@@ -1,18 +1,20 @@
 package com.aus.prva_semestralka.objekty;
 
+import lombok.Builder;
+
 public class GpsPozicia {
-	private char sirka; // vychod/zapad
-	private char dlzka; // sever/juh
+	private String sirka; // vychod/zapad
+	private String dlzka; // sever/juh
 	private Double X;
 	private Double Y;
 	private Orientacia orientacia;
 
-	public GpsPozicia(char sirka, char dlzka, Double X, Double Y) {
+	public GpsPozicia(String sirka, String dlzka, Double X, Double Y) {
 		this.sirka = sirka;
 		this.dlzka = dlzka;
 		this.X = X;
 		this.Y = Y;
-		this.orientacia = Orientacia.getOrientacia(String.valueOf(sirka).trim() + String.valueOf(dlzka).trim());
+		this.orientacia = Orientacia.getOrientacia(sirka.trim() + dlzka.trim());
 	}
 
 	public Double getX() {

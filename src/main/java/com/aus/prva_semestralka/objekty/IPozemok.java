@@ -8,4 +8,5 @@ public interface IPozemok {
 
 	String getPopis();
 	List<GpsPozicia> getGpsSuradnice();
+	String toString();
 }

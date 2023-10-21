@@ -12,12 +12,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class Parcela implements IPozemok {
 
-
 	private Integer supisneCislo;
 
 	private String popis;
-
-	@Getter
 	private List<Nehnutelnost> nehnutelnosti;
 	private List<GpsPozicia> gpsPozicie;
 
@@ -41,6 +38,20 @@ public class Parcela implements IPozemok {
 	@Override
 	public String getPopis() {
 		return this.popis;
+	}
+
+	public List<Nehnutelnost> getNehnutelnosti() {
+		return this.nehnutelnosti;
+	}
+
+	@Override
+	public String toString() {
+		return "Parcela{" +
+				"supisneCislo=" + supisneCislo +
+				", popis='" + popis + '\'' +
+				", nehnutelnosti=" + nehnutelnosti +
+				", gpsPozicie=" + gpsPozicie +
+				'}';
 	}
 
 }

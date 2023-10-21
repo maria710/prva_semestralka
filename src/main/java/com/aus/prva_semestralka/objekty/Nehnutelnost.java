@@ -14,7 +14,6 @@ public class Nehnutelnost implements IPozemok {
 	private Integer supisneCislo;
 	private String popis;
 
-	@Getter
 	private List<Parcela> parcely;
 	private List<GpsPozicia> gpsPozicie;
 
@@ -27,6 +26,10 @@ public class Nehnutelnost implements IPozemok {
 
 	public void pridajParcelu(Parcela parcela) {
 		parcely.add(parcela);
+	}
+
+	public List<Parcela> getParcely() {
+		return this.parcely;
 	}
 
 	@Override
@@ -44,4 +47,13 @@ public class Nehnutelnost implements IPozemok {
 		return this.gpsPozicie;
 	}
 
+	@Override
+	public String toString() {
+		return "Nehnutelnost{" +
+				"supisneCislo=" + supisneCislo +
+				", popis='" + popis + '\'' +
+				", parcely=" + parcely +
+				", gpsPozicie=" + gpsPozicie +
+				'}';
+	}
 }

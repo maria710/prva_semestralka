@@ -16,18 +16,9 @@ import java.io.IOException;
 public class GeodetApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-         FXMLLoader fxmlLoader = new FXMLLoader(GeodetApp.class.getResource("hello-view.fxml"));
-//		GridPane root = new GridPane();
-//		root.setAlignment(Pos.CENTER);
-//		root.setHgap(10);
-//		root.setVgap(10);
-//
-//		Label welcomeText = new Label("Welcome to JavaFX Application!");
-//		welcomeText.setTextFill(Color.GREEN);
-//		welcomeText.setFont(Font.font("Times New Roman", FontWeight.BOLD, 30));
-//		root.getChildren().add(welcomeText);
+		FXMLLoader fxmlLoader = new FXMLLoader(GeodetApp.class.getResource("geodetApp-view.fxml"));
 
-        Scene scene = new Scene(fxmlLoader.load(), 920, 640);
+        Scene scene = new Scene(fxmlLoader.load(), 1000, 700);
         stage.setTitle("GeodetApp");
         stage.setScene(scene);
         stage.show();

@@ -9,8 +9,6 @@ import java.util.Objects;
 
 import com.aus.prva_semestralka.objekty.GpsPozicia;
 import com.aus.prva_semestralka.objekty.IPozemok;
-import com.aus.prva_semestralka.objekty.Nehnutelnost;
-import com.aus.prva_semestralka.objekty.Parcela;
 
 @Data
 @RequiredArgsConstructor
@@ -57,6 +55,15 @@ public class QTNode {
 		return synovia.get(3);
 	}
 
+	public IPozemok getPozemok_data() {
+		return pozemok_data;
+	}
+
+	public void setPozemok_data(IPozemok pozemok_data) {
+		this.jeList = true;
+		this.pozemok_data = pozemok_data;
+	}
+
 	public void setSeverozapadnySyn(QTNode syn) {
 		this.jeList = false;
 		synovia.add(0, syn);
@@ -79,9 +86,6 @@ public class QTNode {
 
 	public boolean pridajPozemok(IPozemok pozemok) {
 		QTNode currentNode = this; // Start with the current node as the root
-
-		// pred pridanim skontrolujem ci sa prelinaju
-		pridajZavislostiNaPozemkoch(pozemok, currentNode);
 
 		while (!currentNode.jeList) {
 			boolean posunNaDalsiehoSyna = false;
@@ -113,6 +117,7 @@ public class QTNode {
 			var jePriradenyKvadrat = zaradPozemokDoKvadratu(currentNode.pozemok_data, currentNode.synovia);
 			if (!jePriradenyKvadrat) {
 				currentNode.pozemky.add(currentNode.pozemok_data);
+				currentNode.pozemok_data = null;
 			}
 			// zaradime novy pozemok do kvadrantu
 			var jeZaradenyAjPozemokNaVkladanie = zaradPozemokDoKvadratu(pozemok, currentNode.synovia);
@@ -121,23 +126,6 @@ public class QTNode {
 			}
 		}
 		return true;
-	}
-
-	private void pridajZavislostiNaPozemkoch(IPozemok pozemok, QTNode currentNode) {
-		for (IPozemok pozemok1 : currentNode.pozemky) {
-			if (pozemok instanceof Nehnutelnost && pozemok1 instanceof Parcela) {
-				if (prelinajuSaPozemky(pozemok1, pozemok)) {
-					((Parcela) pozemok1).getNehnutelnosti().add((Nehnutelnost) pozemok);
-					((Nehnutelnost) pozemok).getParcely().add((Parcela) pozemok1);
-				}
-			}
-			if (pozemok instanceof Parcela && pozemok1 instanceof Nehnutelnost) {
-				if (prelinajuSaPozemky(pozemok1, pozemok)) {
-					((Parcela) pozemok).getNehnutelnosti().add((Nehnutelnost) pozemok1);
-					((Nehnutelnost) pozemok1).getParcely().add((Parcela) pozemok);
-				}
-			}
-		}
 	}
 
 	private boolean zaradPozemokDoKvadratu(IPozemok pozemok_data, List<QTNode> synovia) {
@@ -218,22 +206,27 @@ public class QTNode {
 
 		// 1 kvadrant
 		setSeverozapadnySyn(new QTNode(primarnyKluc + 1,
-									   List.of(new GpsPozicia('S', 'Z', minX, midY), new GpsPozicia('S', 'Z', midX, maxY)), hlbka + 1));
+									   List.of(new GpsPozicia("S", "Z", minX, midY), new GpsPozicia("S", "Z", midX, maxY)), hlbka + 1));
 		// 2 kvadrant
 		setSeverovychodnySyn(new QTNode(primarnyKluc + 2,
-										List.of(new GpsPozicia('S', 'V', midX, midY), new GpsPozicia('S', 'V', maxX, maxY)), hlbka + 1));
+										List.of(new GpsPozicia("S", "V", midX, midY), new GpsPozicia("S", "V", maxX, maxY)), hlbka + 1));
 		// 3 kvadrant
 		setJuhovychodnySyn(new QTNode(primarnyKluc + 3,
-									  List.of(new GpsPozicia('J', 'V', midX, minY), new GpsPozicia('J', 'V', maxX, midY)), hlbka + 1));
+									  List.of(new GpsPozicia("J", "V", midX, minY), new GpsPozicia("J", "V", maxX, midY)), hlbka + 1));
 		// 4 kvadrant
 		setJuhozapadnySyn(new QTNode(primarnyKluc + 4,
-									 List.of(new GpsPozicia('J', 'Z', minX, minY), new GpsPozicia('J', 'Z', midX, midY)), hlbka + 1));
+									 List.of(new GpsPozicia("J", "Z", minX, minY), new GpsPozicia("J", "Z", midX, midY)), hlbka + 1));
 	}
 
 	public boolean zmestiSa(IPozemok pozemok) {
 
 		var suradnica1 = pozemok.getGpsSuradnice().get(0);
 		var suradnica2 = pozemok.getGpsSuradnice().get(1);
+
+		return zmestiSa(suradnica1, suradnica2);
+	}
+
+	public boolean zmestiSa(GpsPozicia suradnica1, GpsPozicia suradnica2) {
 
 		double suradnicaX1 = suradnica1.getX();
 		double suradnicaX2 = suradnica2.getX();
@@ -246,23 +239,6 @@ public class QTNode {
 		double suradnicaNodeY2 = sekundarnyKluc.get(1).getY();
 
 		return suradnicaX1 >= suradnicaNodeX1 && suradnicaX2 <= suradnicaNodeX2 && suradnicaY1 >= suradnicaNodeY1 && suradnicaY2 <= suradnicaNodeY2;
-	}
-
-	public boolean prelinajuSaPozemky(IPozemok nehnutelnost, IPozemok parcela) {
-		// Get the GPS coordinates of the first property (nehnutelnost)
-		GpsPozicia nehnutelnostBL = nehnutelnost.getGpsSuradnice().get(0); // Bottom-left corner
-		GpsPozicia nehnutelnostTR = nehnutelnost.getGpsSuradnice().get(1); // Top-right corner
-
-		// Get the GPS coordinates of the second property (parcela)
-		GpsPozicia parcelaBL = parcela.getGpsSuradnice().get(0); // Bottom-left corner
-		GpsPozicia parcelaTR = parcela.getGpsSuradnice().get(1); // Top-right corner
-
-		// Check if rectangles overlap
-		boolean xOverlap = nehnutelnostBL.getX() <= parcelaTR.getX() && parcelaBL.getX() <= nehnutelnostTR.getX();
-		boolean yOverlap = nehnutelnostBL.getY() <= parcelaTR.getY() && parcelaBL.getY() <= nehnutelnostTR.getY();
-
-		// If both x and y dimensions overlap, the rectangles intersect
-		return xOverlap && yOverlap;
 	}
 
 }
