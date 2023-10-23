@@ -18,8 +18,8 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
-<VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.aus.prva_semestralka.GeodetAppController">
+
+<VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aus.prva_semestralka.GeodetAppController">
     <MenuBar VBox.vgrow="NEVER">
         <Menu mnemonicParsing="false" text="Nehnuteľnosti">
             <MenuItem mnemonicParsing="false" text="Pridaj..." />
@@ -36,8 +36,7 @@
     </MenuBar>
     <SplitPane dividerPositions="0.2505567928730512, 0.7505567928730512" focusTraversable="true" VBox.vgrow="ALWAYS">
         <AnchorPane>
-            <VBox alignment="TOP_CENTER" spacing="10.0" AnchorPane.bottomAnchor="484.79999999999995" AnchorPane.leftAnchor="0.0"
-                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <VBox alignment="TOP_CENTER" spacing="8.0" AnchorPane.bottomAnchor="484.79999999999995" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <padding>
                     <Insets bottom="10.0" left="10.0" right="10.0" top="20.0" />
                 </padding>
@@ -75,17 +74,17 @@
                 </TextField>
                 <TextField fx:id="lavaDolnaY" layoutX="20.0" layoutY="301.0" promptText="Ľavá dolná Y">
                     <VBox.margin>
-                        <Insets left="20.0" right="20.0" top="10.0" />
+                        <Insets left="20.0" right="20.0" />
                     </VBox.margin>
                 </TextField>
                 <TextField fx:id="pravaHornaX" layoutX="40.0" layoutY="256.0" promptText="Pravá horná X">
                     <VBox.margin>
-                        <Insets left="20.0" right="20.0" top="10.0" />
+                        <Insets left="20.0" right="20.0" />
                     </VBox.margin>
                 </TextField>
                 <TextField fx:id="pravaHornaY" layoutX="40.0" layoutY="306.0" promptText="Pravá horná Y">
                     <VBox.margin>
-                        <Insets left="20.0" right="20.0" top="10.0" />
+                        <Insets left="20.0" right="20.0" />
                     </VBox.margin>
                 </TextField>
                 <Label layoutX="95.0" layoutY="234.0" text="Orientácia" />
@@ -110,28 +109,25 @@
                     </VBox.margin>
                 </TextField>
             </VBox>
-            <Button fx:id="spustiButton" layoutX="99.0" layoutY="592.0" mnemonicParsing="false" onAction="#onSpustiButton" text="Spusti" />
-            <Line endX="118.0" layoutX="115.0" layoutY="633.0" startX="-100.0" />
-            <Label fx:id="resultLabel" layoutX="30.0" layoutY="564.0" prefHeight="17.0" prefWidth="187.0" />
-            <VBox alignment="TOP_CENTER" layoutX="14.0" layoutY="646.0" prefHeight="61.0" prefWidth="219.0" spacing="10.0">
-                <Button fx:id="vypisatNehnutelnostiButton" mnemonicParsing="false" onAction="#onVypisNehnutelnostiButton"
-                        text="Vypísať nehnuteľnosti" />
-                <Button fx:id="vypisParcelyButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#onVypisParcelyButton"
-                        text="Vypísať parcely" />
-            </VBox>
+            <Button fx:id="spustiButton" layoutX="99.0" layoutY="518.0" mnemonicParsing="false" onAction="#onSpustiButton" text="Spusti" />
+            <Line endX="118.0" layoutX="114.0" layoutY="553.0" startX="-100.0" />
+            <Label fx:id="resultLabel" layoutX="30.0" layoutY="500.0" prefHeight="17.0" prefWidth="187.0" />
+            <VBox alignment="TOP_CENTER" layoutX="14.0" layoutY="646.0" prefHeight="61.0" prefWidth="219.0" spacing="10.0" />
+             <Button fx:id="vypisatNehnutelnostiButton" layoutX="57.0" layoutY="562.0" mnemonicParsing="false" onAction="#onVypisNehnutelnostiButton" text="Vypísať nehnuteľnosti" />
+             <Button fx:id="vypisParcelyButton" layoutX="74.0" layoutY="595.0" mnemonicParsing="false" onAction="#onVypisParcelyButton" text="Vypísať parcely" />
         </AnchorPane>
         <ScrollPane>
             <AnchorPane id="Content" prefHeight="1028.0" prefWidth="492.0">
                 <SplitPane dividerPositions="0.5" layoutX="14.0" layoutY="14.0" orientation="VERTICAL" prefHeight="617.0" prefWidth="464.0">
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                         <VBox prefHeight="306.0" prefWidth="461.0">
-                            <Label text="Parcely" />
+                            <Label fx:id="labelOfParcelyListView" text="Parcely" />
                             <ListView fx:id="parcelyListView" prefHeight="286.0" prefWidth="461.0" />
                         </VBox>
                     </AnchorPane>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                         <VBox prefHeight="303.0" prefWidth="461.0">
-                            <Label text="Nehnuteľnosti" />
+                            <Label fx:id="labelOfNehnutelnostiListView" text="Nehnuteľnosti" />
                             <ListView fx:id="nehnutelnostiListView" prefHeight="286.0" prefWidth="461.0" />
                         </VBox>
                     </AnchorPane>

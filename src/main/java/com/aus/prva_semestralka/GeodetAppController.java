@@ -77,6 +77,12 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	private Label resultLabel;
 
+	@FXML
+	private Label labelOfParcelyListView;
+
+	@FXML
+	private Label labelOfNehnutelnostiListView;
+
 	private final List<String> akcie = List.of("Pridať", "Vymazať", "Upraviť", "Nájsť");
 	private final List<String> pozemky = List.of("Nehnuteľnosť", "Parcela");
 
@@ -138,9 +144,17 @@ public class GeodetAppController implements Initializable {
 			}
 			case "Vymazať" -> {
 				if (pozemok.equals("Nehnuteľnosť")) {
-					result = manazer.vymazNehnutelnost(nehnutelnost);
+					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
+					labelOfNehnutelnostiListView.setText("Nehnuteľnosti na vymazanie vo zvolenom ohraničení - označ pre odstránenie");
+					nehnutelnostiListView.getItems().clear();
+					nehnutelnostiListView.getItems().addAll(vysledneNehnutelnosti.stream().map(IPozemok::toString).toList());
+					// result = manazer.vymazNehnutelnost(nehnutelnost);
 				} else if (pozemok.equals("Parcela")) {
-					result = manazer.vymazParcelu(parcela);
+					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
+					labelOfParcelyListView.setText("Parcely na vymazanie vo zvolenom ohraničení - označ pre odstránenie");
+					parcelyListView.getItems().clear();
+					parcelyListView.getItems().addAll(vysledneParcely.stream().map(IPozemok::toString).toList());
+					// result = manazer.vymazParcelu(parcela);
 				}
 			}
 			case "Upraviť", "Nájsť" -> {
@@ -165,11 +179,13 @@ public class GeodetAppController implements Initializable {
 	}
 
 	public void onVypisNehnutelnostiButton() {
+		labelOfNehnutelnostiListView.setText("Nehnuteľnosti");
 		nehnutelnostiListView.getItems().clear();
 		nehnutelnostiListView.getItems().addAll(manazer.getNehnutelnosti().stream().map(IPozemok::toString).toList());
 	}
 
 	public void onVypisParcelyButton() {
+		labelOfParcelyListView.setText("Parcely");
 		parcelyListView.getItems().clear();
 		parcelyListView.getItems().addAll(manazer.getParcely().stream().map(IPozemok::toString).toList());
 	}

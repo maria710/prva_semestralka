@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.aus.prva_semestralka.objekty.IPozemok;
 import com.aus.prva_semestralka.objekty.Nehnutelnost;
+import com.aus.prva_semestralka.objekty.Ohranicenie;
 import com.aus.prva_semestralka.objekty.Parcela;
 import com.aus.prva_semestralka.struktury.QuadTree;
 
@@ -45,6 +46,14 @@ public class GeodetAppManazer {
 
 	public boolean vymazParcelu(Parcela parcela) {
 		return parcely.deletePozemok(parcela);
+	}
+
+	public List<IPozemok> najdiNehnutelnostiVOhraniceni(Ohranicenie ohranicenie) {
+		return nehnutelnosti.findWithin(ohranicenie);
+	}
+
+	public List<IPozemok> najdiParcelyVOhraniceni(Ohranicenie ohranicenie) {
+		return parcely.findWithin(ohranicenie);
 	}
 
 	private void pridajZavislostiNaPozemkoch(IPozemok pozemok, List<IPozemok> zavislosti) {

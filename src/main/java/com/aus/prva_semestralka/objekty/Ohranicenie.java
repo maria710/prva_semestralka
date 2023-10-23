@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Ohranicenie {
 
-	private GpsPozicia suradnicaPravyHorny;
-	private GpsPozicia suradnicaLavyDolny;
+	private final GpsPozicia suradnicaPravyHorny;
+	private final GpsPozicia suradnicaLavyDolny;
 
 	public Ohranicenie(GpsPozicia suradnicaLavyDolny, GpsPozicia suradnicaPravyHorny) {
 		this.suradnicaLavyDolny = suradnicaLavyDolny;
