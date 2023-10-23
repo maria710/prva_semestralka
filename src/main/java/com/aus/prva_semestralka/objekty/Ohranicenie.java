@@ -63,9 +63,10 @@ public class Ohranicenie {
 	}
 
 	@Override
-	public String toString() { // TODO prepisat - lavy dolny ide prvy
-		return "(" + suradnicaPravyHorny.getX() + " ; " + suradnicaPravyHorny.getY() + ")" +
-				"(" + suradnicaLavyDolny.getX() + " ; " + suradnicaLavyDolny.getY() + ")";
+	public String toString() {
+		return "(" + suradnicaLavyDolny.getX() + " ; " + suradnicaLavyDolny.getY() + ")" +
+				"(" + suradnicaPravyHorny.getX() + " ; " + suradnicaPravyHorny.getY() + ")";
+
 
 	}
 }
