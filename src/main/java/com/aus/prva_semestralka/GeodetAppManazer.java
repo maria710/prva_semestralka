@@ -85,7 +85,7 @@ public class GeodetAppManazer {
 			return false;
 		}
 		// skontrolujeme ci sa prekryvaju na osi y
-		if (suradnicaY1 < suradnicaY4 || suradnicaY3 < suradnicaY2) {
+		if (suradnicaY1 > suradnicaY4 || suradnicaY3 > suradnicaY2) {
 			return false;
 		}
 

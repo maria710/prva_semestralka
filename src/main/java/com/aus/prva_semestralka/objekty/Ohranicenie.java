@@ -8,9 +8,9 @@ public class Ohranicenie {
 	private GpsPozicia suradnicaPravyHorny;
 	private GpsPozicia suradnicaLavyDolny;
 
-	public Ohranicenie(GpsPozicia suradnicaPravyDolny, GpsPozicia suradnicaLavyHorny) {
-		this.suradnicaPravyHorny = suradnicaPravyDolny;
-		this.suradnicaLavyDolny = suradnicaLavyHorny;
+	public Ohranicenie(GpsPozicia suradnicaLavyDolny, GpsPozicia suradnicaPravyHorny) {
+		this.suradnicaLavyDolny = suradnicaLavyDolny;
+		this.suradnicaPravyHorny = suradnicaPravyHorny;
 	}
 
 	public GpsPozicia getSuradnicaPravyHorny() {
@@ -33,7 +33,7 @@ public class Ohranicenie {
 		double suradnicaNodeY1 = porovnavaneOhranicenie.suradnicaLavyDolny.getY();
 		double suradnicaNodeY2 = porovnavaneOhranicenie.suradnicaPravyHorny.getY();
 
-		return suradnicaX1 >= suradnicaNodeX1 && suradnicaX2 <= suradnicaNodeX2 && suradnicaY1 >= suradnicaNodeY1 && suradnicaY2 <= suradnicaNodeY2;
+		return suradnicaX1 <= suradnicaNodeX1 && suradnicaX2 >= suradnicaNodeX2 && suradnicaY1 <= suradnicaNodeY1 && suradnicaY2 >= suradnicaNodeY2;
 	}
 
 	public List<Double> rozdelNaPolovicu() {
@@ -63,7 +63,7 @@ public class Ohranicenie {
 	}
 
 	@Override
-	public String toString() {
+	public String toString() { // TODO prepisat - lavy dolny ide prvy
 		return "(" + suradnicaPravyHorny.getX() + " ; " + suradnicaPravyHorny.getY() + ")" +
 				"(" + suradnicaLavyDolny.getX() + " ; " + suradnicaLavyDolny.getY() + ")";
 
