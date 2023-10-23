@@ -13,4 +13,6 @@ module com.aus.prva_semestralka {
 
 	opens com.aus.prva_semestralka to javafx.fxml;
     exports com.aus.prva_semestralka;
+    exports com.aus.prva_semestralka.objekty;
+	exports com.aus.prva_semestralka.struktury;
 }

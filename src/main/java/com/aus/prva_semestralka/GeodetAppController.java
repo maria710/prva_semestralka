@@ -1,6 +1,5 @@
 package com.aus.prva_semestralka;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -17,6 +16,7 @@ import java.util.ResourceBundle;
 import com.aus.prva_semestralka.objekty.GpsPozicia;
 import com.aus.prva_semestralka.objekty.IPozemok;
 import com.aus.prva_semestralka.objekty.Nehnutelnost;
+import com.aus.prva_semestralka.objekty.Ohranicenie;
 import com.aus.prva_semestralka.objekty.Parcela;
 
 public class GeodetAppController implements Initializable {
@@ -74,12 +74,11 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	private ListView<String> nehnutelnostiListView;
 
-
 	@FXML
 	private Label resultLabel;
 
-	private List<String> akcie = List.of("Pridať", "Vymazať", "Upraviť", "Nájsť");
-	private List<String> pozemky = List.of("Nehnuteľnosť", "Parcela");
+	private final List<String> akcie = List.of("Pridať", "Vymazať", "Upraviť", "Nájsť");
+	private final List<String> pozemky = List.of("Nehnuteľnosť", "Parcela");
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -113,17 +112,17 @@ public class GeodetAppController implements Initializable {
 		String orientaciaSirkaHorna = this.orientaciaSirkaHorna.getText();
 		String orientaciaVyskaHorna = this.orientaciaVyskaHorna.getText();
 
-
 		GpsPozicia gpsPoziciaDolna = new GpsPozicia(orientaciaSirkaDolna, orientaciaVyskaDolna, lavaDolnaX, lavaDolnaY);
 		GpsPozicia gpsPoziciaHorna = new GpsPozicia(orientaciaSirkaHorna, orientaciaVyskaHorna, pravaHornaX, pravaHornaY);
+		Ohranicenie ohranicenie = new Ohranicenie(gpsPoziciaDolna, gpsPoziciaHorna);
 
 		Nehnutelnost nehnutelnost = null;
 		Parcela parcela = null;
 
 		if (Objects.equals(pozemok, "Nehnuteľnosť")) {
-			nehnutelnost = new Nehnutelnost(supisneCislo, popis, List.of(gpsPoziciaDolna, gpsPoziciaHorna));
+			nehnutelnost = new Nehnutelnost(supisneCislo, popis, ohranicenie);
 		} else if (Objects.equals(pozemok, "Parcela")) {
-			parcela = new Parcela(supisneCislo, popis, List.of(gpsPoziciaDolna, gpsPoziciaHorna));
+			parcela = new Parcela(supisneCislo, popis, ohranicenie);
 		} else {
 			throw new UnsupportedOperationException("Invalid pozemok");
 		}
@@ -165,12 +164,12 @@ public class GeodetAppController implements Initializable {
 		}
 	}
 
-	public void onVypisNehnutelnostiButton(ActionEvent actionEvent) {
+	public void onVypisNehnutelnostiButton() {
 		nehnutelnostiListView.getItems().clear();
 		nehnutelnostiListView.getItems().addAll(manazer.getNehnutelnosti().stream().map(IPozemok::toString).toList());
 	}
 
-	public void onVypisParcelyButton(ActionEvent actionEvent) {
+	public void onVypisParcelyButton() {
 		parcelyListView.getItems().clear();
 		parcelyListView.getItems().addAll(manazer.getParcely().stream().map(IPozemok::toString).toList());
 	}
