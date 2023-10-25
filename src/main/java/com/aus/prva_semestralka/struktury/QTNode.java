@@ -158,4 +158,20 @@ public class QTNode {
 		return -1;
 	}
 
+	public boolean mozeSaVymazat() {
+		return pozemok_data == null && pozemky.isEmpty() && pozemkySPrekrocenouHlbkou.isEmpty() && synovia.isEmpty() && jeList;
+	}
+
+	public boolean dajuSaZmazatSynovia() {
+		for (QTNode syn : synovia) {
+			if (!syn.mozeSaVymazat()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public void zmenJeList(boolean b) {
+		this.jeList = b;
+	}
 }

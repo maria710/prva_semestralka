@@ -29,7 +29,7 @@ public class QuadTree {
 		var prvaSuradnicaKorena = new GpsPozicia("S", "Z", 0.0, 0.0);
 		var druhaSuradnicaKorena = new GpsPozicia("S", "Z", sirka.doubleValue(), dlzka.doubleValue());
 		var ohranicenie = new Ohranicenie(prvaSuradnicaKorena, druhaSuradnicaKorena);
-		this.root = new QTNode(1, ohranicenie, maxHlbka);
+		this.root = new QTNode(1, ohranicenie, 0);
 		root.rozdel();
 	}
 
@@ -135,31 +135,53 @@ public class QuadTree {
 
 	public boolean deletePozemok(IPozemok pozemok) {
 		var currentNode = root;
-		QTNode parentNode = root;
+		List<QTNode> parentNodes = new LinkedList<>();
 
 		while (true) {
 			// ak je current node list a ma pozemok, tak ho vymazeme
+			var result = false;
 			if (currentNode.isJeList()) {
 				if (currentNode.getPozemok_data() != null && currentNode.getPozemok_data().equals(pozemok)) {
 					currentNode.setPozemok_data(null);
-					return true;
+					result = true;
 				} else {
-					return currentNode.getPozemkySPrekrocenouHlbkou().remove(pozemok);
+					result = currentNode.getPozemkySPrekrocenouHlbkou().remove(pozemok);
 				}
+				vymazPraznychSynov(parentNodes, result);
+				return result; // koncime uplne aj ked sme v liste nic nenasli
 			}
 
 			// ak ma synov, tak vymazeme pozemok z aktualneho node
 			if (currentNode.getPozemky().contains(pozemok)) {
-				return currentNode.getPozemky().remove(pozemok);
+				result = currentNode.getPozemky().remove(pozemok);
 			}
 			if (currentNode.getPozemkySPrekrocenouHlbkou().contains(pozemok)) {
-				return currentNode.getPozemkySPrekrocenouHlbkou().remove(pozemok);
+				result = currentNode.getPozemkySPrekrocenouHlbkou().remove(pozemok);
 			}
+			vymazPraznychSynov(parentNodes, result);
+			if (result) { // nemozeme vratit negativny vysledok, mozno sa najde este v dalsich synoch
+				return true;
+			}
+
 			// ak sa pozemok nenachadza v aktualnom node, tak sa posunieme na dalsi node
 			for (QTNode syn : currentNode.getSynovia()) {
 				if (syn.zmestiSa(pozemok)) {
+					parentNodes.add(0, currentNode);
 					currentNode = syn;
 				}
+			}
+		}
+	}
+
+	private void vymazPraznychSynov(List<QTNode> parentNodes, boolean result) {
+		if (result && !parentNodes.isEmpty()) {
+			for (QTNode parentNode : parentNodes) {
+				var dajuSaZmazatSynovia = parentNode.dajuSaZmazatSynovia();
+				if (!dajuSaZmazatSynovia) {
+					break;
+				}
+				parentNode.getSynovia().clear();
+				parentNode.zmenJeList(true);
 			}
 		}
 	}
