@@ -31,6 +31,20 @@ public class Parcela implements IPozemok {
 
 	@Override
 	public String toString() {
+		StringBuilder sb = new StringBuilder("Supisne cislo: ")
+				.append(supisneCislo)
+				.append(", popis: ")
+				.append(popis)
+				.append(", gps pozicie: ")
+				.append(gpsPozicie)
+				.append(", parcely: ");
+
+		nehnutelnosti.forEach(parcela -> sb.append(parcela.toStringZoznam()));
+
+		return sb.toString();
+	}
+
+	public String toStringZoznam() {
 		return "Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
 	}
 

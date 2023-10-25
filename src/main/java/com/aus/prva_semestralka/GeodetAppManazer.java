@@ -41,10 +41,12 @@ public class GeodetAppManazer {
 	}
 
 	public boolean vymazNehnutelnost(Nehnutelnost nehnutelnost) {
+		nehnutelnost.getParcely().forEach(parcela -> parcela.getNehnutelnosti().remove(nehnutelnost));
 		return nehnutelnosti.deletePozemok(nehnutelnost);
 	}
 
 	public boolean vymazParcelu(Parcela parcela) {
+		parcela.getNehnutelnosti().forEach(nehnutelnost -> nehnutelnost.getParcely().remove(parcela));
 		return parcely.deletePozemok(parcela);
 	}
 

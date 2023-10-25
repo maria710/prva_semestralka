@@ -1,12 +1,15 @@
 package com.aus.prva_semestralka;
 
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
 import java.util.List;
@@ -69,10 +72,10 @@ public class GeodetAppController implements Initializable {
 	private Button vypisParcelyButton;
 
 	@FXML
-	private ListView<String> parcelyListView;
+	private ListView<IPozemok> parcelyListView;
 
 	@FXML
-	private ListView<String> nehnutelnostiListView;
+	private ListView<IPozemok> nehnutelnostiListView;
 
 	@FXML
 	private Label resultLabel;
@@ -83,8 +86,11 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	private Label labelOfNehnutelnostiListView;
 
+	@FXML
+	private Button vymazatButton;
+
 	private final List<String> akcie = List.of("Pridať", "Vymazať", "Upraviť", "Nájsť");
-	private final List<String> pozemky = List.of("Nehnuteľnosť", "Parcela");
+	private final List<String> pozemky = List.of("Nehnuteľnosť", "Parcela", "Oba");
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -129,8 +135,11 @@ public class GeodetAppController implements Initializable {
 			nehnutelnost = new Nehnutelnost(supisneCislo, popis, ohranicenie);
 		} else if (Objects.equals(pozemok, "Parcela")) {
 			parcela = new Parcela(supisneCislo, popis, ohranicenie);
-		} else {
-			throw new UnsupportedOperationException("Invalid pozemok");
+		}
+
+		if (!Objects.equals(akcia, "Nájsť") && Objects.equals(pozemok, "Oba")) {
+			resultLabel.setText("Operácia nie je podporovaná pre oba pozemky");
+			return;
 		}
 
 		var result = false;
@@ -146,29 +155,39 @@ public class GeodetAppController implements Initializable {
 				if (pozemok.equals("Nehnuteľnosť")) {
 					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
 					labelOfNehnutelnostiListView.setText("Nehnuteľnosti na vymazanie vo zvolenom ohraničení - označ pre odstránenie");
-					nehnutelnostiListView.getItems().clear();
-					nehnutelnostiListView.getItems().addAll(vysledneNehnutelnosti.stream().map(IPozemok::toString).toList());
-					// result = manazer.vymazNehnutelnost(nehnutelnost);
+					refreshNehnutelnostiView(vysledneNehnutelnosti);
 				} else if (pozemok.equals("Parcela")) {
 					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
 					labelOfParcelyListView.setText("Parcely na vymazanie vo zvolenom ohraničení - označ pre odstránenie");
 					parcelyListView.getItems().clear();
-					parcelyListView.getItems().addAll(vysledneParcely.stream().map(IPozemok::toString).toList());
-					// result = manazer.vymazParcelu(parcela);
+					refreshParcelyView(vysledneParcely);
 				}
+				vymazatButton.setDisable(false);
 			}
-			case "Upraviť", "Nájsť" -> {
+			case "Nájsť" -> {
 				if (pozemok.equals("Nehnuteľnosť")) {
-					// manazer.upravNehnutelnost();
-					throw new UnsupportedOperationException("Not implemented yet");
+					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
+					labelOfNehnutelnostiListView.setText("Nájdené nehnuteľnosti vo zvolenom ohraničení");
+					refreshNehnutelnostiView(vysledneNehnutelnosti);
 				} else if (pozemok.equals("Parcela")) {
-					// manazer.upravParcelu();
-					throw new UnsupportedOperationException("Not implemented yet");
+					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
+					labelOfParcelyListView.setText("Nájdené parcely vo zvolenom ohraničení");
+					parcelyListView.getItems().clear();
+					refreshParcelyView(vysledneParcely);
+				} else {
+					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
+					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
+					vysledneParcely.addAll(vysledneNehnutelnosti);
+					labelOfParcelyListView.setText("Nájdené parcely a nehnuteľnosti vo zvolenom ohraničení");
+					parcelyListView.getItems().clear();
+					refreshParcelyView(vysledneParcely);
 				}
 			}
-			// manazer.najdiNehnutelnost();
-			// manazer.najdiParcelu(
-
+			case "Upraviť" -> {
+				// manazer.najdiNehnutelnost();
+				// manazer.najdiParcelu();
+				throw new UnsupportedOperationException("Upravovanie nie je podporované");
+			}
 		}
 
 		if (result) {
@@ -179,14 +198,58 @@ public class GeodetAppController implements Initializable {
 	}
 
 	public void onVypisNehnutelnostiButton() {
+		setCellFactoryFor(nehnutelnostiListView);
+
 		labelOfNehnutelnostiListView.setText("Nehnuteľnosti");
-		nehnutelnostiListView.getItems().clear();
-		nehnutelnostiListView.getItems().addAll(manazer.getNehnutelnosti().stream().map(IPozemok::toString).toList());
+		refreshNehnutelnostiView(manazer.getNehnutelnosti());
+		vymazatButton.setDisable(true);
 	}
 
 	public void onVypisParcelyButton() {
+		setCellFactoryFor(parcelyListView);
+
 		labelOfParcelyListView.setText("Parcely");
+		refreshParcelyView(manazer.getParcely());
+		vymazatButton.setDisable(true);
+	}
+
+	public void onVymazatButton() {
+		IPozemok pozemok = nehnutelnostiListView.getSelectionModel().getSelectedItem();
+		if (pozemok == null) {
+			pozemok = parcelyListView.getSelectionModel().getSelectedItem();
+		}
+		if (pozemok != null) {
+			if (pozemok instanceof Nehnutelnost) {
+				manazer.vymazNehnutelnost((Nehnutelnost) pozemok);
+				refreshNehnutelnostiView(manazer.getNehnutelnosti());
+			} else if (pozemok instanceof Parcela) {
+				manazer.vymazParcelu((Parcela) pozemok);
+				refreshParcelyView(manazer.getParcely());
+			}
+		}
+
+	}
+
+	private void setCellFactoryFor(ListView<IPozemok> listView) {
+		listView.setCellFactory(param -> new ListCell<>() {
+			@Override
+			protected void updateItem(IPozemok item, boolean empty) {
+				super.updateItem(item, empty);
+				if (empty || item == null) {
+					setText(null);
+				} else {
+					setText(item.toString());
+				}
+			}
+		});
+	}
+
+	private void refreshNehnutelnostiView(List<IPozemok> nehnutelnosti) {
+		nehnutelnostiListView.getItems().clear();
+		nehnutelnostiListView.getItems().addAll(nehnutelnosti);
+	}
+	private void refreshParcelyView(List<IPozemok> parcely) {
 		parcelyListView.getItems().clear();
-		parcelyListView.getItems().addAll(manazer.getParcely().stream().map(IPozemok::toString).toList());
+		parcelyListView.getItems().addAll(parcely);
 	}
 }

@@ -142,4 +142,20 @@ public class QTNode {
 		return -1;
 	}
 
+	public int getKvadrantPreOhranicenie(Ohranicenie ohranicenie) {
+		if (getSeverozapadnySyn().ohranicenie.zmestiSaDovnutra(ohranicenie)) {
+			return 1;
+		}
+		if (getSeverovychodnySyn().ohranicenie.zmestiSaDovnutra(ohranicenie)) {
+			return 2;
+		}
+		if (getJuhovychodnySyn().ohranicenie.zmestiSaDovnutra(ohranicenie)) {
+			return 3;
+		}
+		if (getJuhozapadnySyn().ohranicenie.zmestiSaDovnutra(ohranicenie)) {
+			return 4;
+		}
+		return -1;
+	}
+
 }

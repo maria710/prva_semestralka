@@ -32,6 +32,20 @@ public class Nehnutelnost implements IPozemok {
 
 	@Override
 	public String toString() {
-		return "Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie + ", parcely: " + parcely;
+		StringBuilder sb = new StringBuilder("Supisne cislo: ")
+				.append(supisneCislo)
+				.append(", popis: ")
+				.append(popis)
+				.append(", gps pozicie: ")
+				.append(gpsPozicie)
+				.append(", parcely: ");
+
+		parcely.forEach(parcela -> sb.append(parcela.toStringZoznam()));
+
+		return sb.toString();
+	}
+
+	public String toStringZoznam() {
+		return "Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
 	}
 }

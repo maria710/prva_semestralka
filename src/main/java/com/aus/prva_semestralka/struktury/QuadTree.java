@@ -103,28 +103,39 @@ public class QuadTree {
 
 	public List<IPozemok> findWithin(Ohranicenie ohranicenie) {
 		var currentNode = root;
-		var nodeNaSpracovanie = new LinkedList<QTNode>();
+		ArrayList<IPozemok> result = new ArrayList<>();
 
-		nodeNaSpracovanie.add(currentNode);
-
-		while (currentNode != null && currentNode.getOhranicenie().zmestiSaDovnutra(ohranicenie)) {
-			for (QTNode syn : currentNode.getSynovia()) {
-				if (syn.getOhranicenie().zmestiSaDovnutra(ohranicenie)) {
-					nodeNaSpracovanie.add(syn);
+		while (true) {
+			if (currentNode.getSynovia() == null) {
+				result.addAll(currentNode.getPozemky());
+				result.addAll(currentNode.getPozemkySPrekrocenouHlbkou());
+				if (currentNode.getPozemok_data() != null) {
+					result.add(currentNode.getPozemok_data());
 				}
+				return result;
 			}
-			currentNode = nodeNaSpracovanie.poll();
+			int index = currentNode.getKvadrantPreOhranicenie(ohranicenie);
+			if (index == -1) {
+				var najdenePozemky = getAllPozemkyFromNode(currentNode);
+				for (IPozemok pozemok : najdenePozemky) {
+					if (ohranicenie.zmestiSaDovnutra(pozemok.getGpsSuradnice())) {
+						result.add(pozemok);
+					}
+				}
+				return result;
+			} else {
+				var syn = currentNode.getSynovia().get(index - 1);
+				if (syn == null) {
+					return Collections.emptyList();
+				}
+				currentNode = syn;
+			}
 		}
-
-		if (currentNode == null) {
-			return Collections.emptyList();
-		}
-
-		return getAllPozemkyFromNode(currentNode);
 	}
 
 	public boolean deletePozemok(IPozemok pozemok) {
 		var currentNode = root;
+		QTNode parentNode = root;
 
 		while (true) {
 			// ak je current node list a ma pozemok, tak ho vymazeme
