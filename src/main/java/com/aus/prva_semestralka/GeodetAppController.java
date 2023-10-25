@@ -1,6 +1,5 @@
 package com.aus.prva_semestralka;
 
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -9,7 +8,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
 import java.util.List;
@@ -89,7 +87,7 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	private Button vymazatButton;
 
-	private final List<String> akcie = List.of("Pridať", "Vymazať", "Upraviť", "Nájsť");
+	private final List<String> akcie = List.of("Pridať", "Vymazať", "Upraviť", "Nájsť", "Vypísať");
 	private final List<String> pozemky = List.of("Nehnuteľnosť", "Parcela", "Oba");
 
 	@Override
@@ -184,9 +182,25 @@ public class GeodetAppController implements Initializable {
 				}
 			}
 			case "Upraviť" -> {
-				// manazer.najdiNehnutelnost();
-				// manazer.najdiParcelu();
-				throw new UnsupportedOperationException("Upravovanie nie je podporované");
+//				if (pozemok.equals("Nehnuteľnosť")) {
+//					result = manazer.upravNehnutelnost(nehnutelnostPovodna, nehnutelnost);
+//				} else if (pozemok.equals("Parcela")) {
+//					result = manazer.upravParcelu(parcelaPovodna, parcela);
+//				}
+			}
+			case "Vypísať"-> {
+				if (pozemok.equals("Nehnuteľnosť")) {
+					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
+					labelOfNehnutelnostiListView.setText("Nájdené nehnuteľnosti vo zvolenom ohraničení");
+					refreshNehnutelnostiView(vysledneNehnutelnosti);
+					nehnutelnostiListView.setOnMouseClicked(event -> fillFieldsWith(nehnutelnostiListView.getSelectionModel().getSelectedItem()));
+				} else if (pozemok.equals("Parcela")) {
+					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
+					labelOfParcelyListView.setText("Nájdené parcely vo zvolenom ohraničení");
+					parcelyListView.getItems().clear();
+					refreshParcelyView(vysledneParcely);
+					parcelyListView.setOnMouseClicked(event -> fillFieldsWith(parcelyListView.getSelectionModel().getSelectedItem()));
+				}
 			}
 		}
 
@@ -248,8 +262,22 @@ public class GeodetAppController implements Initializable {
 		nehnutelnostiListView.getItems().clear();
 		nehnutelnostiListView.getItems().addAll(nehnutelnosti);
 	}
+
 	private void refreshParcelyView(List<IPozemok> parcely) {
 		parcelyListView.getItems().clear();
 		parcelyListView.getItems().addAll(parcely);
+	}
+
+	private void fillFieldsWith(IPozemok pozemok) {
+		supisneCisloText.setText(pozemok.getSupisneCislo().toString());
+		popisText.setText(pozemok.getPopis());
+		lavaDolnaX.setText(pozemok.getGpsSuradnice().getSuradnicaLavyDolny().getX().toString());
+		lavaDolnaY.setText(pozemok.getGpsSuradnice().getSuradnicaLavyDolny().getY().toString());
+		pravaHornaX.setText(pozemok.getGpsSuradnice().getSuradnicaPravyHorny().getX().toString());
+		pravaHornaY.setText(pozemok.getGpsSuradnice().getSuradnicaPravyHorny().getY().toString());
+		orientaciaSirkaDolna.setText(pozemok.getGpsSuradnice().getSuradnicaLavyDolny().getSirka());
+		orientaciaVyskaDolna.setText(pozemok.getGpsSuradnice().getSuradnicaLavyDolny().getVyska());
+		orientaciaSirkaHorna.setText(pozemok.getGpsSuradnice().getSuradnicaPravyHorny().getSirka());
+		orientaciaVyskaHorna.setText(pozemok.getGpsSuradnice().getSuradnicaPravyHorny().getVyska());
 	}
 }

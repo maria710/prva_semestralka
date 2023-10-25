@@ -45,6 +45,16 @@ public class Nehnutelnost implements IPozemok {
 		return sb.toString();
 	}
 
+	@Override
+	public Integer getSupisneCislo() {
+		return this.supisneCislo;
+	}
+
+	@Override
+	public String getPopis() {
+		return this.popis;
+	}
+
 	public String toStringZoznam() {
 		return "Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
 	}

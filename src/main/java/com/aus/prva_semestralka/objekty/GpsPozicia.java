@@ -22,4 +22,8 @@ public class GpsPozicia {
 	public Double getY() {
 		return this.Y;
 	}
+
+	public String getSirka() { return this.sirka; }
+
+	public String getVyska() { return this.dlzka; }
 }

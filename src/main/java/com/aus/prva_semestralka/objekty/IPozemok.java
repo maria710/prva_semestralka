@@ -4,4 +4,8 @@ public interface IPozemok {
 
 	Ohranicenie getGpsSuradnice();
 	String toString();
+
+	Integer getSupisneCislo();
+
+	String getPopis();
 }
