@@ -90,6 +90,8 @@ public class GeodetAppController implements Initializable {
 	private final List<String> akcie = List.of("Pridať", "Vymazať", "Upraviť", "Nájsť", "Vypísať");
 	private final List<String> pozemky = List.of("Nehnuteľnosť", "Parcela", "Oba");
 
+	private IPozemok povodnyPozemok;
+
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 
@@ -182,11 +184,11 @@ public class GeodetAppController implements Initializable {
 				}
 			}
 			case "Upraviť" -> {
-//				if (pozemok.equals("Nehnuteľnosť")) {
-//					result = manazer.upravNehnutelnost(nehnutelnostPovodna, nehnutelnost);
-//				} else if (pozemok.equals("Parcela")) {
-//					result = manazer.upravParcelu(parcelaPovodna, parcela);
-//				}
+				if (pozemok.equals("Nehnuteľnosť")) {
+					result = manazer.upravNehnutelnost(povodnyPozemok, nehnutelnost);
+				} else if (pozemok.equals("Parcela")) {
+					result = manazer.upravParcelu(povodnyPozemok, parcela);
+				}
 			}
 			case "Vypísať"-> {
 				if (pozemok.equals("Nehnuteľnosť")) {
@@ -269,6 +271,7 @@ public class GeodetAppController implements Initializable {
 	}
 
 	private void fillFieldsWith(IPozemok pozemok) {
+		povodnyPozemok = pozemok;
 		supisneCisloText.setText(pozemok.getSupisneCislo().toString());
 		popisText.setText(pozemok.getPopis());
 		lavaDolnaX.setText(pozemok.getGpsSuradnice().getSuradnicaLavyDolny().getX().toString());

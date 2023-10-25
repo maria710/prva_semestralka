@@ -102,4 +102,22 @@ public class GeodetAppManazer {
 
 		return true;
 	}
+
+	public boolean upravNehnutelnost(IPozemok povodnyPozemok, Nehnutelnost nehnutelnost) {
+		if (povodnyPozemok.getGpsSuradnice().equalsOhranicenie(nehnutelnost.getGpsSuradnice())) {
+			return nehnutelnosti.uprav(povodnyPozemok, nehnutelnost);
+		} else {
+			nehnutelnosti.deletePozemok(povodnyPozemok);
+			return nehnutelnosti.pridaj(nehnutelnost);
+		}
+	}
+
+	public boolean upravParcelu(IPozemok povodnyPozemok, Parcela parcela) {
+		if (povodnyPozemok.getGpsSuradnice() == parcela.getGpsSuradnice()) {
+			return parcely.uprav(povodnyPozemok, parcela);
+		} else {
+			parcely.deletePozemok(povodnyPozemok);
+			return parcely.pridaj(parcela);
+		}
+	}
 }

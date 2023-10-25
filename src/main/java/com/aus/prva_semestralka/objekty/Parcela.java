@@ -54,6 +54,16 @@ public class Parcela implements IPozemok {
 		return this.popis;
 	}
 
+	@Override
+	public void setPopis(String popis) {
+		this.popis = popis;
+	}
+
+	@Override
+	public void setSupisneCislo(Integer supisneCislo) {
+		this.supisneCislo = supisneCislo;
+	}
+
 	public String toStringZoznam() {
 		return "Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
 	}

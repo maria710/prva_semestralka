@@ -185,4 +185,19 @@ public class QuadTree {
 			}
 		}
 	}
+
+	public boolean uprav(IPozemok povodnyPozemok, IPozemok pozemok) {
+		var najdene = findWithin(povodnyPozemok.getGpsSuradnice());
+		if (najdene.isEmpty()) {
+			return false;
+		}
+		for (IPozemok pozemok1 : najdene) {
+			if (pozemok1.getSupisneCislo().equals(povodnyPozemok.getSupisneCislo())) {
+				pozemok1.setPopis(pozemok.getPopis());
+				pozemok1.setSupisneCislo(pozemok.getSupisneCislo());
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -8,4 +8,8 @@ public interface IPozemok {
 	Integer getSupisneCislo();
 
 	String getPopis();
+
+	void setPopis(String popis);
+
+	void setSupisneCislo(Integer supisneCislo);
 }

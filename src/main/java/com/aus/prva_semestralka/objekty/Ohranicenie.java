@@ -66,7 +66,12 @@ public class Ohranicenie {
 	public String toString() {
 		return "(" + suradnicaLavyDolny.getX() + " ; " + suradnicaLavyDolny.getY() + ")" +
 				"(" + suradnicaPravyHorny.getX() + " ; " + suradnicaPravyHorny.getY() + ")";
+	}
 
-
+	public boolean equalsOhranicenie(Ohranicenie ohranicenie) {
+		return suradnicaLavyDolny.getX().equals(ohranicenie.suradnicaLavyDolny.getX()) &&
+				suradnicaLavyDolny.getY().equals(ohranicenie.suradnicaLavyDolny.getY()) &&
+				suradnicaPravyHorny.getX().equals(ohranicenie.suradnicaPravyHorny.getX()) &&
+				suradnicaPravyHorny.getY().equals(ohranicenie.suradnicaPravyHorny.getY());
 	}
 }
