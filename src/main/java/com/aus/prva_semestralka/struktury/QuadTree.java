@@ -39,7 +39,7 @@ public class QuadTree {
 		}
 
 		var currentNode = root;
-		while (!currentNode.isJeList()) {
+		while (!currentNode.jeList()) {
 			var indexSyna = currentNode.getKvadrantPrePozemok(pozemok);
 			if (indexSyna != -1) {
 				currentNode = currentNode.getSynovia().get(indexSyna - 1);
@@ -90,7 +90,7 @@ public class QuadTree {
 			pozemky.addAll(currentNode.getPozemkySPrekrocenouHlbkou());
 			pozemky.addAll(currentNode.getPozemky());
 
-			if (currentNode.isJeList() && currentNode.getPozemok_data() != null) {
+			if (currentNode.jeList() && currentNode.getPozemok_data() != null) {
 				pozemky.add(currentNode.getPozemok_data());
 			} else {
 				// pridanie synov do zoznamu na spracovanie
@@ -140,7 +140,7 @@ public class QuadTree {
 		while (true) {
 			// ak je current node list a ma pozemok, tak ho vymazeme
 			var result = false;
-			if (currentNode.isJeList()) {
+			if (currentNode.jeList()) {
 				if (currentNode.getPozemok_data() != null && currentNode.getPozemok_data().equals(pozemok)) {
 					currentNode.setPozemok_data(null);
 					result = true;

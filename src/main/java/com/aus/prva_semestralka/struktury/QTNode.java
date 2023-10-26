@@ -43,6 +43,21 @@ public class QTNode {
 
 	public IPozemok getPozemok_data() {	return pozemok_data; }
 
+	public boolean jeList() { return jeList; }
+	public int getHlbka() { return hlbka; }
+
+	public List<QTNode> getSynovia() {
+		return synovia;
+	}
+
+	public List<IPozemok> getPozemky() {
+		return pozemky;
+	}
+
+	public List<IPozemok> getPozemkySPrekrocenouHlbkou() {
+		return pozemkySPrekrocenouHlbkou;
+	}
+
 	public void setPozemok_data(IPozemok pozemok_data) {
 		this.jeList = true;
 		this.pozemok_data = pozemok_data;
@@ -77,7 +92,7 @@ public class QTNode {
 		var syn = synovia.get(indexSyna - 1);
 
 		// ak je prazdny tak ho pridame na miesto pozemku
-		if (syn.getPozemok_data() == null && syn.isJeList()) {
+		if (syn.getPozemok_data() == null && syn.jeList()) {
 			syn.setPozemok_data(pozemok_data);
 			return true;
 		}
