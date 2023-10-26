@@ -24,14 +24,14 @@ public class Generator {
 	public Ohranicenie getRandomOhranicenie(int sirka, int dlzka) {
 		double suradnicaX1 = generateInRange(0, sirka);
 		double suradnicaY1 = generateInRange(0, dlzka);
-		double suradnicaX2 = generateInRange(suradnicaX1 + 1, sirka);
-		double suradnicaY2 = generateInRange(suradnicaY1 + 1, dlzka);
+		double suradnicaX2 = generateInRange(suradnicaX1, sirka);
+		double suradnicaY2 = generateInRange(suradnicaY1, dlzka);
 
 		return new Ohranicenie(new GpsPozicia("S", "Z", suradnicaX1, suradnicaY1), new GpsPozicia("J", "V", suradnicaX2, suradnicaY2));
 	}
 
 	private double generateInRange(double min, double max) {
-		return random.nextDouble(max - min) + min;
+		return random.nextDouble() * (max - min) + min;
 	}
 
 }

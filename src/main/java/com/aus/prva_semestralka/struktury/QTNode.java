@@ -59,7 +59,6 @@ public class QTNode {
 	}
 
 	public void setPozemok_data(IPozemok pozemok_data) {
-		this.jeList = true;
 		this.pozemok_data = pozemok_data;
 	}
 
@@ -87,7 +86,7 @@ public class QTNode {
 		int indexSyna = getKvadrantPrePozemok(pozemok_data);
 		if (indexSyna == -1) {
 			pozemky.add(pozemok_data);
-			return false;
+			return true;
 		}
 		var syn = synovia.get(indexSyna - 1);
 

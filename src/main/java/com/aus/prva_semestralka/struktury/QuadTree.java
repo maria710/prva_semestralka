@@ -21,6 +21,7 @@ public class QuadTree {
 	public static Integer maxHlbka;
 	private Integer sirka;
 	private Integer dlzka;
+	private Integer pocetPozemkov = 0;
 
 	public QuadTree(Integer maxHlbka, Integer sirka, Integer dlzka) {
 		QuadTree.maxHlbka = maxHlbka;
@@ -31,6 +32,10 @@ public class QuadTree {
 		var ohranicenie = new Ohranicenie(prvaSuradnicaKorena, druhaSuradnicaKorena);
 		this.root = new QTNode(1, ohranicenie, 0);
 		root.rozdel();
+	}
+
+	public int getPocetPozemkov() {
+		return pocetPozemkov;
 	}
 
 	public boolean pridaj(IPozemok pozemok) {
@@ -45,17 +50,20 @@ public class QuadTree {
 				currentNode = currentNode.getSynovia().get(indexSyna - 1);
 			} else {
 				currentNode.getPozemky().add(pozemok); // presli sme vsetkych synov currentNode ale ani do jedneho sa nam nezmesti, tak ho pridame do tohto
+				pocetPozemkov++;
 				return true;
 			}
 		}
 
 		if (Objects.equals(currentNode.getHlbka(), maxHlbka)) { // nemozeme prekrocit sme maximalnu hlbku
 			currentNode.getPozemkySPrekrocenouHlbkou().add(pozemok);
+			pocetPozemkov++;
 			return true;
 		}
 
 		if (currentNode.getPozemok_data() == null) { // current node je list - nema synov
 			currentNode.setPozemok_data(pozemok);
+			pocetPozemkov++;
 			return true;
 		} else {
 			// ak uz obsahuje nejake data, potom ideme delit node
@@ -63,8 +71,15 @@ public class QuadTree {
 			var jePriradenyKvadrat = currentNode.zaradPozemokDoKvadratu(currentNode.getPozemok_data()); // pridame pozemok, ktory uz bol v node
 			if (jePriradenyKvadrat) {
 				currentNode.setPozemok_data(null);
+				pocetPozemkov--;
 			}
 			var jeZaradenyPozemokNaVkladanie = currentNode.zaradPozemokDoKvadratu(pozemok); // pridame pozemok, ktory chceme vlozit
+			if (jeZaradenyPozemokNaVkladanie) {
+				pocetPozemkov++;
+			}
+			if (jePriradenyKvadrat) {
+				pocetPozemkov++;
+			}
 			return jePriradenyKvadrat && jeZaradenyPozemokNaVkladanie;
 		}
 	}
@@ -148,6 +163,9 @@ public class QuadTree {
 					result = currentNode.getPozemkySPrekrocenouHlbkou().remove(pozemok);
 				}
 				vymazPraznychSynov(parentNodes, result);
+				if (result) {
+					pocetPozemkov--;
+				}
 				return result; // koncime uplne aj ked sme v liste nic nenasli
 			}
 
@@ -160,16 +178,17 @@ public class QuadTree {
 			}
 			vymazPraznychSynov(parentNodes, result);
 			if (result) { // nemozeme vratit negativny vysledok, mozno sa najde este v dalsich synoch
+				pocetPozemkov--;
 				return true;
 			}
 
 			// ak sa pozemok nenachadza v aktualnom node, tak sa posunieme na dalsi node
-			for (QTNode syn : currentNode.getSynovia()) {
-				if (syn.zmestiSa(pozemok)) {
-					parentNodes.add(0, currentNode);
-					currentNode = syn;
-				}
+			var indexSyna = currentNode.getKvadrantPrePozemok(pozemok);
+			if (indexSyna == -1) {
+				return false;
 			}
+			parentNodes.add(0, currentNode);
+			currentNode = currentNode.getSynovia().get(indexSyna - 1);
 		}
 	}
 
@@ -181,7 +200,9 @@ public class QuadTree {
 					break;
 				}
 				parentNode.getSynovia().clear();
-				parentNode.zmenJeList(true);
+				if (parentNode.getPozemky().isEmpty() && parentNode.getPozemkySPrekrocenouHlbkou().isEmpty() && parentNode.getPozemok_data() == null) {
+					parentNode.zmenJeList(true);
+				}
 			}
 		}
 	}

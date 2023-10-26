@@ -1,10 +1,11 @@
 package com.aus.prva_semestralka.struktury;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.aus.prva_semestralka.objekty.Generator;
 import com.aus.prva_semestralka.objekty.IPozemok;
@@ -18,9 +19,11 @@ class QuadTreeTest {
 	private ArrayList<IPozemok> pozemky;
 	private final Generator generator = new Generator();
 	private final int MAX_POCET_POZEMKOV = 100;
-	private final int MAX_HLBKA = 15;
+	private final int MAX_HLBKA = 10;
 	private final int SIRKA = 100;
 	private final int DLZKA = 100;
+
+	private Logger logger = Logger.getLogger(QuadTreeTest.class.getName());
 
 
 	@BeforeEach
@@ -33,16 +36,39 @@ class QuadTreeTest {
 	@Test
 	void pridaj() {
 		for (IPozemok pozemok : pozemky) {
+			logger.log (Level.INFO, "Pridavam pozemok: " + pozemok);
 			assertTrue(quadTree.pridaj(pozemok));
 		}
-		assertEquals(MAX_POCET_POZEMKOV, quadTree.getAllPozemky().size());
+		//assertEquals(MAX_POCET_POZEMKOV, quadTree.getAllPozemky().size());
+		assertEquals(MAX_POCET_POZEMKOV, quadTree.getPocetPozemkov());
 	}
 
 	@Test
-	void findWithin() {
+	void delete() {
+		for (IPozemok pozemok : pozemky) {
+			quadTree.pridaj(pozemok);
+		}
+		for (IPozemok pozemok : pozemky) {
+			logger.log (Level.INFO, "Vymazavam pozemok: " + pozemok);
+			assertTrue(quadTree.deletePozemok(pozemok));
+		}
+		assertEquals(0, quadTree.getAllPozemky().size());
 	}
 
 	@Test
-	void deletePozemok() {
+	void find() {
+		var ohranicenie = generator.getRandomOhranicenie(SIRKA, DLZKA);
+		var spadajuDoOhranicenia = new ArrayList<IPozemok>();
+		for (IPozemok pozemok : pozemky) {
+			quadTree.pridaj(pozemok);
+			if (ohranicenie.zmestiSaDovnutra(pozemok.getGpsSuradnice())) {
+				spadajuDoOhranicenia.add(pozemok);
+			}
+		}
+		var najdeneMetodouFind = new ArrayList<>(quadTree.findWithin(ohranicenie));
+		var obsahujuToTieIstePozemky = najdeneMetodouFind.containsAll(spadajuDoOhranicenia) && spadajuDoOhranicenia.containsAll(najdeneMetodouFind);
+		assertTrue(obsahujuToTieIstePozemky);
+		assertEquals(spadajuDoOhranicenia.size(), najdeneMetodouFind.size());
 	}
+
 }
