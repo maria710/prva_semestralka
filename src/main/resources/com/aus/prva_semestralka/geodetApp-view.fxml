@@ -22,16 +22,12 @@
 <VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aus.prva_semestralka.GeodetAppController">
     <MenuBar VBox.vgrow="NEVER">
         <Menu mnemonicParsing="false" text="Nehnuteľnosti">
-            <MenuItem mnemonicParsing="false" text="Pridaj..." />
-            <MenuItem mnemonicParsing="false" text="Uprav..." />
-            <MenuItem mnemonicParsing="false" text="Vymaž" />
-            <MenuItem mnemonicParsing="false" text="Vyhľadaj" />
+            <MenuItem fx:id="nehnutelnostiImportMenuItem" mnemonicParsing="false" onAction="#onNehnutelnostiImportClick" text="Import" />
+            <MenuItem fx:id="nehnutelnostiExportMenuItem" mnemonicParsing="false" onAction="#onNehnutelnostiExportClick" text="Export" />
         </Menu>
         <Menu mnemonicParsing="false" text="Parcely">
-            <MenuItem mnemonicParsing="false" text="Pridaj..." />
-            <MenuItem mnemonicParsing="false" text="Uprav..." />
-            <MenuItem mnemonicParsing="false" text="Vymaž" />
-            <MenuItem mnemonicParsing="false" text="Vyhľadaj" />
+            <MenuItem fx:id="parcelaImportMenuItem" mnemonicParsing="false" onAction="#onParcelyImportClick" text="Import" />
+            <MenuItem fx:id="parcelyExportMenuItem" mnemonicParsing="false" onAction="#onParcelyExportClick" text="Export" />
         </Menu>
     </MenuBar>
     <SplitPane dividerPositions="0.2505567928730512, 0.7505567928730512" focusTraversable="true" VBox.vgrow="ALWAYS">
@@ -117,7 +113,7 @@
              <Button fx:id="vypisParcelyButton" layoutX="74.0" layoutY="595.0" mnemonicParsing="false" onAction="#onVypisParcelyButton" text="Vypísať parcely" />
         </AnchorPane>
         <ScrollPane>
-            <AnchorPane id="Content" prefHeight="1028.0" prefWidth="492.0">
+            <AnchorPane id="Content" prefHeight="1028.0" prefWidth="494.0">
                 <SplitPane dividerPositions="0.5" layoutX="14.0" layoutY="14.0" orientation="VERTICAL" prefHeight="617.0" prefWidth="464.0">
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                         <VBox prefHeight="306.0" prefWidth="461.0">

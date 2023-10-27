@@ -2,6 +2,8 @@ package com.aus.prva_semestralka;
 
 import java.util.List;
 
+import com.aus.prva_semestralka.fileManazer.Exporter;
+import com.aus.prva_semestralka.fileManazer.Importer;
 import com.aus.prva_semestralka.objekty.IPozemok;
 import com.aus.prva_semestralka.objekty.Nehnutelnost;
 import com.aus.prva_semestralka.objekty.Ohranicenie;
@@ -119,5 +121,27 @@ public class GeodetAppManazer {
 			parcely.deletePozemok(povodnyPozemok);
 			return parcely.pridaj(parcela);
 		}
+	}
+
+	public void importParcely(String absolutePath) {
+		var parcelyImportovane = Importer.importFromCSV(absolutePath, true);
+		for (IPozemok pozemok : parcelyImportovane) {
+			pridajParcelu((Parcela) pozemok);
+		}
+	}
+
+	public void importNehnutelnosti(String absolutePath) {
+		var nehnutelnostiImportovane = Importer.importFromCSV(absolutePath, false);
+		for (IPozemok pozemok : nehnutelnostiImportovane) {
+			pridajNehnutelnost((Nehnutelnost) pozemok);
+		}
+	}
+
+	public void exportParcely(String absolutePath) {
+		Exporter.exportToCSV(parcely.getAllPozemky(), absolutePath);
+	}
+
+	public void exportNehnutelnosti(String absolutePath) {
+		Exporter.exportToCSV(nehnutelnosti.getAllPozemky(), absolutePath);
 	}
 }

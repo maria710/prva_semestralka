@@ -7,8 +7,11 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +24,18 @@ import com.aus.prva_semestralka.objekty.Ohranicenie;
 import com.aus.prva_semestralka.objekty.Parcela;
 
 public class GeodetAppController implements Initializable {
+
+	@FXML
+	public MenuItem nehnutelnostiImportMenuItem;
+
+	@FXML
+	public MenuItem nehnutelnostiExportMenuItem;
+
+	@FXML
+	public MenuItem parcelaImportMenuItem;
+
+	@FXML
+	public MenuItem parcelyExportMenuItem;
 
 	private GeodetAppManazer manazer;
 
@@ -282,5 +297,49 @@ public class GeodetAppController implements Initializable {
 		orientaciaVyskaDolna.setText(pozemok.getGpsSuradnice().getSuradnicaLavyDolny().getVyska());
 		orientaciaSirkaHorna.setText(pozemok.getGpsSuradnice().getSuradnicaPravyHorny().getSirka());
 		orientaciaVyskaHorna.setText(pozemok.getGpsSuradnice().getSuradnicaPravyHorny().getVyska());
+	}
+
+	public void onNehnutelnostiImportClick() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("C:\\Users\\mkuruczova\\projects\\aus2"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		File file = fileChooser.showOpenDialog(null);
+		if (file != null) {
+			manazer.importNehnutelnosti(file.getAbsolutePath());
+		}
+		refreshNehnutelnostiView(manazer.getNehnutelnosti());
+	}
+
+	public void onParcelyImportClick() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("C:\\Users\\mkuruczova\\projects\\aus2"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		File file = fileChooser.showOpenDialog(null);
+		if (file != null) {
+			manazer.importParcely(file.getAbsolutePath());
+		}
+		refreshParcelyView(manazer.getParcely());
+	}
+
+	public void onNehnutelnostiExportClick() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("C:\\Users\\mkuruczova\\projects\\aus2"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		File file = fileChooser.showSaveDialog(null);
+		if (file != null) {
+			manazer.exportNehnutelnosti(file.getAbsolutePath());
+		}
+		//refreshNehnutelnostiView(manazer.getNehnutelnosti());
+	}
+
+	public void onParcelyExportClick() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("C:\\Users\\mkuruczova\\projects\\aus2"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		File file = fileChooser.showSaveDialog(null);
+		if (file != null) {
+			manazer.exportParcely(file.getAbsolutePath());
+		}
+		//refreshParcelyView(manazer.getParcely());
 	}
 }

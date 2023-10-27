@@ -23,7 +23,7 @@ class QuadTreeTest {
 	private final int SIRKA = 1000;
 	private final int DLZKA = 1000;
 
-	private Logger logger = Logger.getLogger(QuadTreeTest.class.getName());
+	private final Logger logger = Logger.getLogger(QuadTreeTest.class.getName());
 
 
 	@BeforeEach
@@ -70,5 +70,4 @@ class QuadTreeTest {
 		assertTrue(obsahujuToTieIstePozemky);
 		assertEquals(spadajuDoOhranicenia.size(), najdeneMetodouFind.size());
 	}
-
 }
