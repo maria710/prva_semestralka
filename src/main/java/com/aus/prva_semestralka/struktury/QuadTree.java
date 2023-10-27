@@ -69,11 +69,11 @@ public class QuadTree {
 			// ak uz obsahuje nejake data, potom ideme delit node
 			currentNode.rozdel();
 			var jePriradenyKvadrat = currentNode.zaradPozemokDoKvadratu(currentNode.getPozemok_data()); // pridame pozemok, ktory uz bol v node
+			var jeZaradenyPozemokNaVkladanie = currentNode.zaradPozemokDoKvadratu(pozemok); // pridame pozemok, ktory chceme vlozit
 			if (jePriradenyKvadrat) {
 				currentNode.setPozemok_data(null);
 				pocetPozemkov--;
 			}
-			var jeZaradenyPozemokNaVkladanie = currentNode.zaradPozemokDoKvadratu(pozemok); // pridame pozemok, ktory chceme vlozit
 			if (jeZaradenyPozemokNaVkladanie) {
 				pocetPozemkov++;
 			}
@@ -121,7 +121,7 @@ public class QuadTree {
 		ArrayList<IPozemok> result = new ArrayList<>();
 
 		while (true) {
-			if (currentNode.getSynovia() == null) {
+			if (currentNode.getSynovia().isEmpty()) {
 				result.addAll(currentNode.getPozemky());
 				result.addAll(currentNode.getPozemkySPrekrocenouHlbkou());
 				if (currentNode.getPozemok_data() != null) {
@@ -173,11 +173,18 @@ public class QuadTree {
 			if (currentNode.getPozemky().contains(pozemok)) {
 				result = currentNode.getPozemky().remove(pozemok);
 			}
+
+			if (result) { // nemozeme vratit negativny vysledok, mozno sa najde este v dalsich synoch
+				vymazPraznychSynov(parentNodes, result);
+				pocetPozemkov--;
+				return true;
+			}
 			if (currentNode.getPozemkySPrekrocenouHlbkou().contains(pozemok)) {
 				result = currentNode.getPozemkySPrekrocenouHlbkou().remove(pozemok);
 			}
-			vymazPraznychSynov(parentNodes, result);
+
 			if (result) { // nemozeme vratit negativny vysledok, mozno sa najde este v dalsich synoch
+				vymazPraznychSynov(parentNodes, result);
 				pocetPozemkov--;
 				return true;
 			}
@@ -199,9 +206,11 @@ public class QuadTree {
 				if (!dajuSaZmazatSynovia) {
 					break;
 				}
-				parentNode.getSynovia().clear();
 				if (parentNode.getPozemky().isEmpty() && parentNode.getPozemkySPrekrocenouHlbkou().isEmpty() && parentNode.getPozemok_data() == null) {
+					parentNode.getSynovia().clear();
 					parentNode.zmenJeList(true);
+				} else {
+					break;
 				}
 			}
 		}

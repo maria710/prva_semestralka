@@ -114,13 +114,14 @@ public class QTNode {
 				// ak sa nezmestia do synov tak ich pridame do pozemkov
 				if (indexSynaPrePozemokSyna == -1) {
 					syn.getPozemky().add(pozemokSyna);
+				} else {
+					syn.synovia.get(indexSynaPrePozemokSyna - 1).pozemok_data = pozemokSyna;
+					syn.setPozemok_data(null);
 				}
 				if (indexSynaPrePozemokVkladany == -1) {
 					syn.getPozemky().add(pozemok_data);
-				}
-				if (indexSynaPrePozemokSyna != -1 && indexSynaPrePozemokVkladany != -1) {
-					syn.synovia.get(indexSynaPrePozemokSyna - 1).pozemok_data = pozemokSyna;
-					syn.synovia.get(indexSynaPrePozemokVkladany -1).pozemok_data = pozemok_data;
+				} else {
+					syn.synovia.get(indexSynaPrePozemokVkladany - 1).pozemok_data = pozemok_data;
 				}
 				return true;
 			}

@@ -18,10 +18,10 @@ class QuadTreeTest {
 	private QuadTree quadTree;
 	private ArrayList<IPozemok> pozemky;
 	private final Generator generator = new Generator();
-	private final int MAX_POCET_POZEMKOV = 100;
+	private final int MAX_POCET_POZEMKOV = 100000;
 	private final int MAX_HLBKA = 10;
-	private final int SIRKA = 100;
-	private final int DLZKA = 100;
+	private final int SIRKA = 1000;
+	private final int DLZKA = 1000;
 
 	private Logger logger = Logger.getLogger(QuadTreeTest.class.getName());
 
@@ -39,7 +39,7 @@ class QuadTreeTest {
 			logger.log (Level.INFO, "Pridavam pozemok: " + pozemok);
 			assertTrue(quadTree.pridaj(pozemok));
 		}
-		//assertEquals(MAX_POCET_POZEMKOV, quadTree.getAllPozemky().size());
+		assertEquals(MAX_POCET_POZEMKOV, quadTree.getAllPozemky().size());
 		assertEquals(MAX_POCET_POZEMKOV, quadTree.getPocetPozemkov());
 	}
 
