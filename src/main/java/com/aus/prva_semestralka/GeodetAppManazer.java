@@ -144,4 +144,14 @@ public class GeodetAppManazer {
 	public void exportNehnutelnosti(String absolutePath) {
 		Exporter.exportToCSV(nehnutelnosti.getAllPozemky(), absolutePath);
 	}
+
+	public void zmenRozmer(int sirka, int vyska) {
+//		nehnutelnosti.zmenRozmer(sirka, vyska);
+//		parcely.zmenRozmer(sirka, vyska);
+		// TODO
+	}
+
+	public void optimalizuj() {
+		// TODO
+	}
 }

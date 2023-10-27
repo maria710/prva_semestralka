@@ -37,6 +37,18 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	public MenuItem parcelyExportMenuItem;
 
+	@FXML
+	public Button zmenitRozmerButton;
+
+	@FXML
+	public Button optimalizovatButton;
+
+	@FXML
+	public TextField sirkaTextField;
+
+	@FXML
+	public TextField vyskaTextField;
+
 	private GeodetAppManazer manazer;
 
 	@FXML
@@ -205,7 +217,7 @@ public class GeodetAppController implements Initializable {
 					result = manazer.upravParcelu(povodnyPozemok, parcela);
 				}
 			}
-			case "Vypísať"-> {
+			case "Vypísať" -> {
 				if (pozemok.equals("Nehnuteľnosť")) {
 					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
 					labelOfNehnutelnostiListView.setText("Nájdené nehnuteľnosti vo zvolenom ohraničení");
@@ -263,6 +275,7 @@ public class GeodetAppController implements Initializable {
 
 	private void setCellFactoryFor(ListView<IPozemok> listView) {
 		listView.setCellFactory(param -> new ListCell<>() {
+
 			@Override
 			protected void updateItem(IPozemok item, boolean empty) {
 				super.updateItem(item, empty);
@@ -329,7 +342,6 @@ public class GeodetAppController implements Initializable {
 		if (file != null) {
 			manazer.exportNehnutelnosti(file.getAbsolutePath());
 		}
-		//refreshNehnutelnostiView(manazer.getNehnutelnosti());
 	}
 
 	public void onParcelyExportClick() {
@@ -340,6 +352,15 @@ public class GeodetAppController implements Initializable {
 		if (file != null) {
 			manazer.exportParcely(file.getAbsolutePath());
 		}
-		//refreshParcelyView(manazer.getParcely());
+	}
+
+	public void onOptimalizovatClick() {
+		manazer.optimalizuj();
+	}
+
+	public void onZmenitRozmerClick() {
+		int sirka = Integer.parseInt(sirkaTextField.getText());
+		int vyska = Integer.parseInt(vyskaTextField.getText());
+		manazer.zmenRozmer(sirka, vyska);
 	}
 }
