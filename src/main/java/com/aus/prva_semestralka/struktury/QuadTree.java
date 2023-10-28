@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import com.aus.prva_semestralka.objekty.GpsPozicia;
 import com.aus.prva_semestralka.objekty.IPozemok;
@@ -38,12 +39,18 @@ public class QuadTree {
 		return pocetPozemkov;
 	}
 
+	public int getMaxHlbka() { return maxHlbka; }
+
 	public boolean pridaj(IPozemok pozemok) {
-		if (pozemok == null || !root.zmestiSa(pozemok)) { // ak je pozemok velmi velky alebo neexistuje, tak ho nepridavame
+		return pridajDoNode(pozemok, root);
+	}
+
+	public boolean pridajDoNode(IPozemok pozemok, QTNode node) {
+		if (pozemok == null || !node.zmestiSa(pozemok)) { // ak je pozemok velmi velky alebo neexistuje, tak ho nepridavame
 			return false;
 		}
 
-		var currentNode = root;
+		var currentNode = node;
 		while (!currentNode.jeList()) {
 			var indexSyna = currentNode.getKvadrantPrePozemok(pozemok);
 			if (indexSyna != -1) {
@@ -229,5 +236,66 @@ public class QuadTree {
 			}
 		}
 		return false;
+	}
+
+	public boolean zmenHlbku(Integer hlbka) {
+		if (hlbka < 1) {
+			return false;
+		}
+
+		if (hlbka == root.getHlbka()) {
+			return true;
+		}
+		if (hlbka < root.getHlbka()) {
+			Predicate<QTNode> predicate = node -> node.getHlbka() > hlbka;
+			var nodes = getNodesPodlaPredikatu(predicate);
+			maxHlbka = hlbka;
+
+			for (QTNode node : nodes) {
+				ArrayList<IPozemok> pozemkyNaVlozenie = new ArrayList<>();
+				pozemkyNaVlozenie.add(node.getPozemok_data());
+				pozemkyNaVlozenie.addAll(node.getPozemky());
+				pozemkyNaVlozenie.addAll(node.getPozemkySPrekrocenouHlbkou());
+
+				for (IPozemok pozemok : pozemkyNaVlozenie) {
+					deletePozemok(pozemok); // vymazeme pozemok aby sme nemali duplicity
+					pridaj(pozemok);
+				}
+			}
+			return true;
+		}
+		if (hlbka > maxHlbka) {
+			Predicate<QTNode> predicate = node -> node.getHlbka() == maxHlbka && !node.getPozemkySPrekrocenouHlbkou().isEmpty();
+			var nodes = getNodesPodlaPredikatu(predicate);
+			maxHlbka = hlbka;
+
+			for (QTNode node : nodes) { // pre kazdy node s pozemkami s prekrocenou hlbkou
+				// pre kazdy pozemok s prekrocenou hlbkou sa pokusime znovu vlozit do stromu, vsetky sa musia odstranit!
+				for (IPozemok pozemok : node.getPozemkySPrekrocenouHlbkou()) {
+					if (pridajDoNode(pozemok, node)) { // nehladame kde sa zmeti, lebo uz vieme ze sa zmesti len do current node alebo nizsie
+						node.getPozemkySPrekrocenouHlbkou().remove(pozemok);
+						pocetPozemkov--; // ked ostranime zo zoznamu, musime znizit pocet pozemkov aby sme nepridali duplikat
+					}
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public List<QTNode> getNodesPodlaPredikatu(Predicate<QTNode> predicate) {
+		List<QTNode> nodes = new ArrayList<>(4 ^ root.getHlbka());
+		LinkedList<QTNode> nodeNaSpracovanie = new LinkedList<>();
+
+		nodeNaSpracovanie.add(root);
+
+		while (!nodeNaSpracovanie.isEmpty()) {
+			QTNode currentNode = nodeNaSpracovanie.poll();
+			if (predicate.test(currentNode)) {
+				nodes.add(currentNode);
+			}
+			nodeNaSpracovanie.addAll(currentNode.getSynovia());
+		}
+		return nodes;
 	}
 }

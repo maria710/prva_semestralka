@@ -49,6 +49,12 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	public TextField vyskaTextField;
 
+	@FXML
+	public TextField hlbkaTextField;
+
+	@FXML
+	public Label resultOptAZmenaLabel;
+
 	private GeodetAppManazer manazer;
 
 	@FXML
@@ -114,6 +120,9 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	private Button vymazatButton;
 
+	@FXML
+	private Button vytvoritButton;
+
 	private final List<String> akcie = List.of("Pridať", "Vymazať", "Upraviť", "Nájsť", "Vypísať");
 	private final List<String> pozemky = List.of("Nehnuteľnosť", "Parcela", "Oba");
 
@@ -123,13 +132,24 @@ public class GeodetAppController implements Initializable {
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 
 		manazer = new GeodetAppManazer();
-		manazer.vytvorStromy(20, 100, 100);
 
 		actionChoiceBox.getItems().addAll(akcie);
 		actionChoiceBox.setValue(akcie.get(0));
 
 		pozemokChoiceBox.getItems().addAll(pozemky);
 		pozemokChoiceBox.setValue(pozemky.get(0));
+		spustiButton.setDisable(true);
+	}
+
+	public void onVytvoritButtonClick() {
+		int sirka = Integer.parseInt(sirkaTextField.getText());
+		int vyska = Integer.parseInt(vyskaTextField.getText());
+		int hlbka = Integer.parseInt(hlbkaTextField.getText());
+		manazer.vytvorStromy(hlbka, sirka, vyska);
+		vytvoritButton.setDisable(true);
+		sirkaTextField.setDisable(true);
+		vyskaTextField.setDisable(true);
+		spustiButton.setDisable(false);
 	}
 
 	@FXML
@@ -359,8 +379,11 @@ public class GeodetAppController implements Initializable {
 	}
 
 	public void onZmenitRozmerClick() {
-		int sirka = Integer.parseInt(sirkaTextField.getText());
-		int vyska = Integer.parseInt(vyskaTextField.getText());
-		manazer.zmenRozmer(sirka, vyska);
+		int hlbka = Integer.parseInt(hlbkaTextField.getText());
+		if (manazer.zmenHlbku(hlbka)) {
+			resultOptAZmenaLabel.setText("Hĺbka bola zmenená");
+		} else {
+			resultOptAZmenaLabel.setText("Hĺbku sa nepodarilo zmeniť");
+		}
 	}
 }

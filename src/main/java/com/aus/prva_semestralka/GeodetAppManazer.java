@@ -145,13 +145,14 @@ public class GeodetAppManazer {
 		Exporter.exportToCSV(nehnutelnosti.getAllPozemky(), absolutePath);
 	}
 
-	public void zmenRozmer(int sirka, int vyska) {
-//		nehnutelnosti.zmenRozmer(sirka, vyska);
-//		parcely.zmenRozmer(sirka, vyska);
+	public void optimalizuj() {
 		// TODO
 	}
 
-	public void optimalizuj() {
-		// TODO
+	public boolean zmenHlbku(int hlbka) {
+		if (hlbka < 1) {
+			return false;
+		}
+		return nehnutelnosti.zmenHlbku(hlbka) && parcely.zmenHlbku(hlbka);
 	}
 }

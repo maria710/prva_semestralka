@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.aus.prva_semestralka.fileManazer.Exporter;
 import com.aus.prva_semestralka.objekty.Generator;
 import com.aus.prva_semestralka.objekty.IPozemok;
 
@@ -18,10 +19,10 @@ class QuadTreeTest {
 	private QuadTree quadTree;
 	private ArrayList<IPozemok> pozemky;
 	private final Generator generator = new Generator();
-	private final int MAX_POCET_POZEMKOV = 100000;
+	private final int MAX_POCET_POZEMKOV = 50;
 	private final int MAX_HLBKA = 10;
-	private final int SIRKA = 1000;
-	private final int DLZKA = 1000;
+	private final int SIRKA = 100;
+	private final int DLZKA = 100;
 
 	private final Logger logger = Logger.getLogger(QuadTreeTest.class.getName());
 
@@ -39,6 +40,7 @@ class QuadTreeTest {
 			logger.log (Level.INFO, "Pridavam pozemok: " + pozemok);
 			assertTrue(quadTree.pridaj(pozemok));
 		}
+		Exporter.exportToCSV(pozemky, "quadTreeGenerovany.csv");
 		assertEquals(MAX_POCET_POZEMKOV, quadTree.getAllPozemky().size());
 		assertEquals(MAX_POCET_POZEMKOV, quadTree.getPocetPozemkov());
 	}

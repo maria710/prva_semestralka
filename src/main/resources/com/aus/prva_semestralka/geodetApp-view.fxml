@@ -165,17 +165,36 @@
                         <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
                      </opaqueInsets>
                   </HBox>
+                  <HBox alignment="CENTER" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
+                     <children>
+                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="48.0" text="Hĺbka">
+                           <opaqueInsets>
+                              <Insets bottom="20.0" left="20.0" right="10.0" top="50.0" />
+                           </opaqueInsets>
+                        </Label>
+                        <TextField fx:id="hlbkaTextField" promptText="Hĺbka" />
+                     </children>
+                     <opaqueInsets>
+                        <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
+                     </opaqueInsets>
+                  </HBox>
                   <HBox alignment="CENTER" layoutX="10.0" layoutY="58.0" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
                      <opaqueInsets>
                         <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
                      </opaqueInsets>
                      <children>
-                        <Button fx:id="zmenitRozmerButton" mnemonicParsing="false" onAction="#onZmenitRozmerClick" text="Zmeniť rozmer" />
+                        <Button fx:id="zmenitRozmerButton" mnemonicParsing="false" onAction="#onZmenitRozmerClick" text="Zmeniť" />
                         <Button fx:id="optimalizovatButton" mnemonicParsing="false" onAction="#onOptimalizovatClick" text="Optimalizovať" />
+                        <Button fx:id="vytvoritButton" layoutX="161.0" layoutY="21.0" mnemonicParsing="false" onAction="#onVytvoritButtonClick" text="Vytvoriť" />
                      </children>
                   </HBox>
                </children>
             </VBox>
+            <Label fx:id="resultOptAZmenaLabel" layoutX="48.0" layoutY="211.0" prefHeight="18.0" prefWidth="187.0">
+               <opaqueInsets>
+                  <Insets left="20.0" />
+               </opaqueInsets>
+            </Label>
          </children>
         </AnchorPane>
     </SplitPane>
