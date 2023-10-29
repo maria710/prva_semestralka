@@ -22,15 +22,15 @@ public class Generator {
 	}
 
 	public Ohranicenie getRandomOhranicenie(int sirka, int dlzka) {
-		double suradnicaX1 = generateInRange(0, sirka);
-		double suradnicaY1 = generateInRange(0, dlzka);
-		double suradnicaX2 = generateInRange(suradnicaX1, sirka);
-		double suradnicaY2 = generateInRange(suradnicaY1, dlzka);
+		double suradnicaX1 = vygenerujVOhraniceni(0, sirka);
+		double suradnicaY1 = vygenerujVOhraniceni(0, dlzka);
+		double suradnicaX2 = vygenerujVOhraniceni(suradnicaX1, sirka);
+		double suradnicaY2 = vygenerujVOhraniceni(suradnicaY1, dlzka);
 
 		return new Ohranicenie(new GpsPozicia("S", "Z", suradnicaX1, suradnicaY1), new GpsPozicia("J", "V", suradnicaX2, suradnicaY2));
 	}
 
-	private double generateInRange(double min, double max) {
+	private double vygenerujVOhraniceni(double min, double max) {
 		return random.nextDouble() * (max - min) + min;
 	}
 

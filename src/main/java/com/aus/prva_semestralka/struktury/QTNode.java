@@ -10,6 +10,8 @@ import java.util.Objects;
 import com.aus.prva_semestralka.objekty.IPozemok;
 import com.aus.prva_semestralka.objekty.Ohranicenie;
 
+import static com.aus.prva_semestralka.GeodetAppManazer.generatorKlucov;
+
 @Data
 @RequiredArgsConstructor
 public class QTNode {
@@ -33,18 +35,33 @@ public class QTNode {
 		this.hlbka = hlbka;
 	}
 
-	public QTNode getSeverozapadnySyn() { return synovia.get(0); }
+	public QTNode getSeverozapadnySyn() {
+		return synovia.get(0);
+	}
 
-	public QTNode getSeverovychodnySyn() { return synovia.get(1); }
+	public QTNode getSeverovychodnySyn() {
+		return synovia.get(1);
+	}
 
-	public QTNode getJuhovychodnySyn() { return synovia.get(2); }
+	public QTNode getJuhovychodnySyn() {
+		return synovia.get(2);
+	}
 
-	public QTNode getJuhozapadnySyn() { return synovia.get(3); }
+	public QTNode getJuhozapadnySyn() {
+		return synovia.get(3);
+	}
 
-	public IPozemok getPozemok_data() {	return pozemok_data; }
+	public IPozemok getPozemok_data() {
+		return pozemok_data;
+	}
 
-	public boolean jeList() { return jeList; }
-	public int getHlbka() { return hlbka; }
+	public boolean jeList() {
+		return jeList;
+	}
+
+	public int getHlbka() {
+		return hlbka;
+	}
 
 	public List<QTNode> getSynovia() {
 		return synovia;
@@ -131,10 +148,10 @@ public class QTNode {
 	public void rozdel() {
 		var ohranicenia = ohranicenie.rozdel();
 
-		setSeverozapadnySyn(new QTNode(primarnyKluc + 1, ohranicenia.get(0), hlbka + 1));
-		setSeverovychodnySyn(new QTNode(primarnyKluc + 2, ohranicenia.get(1), hlbka + 1));
-		setJuhovychodnySyn(new QTNode(primarnyKluc + 3, ohranicenia.get(2), hlbka + 1));
-		setJuhozapadnySyn(new QTNode(primarnyKluc + 4, ohranicenia.get(3), hlbka + 1));
+		setSeverozapadnySyn(new QTNode(generatorKlucov.getKluc(), ohranicenia.get(0), hlbka + 1));
+		setSeverovychodnySyn(new QTNode(generatorKlucov.getKluc(), ohranicenia.get(1), hlbka + 1));
+		setJuhovychodnySyn(new QTNode(generatorKlucov.getKluc(), ohranicenia.get(2), hlbka + 1));
+		setJuhozapadnySyn(new QTNode(generatorKlucov.getKluc(), ohranicenia.get(3), hlbka + 1));
 	}
 
 	public boolean zmestiSa(IPozemok pozemok) {

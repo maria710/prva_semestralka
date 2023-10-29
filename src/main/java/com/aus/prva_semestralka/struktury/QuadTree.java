@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 
 import com.aus.prva_semestralka.objekty.GpsPozicia;
 import com.aus.prva_semestralka.objekty.IPozemok;
+import com.aus.prva_semestralka.objekty.Map;
 import com.aus.prva_semestralka.objekty.Ohranicenie;
 
 @Data
@@ -123,8 +124,16 @@ public class QuadTree {
 		return pozemky;
 	}
 
-	public List<IPozemok> findWithin(Ohranicenie ohranicenie) {
-		var currentNode = root;
+	public Map findWithin(Ohranicenie ohranicenie) {
+		return findWithinFromNode(ohranicenie, root);
+	}
+
+	public Map findWithinFromNode(Ohranicenie ohranicenie, QTNode node) {
+		if (node == null) {
+			node = root;
+		}
+
+		var currentNode = node;
 		ArrayList<IPozemok> result = new ArrayList<>();
 
 		while (true) {
@@ -134,7 +143,7 @@ public class QuadTree {
 				if (currentNode.getPozemok_data() != null) {
 					result.add(currentNode.getPozemok_data());
 				}
-				return result;
+				return Map.of(currentNode, result);
 			}
 			int index = currentNode.getKvadrantPreOhranicenie(ohranicenie);
 			if (index == -1) {
@@ -144,11 +153,11 @@ public class QuadTree {
 						result.add(pozemok);
 					}
 				}
-				return result;
+				return Map.of(currentNode, result);
 			} else {
 				var syn = currentNode.getSynovia().get(index - 1);
 				if (syn == null) {
-					return Collections.emptyList();
+					return Map.of(null, Collections.emptyList());
 				}
 				currentNode = syn;
 			}
@@ -156,7 +165,14 @@ public class QuadTree {
 	}
 
 	public boolean deletePozemok(IPozemok pozemok) {
-		var currentNode = root;
+		return deletePozemokFromNode(pozemok, root);
+	}
+
+	public boolean deletePozemokFromNode(IPozemok pozemok, QTNode node) {
+		if (node == null) {
+			node = root;
+		}
+		var currentNode = node;
 		List<QTNode> parentNodes = new LinkedList<>();
 
 		while (true) {
@@ -223,8 +239,8 @@ public class QuadTree {
 		}
 	}
 
-	public boolean uprav(IPozemok povodnyPozemok, IPozemok pozemok) {
-		var najdene = findWithin(povodnyPozemok.getGpsSuradnice());
+	public boolean uprav(IPozemok povodnyPozemok, IPozemok pozemok, QTNode node) {
+		var najdene = findWithinFromNode(povodnyPozemok.getGpsSuradnice(), node).getPozemky();
 		if (najdene.isEmpty()) {
 			return false;
 		}

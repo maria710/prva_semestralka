@@ -4,16 +4,20 @@ import java.util.List;
 
 import com.aus.prva_semestralka.fileManazer.Exporter;
 import com.aus.prva_semestralka.fileManazer.Importer;
+import com.aus.prva_semestralka.objekty.GeneratorKlucov;
 import com.aus.prva_semestralka.objekty.IPozemok;
 import com.aus.prva_semestralka.objekty.Nehnutelnost;
 import com.aus.prva_semestralka.objekty.Ohranicenie;
 import com.aus.prva_semestralka.objekty.Parcela;
+import com.aus.prva_semestralka.struktury.QTNode;
 import com.aus.prva_semestralka.struktury.QuadTree;
 
 public class GeodetAppManazer {
 
-	QuadTree nehnutelnosti;
-	QuadTree parcely;
+	private QuadTree nehnutelnosti;
+	private QuadTree parcely;
+	public static GeneratorKlucov generatorKlucov = new GeneratorKlucov();
+	private QTNode aktualnyNodePriVyhladavani;
 
 	public void vytvorStromy(int maxHlbka, int sirka, int dlzka) {
 		nehnutelnosti = new QuadTree(maxHlbka, sirka, dlzka);
@@ -44,20 +48,24 @@ public class GeodetAppManazer {
 
 	public boolean vymazNehnutelnost(Nehnutelnost nehnutelnost) {
 		nehnutelnost.getParcely().forEach(parcela -> parcela.getNehnutelnosti().remove(nehnutelnost));
-		return nehnutelnosti.deletePozemok(nehnutelnost);
+		return nehnutelnosti.deletePozemokFromNode(nehnutelnost, aktualnyNodePriVyhladavani);
 	}
 
 	public boolean vymazParcelu(Parcela parcela) {
 		parcela.getNehnutelnosti().forEach(nehnutelnost -> nehnutelnost.getParcely().remove(parcela));
-		return parcely.deletePozemok(parcela);
+		return parcely.deletePozemokFromNode(parcela, aktualnyNodePriVyhladavani);
 	}
 
 	public List<IPozemok> najdiNehnutelnostiVOhraniceni(Ohranicenie ohranicenie) {
-		return nehnutelnosti.findWithin(ohranicenie);
+		var map = nehnutelnosti.findWithin(ohranicenie);
+		aktualnyNodePriVyhladavani = map.getRoot();
+		return map.getPozemky();
 	}
 
 	public List<IPozemok> najdiParcelyVOhraniceni(Ohranicenie ohranicenie) {
-		return parcely.findWithin(ohranicenie);
+		var map = parcely.findWithin(ohranicenie);
+		aktualnyNodePriVyhladavani = map.getRoot();
+		return map.getPozemky();
 	}
 
 	private void pridajZavislostiNaPozemkoch(IPozemok pozemok, List<IPozemok> zavislosti) {
@@ -107,18 +115,18 @@ public class GeodetAppManazer {
 
 	public boolean upravNehnutelnost(IPozemok povodnyPozemok, Nehnutelnost nehnutelnost) {
 		if (povodnyPozemok.getGpsSuradnice().equalsOhranicenie(nehnutelnost.getGpsSuradnice())) {
-			return nehnutelnosti.uprav(povodnyPozemok, nehnutelnost);
+			return nehnutelnosti.uprav(povodnyPozemok, nehnutelnost, aktualnyNodePriVyhladavani);
 		} else {
-			nehnutelnosti.deletePozemok(povodnyPozemok);
+			nehnutelnosti.deletePozemokFromNode(povodnyPozemok, aktualnyNodePriVyhladavani);
 			return nehnutelnosti.pridaj(nehnutelnost);
 		}
 	}
 
 	public boolean upravParcelu(IPozemok povodnyPozemok, Parcela parcela) {
 		if (povodnyPozemok.getGpsSuradnice() == parcela.getGpsSuradnice()) {
-			return parcely.uprav(povodnyPozemok, parcela);
+			return parcely.uprav(povodnyPozemok, parcela, aktualnyNodePriVyhladavani);
 		} else {
-			parcely.deletePozemok(povodnyPozemok);
+			parcely.deletePozemokFromNode(povodnyPozemok, aktualnyNodePriVyhladavani);
 			return parcely.pridaj(parcela);
 		}
 	}

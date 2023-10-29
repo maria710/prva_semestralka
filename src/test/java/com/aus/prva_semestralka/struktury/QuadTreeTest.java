@@ -35,7 +35,7 @@ class QuadTreeTest {
 	}
 
 	@Test
-	void pridaj() {
+	void pridajTest() {
 		for (IPozemok pozemok : pozemky) {
 			logger.log (Level.INFO, "Pridavam pozemok: " + pozemok);
 			assertTrue(quadTree.pridaj(pozemok));
@@ -46,7 +46,7 @@ class QuadTreeTest {
 	}
 
 	@Test
-	void delete() {
+	void deleteTest() {
 		for (IPozemok pozemok : pozemky) {
 			quadTree.pridaj(pozemok);
 		}
@@ -58,7 +58,7 @@ class QuadTreeTest {
 	}
 
 	@Test
-	void find() {
+	void findTest() {
 		var ohranicenie = generator.getRandomOhranicenie(SIRKA, DLZKA);
 		var spadajuDoOhranicenia = new ArrayList<IPozemok>();
 		for (IPozemok pozemok : pozemky) {
@@ -67,7 +67,7 @@ class QuadTreeTest {
 				spadajuDoOhranicenia.add(pozemok);
 			}
 		}
-		var najdeneMetodouFind = new ArrayList<>(quadTree.findWithin(ohranicenie));
+		var najdeneMetodouFind = new ArrayList<>(quadTree.findWithin(ohranicenie).getPozemky());
 		var obsahujuToTieIstePozemky = najdeneMetodouFind.containsAll(spadajuDoOhranicenia) && spadajuDoOhranicenia.containsAll(najdeneMetodouFind);
 		assertTrue(obsahujuToTieIstePozemky);
 		assertEquals(spadajuDoOhranicenia.size(), najdeneMetodouFind.size());
