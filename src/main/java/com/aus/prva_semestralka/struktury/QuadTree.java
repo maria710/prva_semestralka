@@ -179,7 +179,7 @@ public class QuadTree {
 			// ak je current node list a ma data, tak ho vymazeme
 			var result = false;
 			if (currentNode.jeList()) {
-				if (currentNode.getDataListu() != null && currentNode.getDataListu().equals(data)) {
+				if (currentNode.getDataListu() != null && currentNode.getDataListu().equals(data)) { // vlastne equals
 					currentNode.setDataListu(null);
 					result = true;
 				} else {

@@ -5,4 +5,5 @@ public interface IData {
 	Integer getPrimarnyKluc();
 	Ohranicenie getSekundarnyKluc();
 	void setData(IData data);
+	boolean equals(IData o);
 }

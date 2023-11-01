@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import static java.util.Objects.*;
 
 @RequiredArgsConstructor
 public class Nehnutelnost implements IPozemok {
@@ -82,5 +85,10 @@ public class Nehnutelnost implements IPozemok {
 			this.gpsPozicie = nehnutelnost.gpsPozicie;
 			this.parcely = nehnutelnost.parcely;
 		}
+	}
+
+	@Override
+	public boolean equals(IData o) {
+		return Objects.equals(o.getPrimarnyKluc(), this.supisneCislo) && gpsPozicie.equalsOhranicenie(o.getSekundarnyKluc());
 	}
 }
