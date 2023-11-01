@@ -5,11 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.IPozemok;
 
 public class Exporter {
 
-	public static void exportToCSV(List<IPozemok> pozemkyList, String csvFilePath) {
+	public static void exportToCSV(List<IData> dataList, String csvFilePath) {
+		List<IPozemok> pozemkyList = dataList.stream()
+											 .filter(data -> data instanceof IPozemok)
+											 .map(data -> (IPozemok) data)
+											 .toList();
+
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFilePath))) {
 			writer.write("SupisneCislo;Popis;Sirka1;Dlzka1;X1;Y1;Sirka2;Dlzka2;X2;Y2\n"); // prvy riadok v exceli
 

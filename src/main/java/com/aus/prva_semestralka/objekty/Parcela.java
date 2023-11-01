@@ -59,13 +59,27 @@ public class Parcela implements IPozemok {
 		this.popis = popis;
 	}
 
-	@Override
-	public void setSupisneCislo(Integer supisneCislo) {
-		this.supisneCislo = supisneCislo;
-	}
-
 	public String toStringZoznam() {
 		return "Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
 	}
 
+	@Override
+	public Integer getPrimarnyKluc() {
+		return this.supisneCislo;
+	}
+
+	@Override
+	public Ohranicenie getSekundarnyKluc() {
+		return this.gpsPozicie;
+	}
+
+	@Override
+	public void setData(IData data) {
+		if (data instanceof Parcela parcela) {
+			this.supisneCislo = parcela.supisneCislo;
+			this.popis = parcela.popis;
+			this.gpsPozicie = parcela.gpsPozicie;
+			this.nehnutelnosti = parcela.nehnutelnosti;
+		}
+	}
 }

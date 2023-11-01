@@ -1,10 +1,12 @@
 package com.aus.prva_semestralka;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.aus.prva_semestralka.fileManazer.Exporter;
 import com.aus.prva_semestralka.fileManazer.Importer;
 import com.aus.prva_semestralka.objekty.GeneratorKlucov;
+import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.IPozemok;
 import com.aus.prva_semestralka.objekty.Nehnutelnost;
 import com.aus.prva_semestralka.objekty.Ohranicenie;
@@ -25,47 +27,47 @@ public class GeodetAppManazer {
 	}
 
 	public List<IPozemok> getNehnutelnosti() {
-		return nehnutelnosti.getAllPozemky();
+		return filterAndCastToIPozemok(nehnutelnosti.getAllData());
 	}
 
 	public List<IPozemok> getParcely() {
-		return parcely.getAllPozemky();
+		return filterAndCastToIPozemok(parcely.getAllData());
 	}
 
 	public boolean pridajNehnutelnost(Nehnutelnost nehnutelnost) {
 
-		List<IPozemok> parcelyZoznam = parcely.getAllPozemky();
+		List<IPozemok> parcelyZoznam = filterAndCastToIPozemok(parcely.getAllData());
 		pridajZavislostiNaPozemkoch(nehnutelnost, parcelyZoznam);
 		return nehnutelnosti.pridaj(nehnutelnost);
 	}
 
 	public boolean pridajParcelu(Parcela parcela) {
 
-		List<IPozemok> nehnutelnostiZoznam = nehnutelnosti.getAllPozemky();
+		List<IPozemok> nehnutelnostiZoznam = filterAndCastToIPozemok(nehnutelnosti.getAllData());
 		pridajZavislostiNaPozemkoch(parcela, nehnutelnostiZoznam);
 		return parcely.pridaj(parcela);
 	}
 
 	public boolean vymazNehnutelnost(Nehnutelnost nehnutelnost) {
 		nehnutelnost.getParcely().forEach(parcela -> parcela.getNehnutelnosti().remove(nehnutelnost));
-		return nehnutelnosti.deletePozemokFromNode(nehnutelnost, aktualnyNodePriVyhladavani);
+		return nehnutelnosti.deleteDataFromNode(nehnutelnost, aktualnyNodePriVyhladavani);
 	}
 
 	public boolean vymazParcelu(Parcela parcela) {
 		parcela.getNehnutelnosti().forEach(nehnutelnost -> nehnutelnost.getParcely().remove(parcela));
-		return parcely.deletePozemokFromNode(parcela, aktualnyNodePriVyhladavani);
+		return parcely.deleteDataFromNode(parcela, aktualnyNodePriVyhladavani);
 	}
 
 	public List<IPozemok> najdiNehnutelnostiVOhraniceni(Ohranicenie ohranicenie) {
 		var map = nehnutelnosti.findWithin(ohranicenie);
-		aktualnyNodePriVyhladavani = map.getRoot();
-		return map.getPozemky();
+		aktualnyNodePriVyhladavani = map.getNode();
+		return filterAndCastToIPozemok(map.getData());
 	}
 
 	public List<IPozemok> najdiParcelyVOhraniceni(Ohranicenie ohranicenie) {
 		var map = parcely.findWithin(ohranicenie);
-		aktualnyNodePriVyhladavani = map.getRoot();
-		return map.getPozemky();
+		aktualnyNodePriVyhladavani = map.getNode();
+		return filterAndCastToIPozemok(map.getData());
 	}
 
 	private void pridajZavislostiNaPozemkoch(IPozemok pozemok, List<IPozemok> zavislosti) {
@@ -117,7 +119,7 @@ public class GeodetAppManazer {
 		if (povodnyPozemok.getGpsSuradnice().equalsOhranicenie(nehnutelnost.getGpsSuradnice())) {
 			return nehnutelnosti.uprav(povodnyPozemok, nehnutelnost, aktualnyNodePriVyhladavani);
 		} else {
-			nehnutelnosti.deletePozemokFromNode(povodnyPozemok, aktualnyNodePriVyhladavani);
+			nehnutelnosti.deleteDataFromNode(povodnyPozemok, aktualnyNodePriVyhladavani);
 			return nehnutelnosti.pridaj(nehnutelnost);
 		}
 	}
@@ -126,7 +128,7 @@ public class GeodetAppManazer {
 		if (povodnyPozemok.getGpsSuradnice() == parcela.getGpsSuradnice()) {
 			return parcely.uprav(povodnyPozemok, parcela, aktualnyNodePriVyhladavani);
 		} else {
-			parcely.deletePozemokFromNode(povodnyPozemok, aktualnyNodePriVyhladavani);
+			parcely.deleteDataFromNode(povodnyPozemok, aktualnyNodePriVyhladavani);
 			return parcely.pridaj(parcela);
 		}
 	}
@@ -146,11 +148,11 @@ public class GeodetAppManazer {
 	}
 
 	public void exportParcely(String absolutePath) {
-		Exporter.exportToCSV(parcely.getAllPozemky(), absolutePath);
+		Exporter.exportToCSV(parcely.getAllData(), absolutePath);
 	}
 
 	public void exportNehnutelnosti(String absolutePath) {
-		Exporter.exportToCSV(nehnutelnosti.getAllPozemky(), absolutePath);
+		Exporter.exportToCSV(nehnutelnosti.getAllData(), absolutePath);
 	}
 
 	public void optimalizuj() {
@@ -162,5 +164,12 @@ public class GeodetAppManazer {
 			return false;
 		}
 		return nehnutelnosti.zmenHlbku(hlbka) && parcely.zmenHlbku(hlbka);
+	}
+
+	private List<IPozemok> filterAndCastToIPozemok(List<IData> dataList) {
+		return dataList.stream()
+					   .filter(data -> data instanceof IPozemok)
+					   .map(data -> (IPozemok) data)
+					   .collect(Collectors.toList());
 	}
 }

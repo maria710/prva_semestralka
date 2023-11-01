@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.aus.prva_semestralka.objekty.GpsPozicia;
-import com.aus.prva_semestralka.objekty.IPozemok;
+import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.Map;
 import com.aus.prva_semestralka.objekty.Ohranicenie;
 
@@ -23,7 +23,7 @@ public class QuadTree {
 	public static Integer maxHlbka;
 	private Integer sirka;
 	private Integer dlzka;
-	private Integer pocetPozemkov = 0;
+	private Integer size = 0;
 
 	public QuadTree(Integer maxHlbka, Integer sirka, Integer dlzka) {
 		QuadTree.maxHlbka = maxHlbka;
@@ -36,72 +36,72 @@ public class QuadTree {
 		root.rozdel();
 	}
 
-	public int getPocetPozemkov() {
-		return pocetPozemkov;
+	public int getSize() {
+		return size;
 	}
 
 	public int getMaxHlbka() { return maxHlbka; }
 
-	public boolean pridaj(IPozemok pozemok) {
-		return pridajDoNode(pozemok, root);
+	public boolean pridaj(IData data) {
+		return pridajDoNode(data, root);
 	}
 
-	public boolean pridajDoNode(IPozemok pozemok, QTNode node) {
-		if (pozemok == null || !node.zmestiSa(pozemok)) { // ak je pozemok velmi velky alebo neexistuje, tak ho nepridavame
+	public boolean pridajDoNode(IData data, QTNode node) {
+		if (data == null || !node.zmestiSa(data)) { // ak je sekundarny kluc velmi velky alebo data neexistuju, tak ho nepridavame
 			return false;
 		}
 
 		var currentNode = node;
 		while (!currentNode.jeList()) {
-			var indexSyna = currentNode.getKvadrantPrePozemok(pozemok);
+			var indexSyna = currentNode.getKvadrantPreData(data);
 			if (indexSyna != -1) {
 				currentNode = currentNode.getSynovia().get(indexSyna - 1);
 			} else {
-				currentNode.getPozemky().add(pozemok); // presli sme vsetkych synov currentNode ale ani do jedneho sa nam nezmesti, tak ho pridame do tohto
-				pocetPozemkov++;
+				currentNode.getData().add(data); // presli sme vsetkych synov currentNode ale ani do jedneho sa nam nezmesti, tak ho pridame do tohto
+				size++;
 				return true;
 			}
 		}
 
 		if (Objects.equals(currentNode.getHlbka(), maxHlbka)) { // nemozeme prekrocit sme maximalnu hlbku
-			currentNode.getPozemkySPrekrocenouHlbkou().add(pozemok);
-			pocetPozemkov++;
+			currentNode.getDataSPrekrocenouHlbkou().add(data);
+			size++;
 			return true;
 		}
 
-		if (currentNode.getPozemok_data() == null) { // current node je list - nema synov
-			currentNode.setPozemok_data(pozemok);
-			pocetPozemkov++;
+		if (currentNode.getDataListu() == null) { // current node je list - nema synov
+			currentNode.setDataListu(data);
+			size++;
 			return true;
 		} else {
 			// ak uz obsahuje nejake data, potom ideme delit node
 			currentNode.rozdel();
-			var jePriradenyKvadrat = currentNode.zaradPozemokDoKvadratu(currentNode.getPozemok_data()); // pridame pozemok, ktory uz bol v node
-			var jeZaradenyPozemokNaVkladanie = currentNode.zaradPozemokDoKvadratu(pozemok); // pridame pozemok, ktory chceme vlozit
+			var jePriradenyKvadrat = currentNode.zaradDoKvadratu(currentNode.getDataListu()); // pridame data, ktore uz bol v node
+			var suZaradeneDataNaVkladanie = currentNode.zaradDoKvadratu(data); // pridame data, ktore chceme vlozit
 			if (jePriradenyKvadrat) {
-				currentNode.setPozemok_data(null);
-				pocetPozemkov--;
+				currentNode.setDataListu(null);
+				size--;
 			}
-			if (jeZaradenyPozemokNaVkladanie) {
-				pocetPozemkov++;
+			if (suZaradeneDataNaVkladanie) {
+				size++;
 			}
 			if (jePriradenyKvadrat) {
-				pocetPozemkov++;
+				size++;
 			}
-			return jePriradenyKvadrat && jeZaradenyPozemokNaVkladanie;
+			return jePriradenyKvadrat && suZaradeneDataNaVkladanie;
 		}
 	}
 
-	public List<IPozemok> getAllPozemky() {
-		return getAllPozemkyFromNode(root);
+	public List<IData> getAllData() {
+		return getAllDataFromNode(root);
 	}
 
-	public List<IPozemok> getAllPozemkyFromNode(QTNode node) {
+	public List<IData> getAllDataFromNode(QTNode node) {
 		if (node == null) {
 			return Collections.emptyList();
 		}
 
-		List<IPozemok> pozemky = new ArrayList<>(4 ^ root.getHlbka());
+		List<IData> dataList = new ArrayList<>(4 ^ root.getHlbka());
 		LinkedList<QTNode> nodeNaSpracovanie = new LinkedList<>();
 
 		nodeNaSpracovanie.add(node);
@@ -109,19 +109,19 @@ public class QuadTree {
 		while (!nodeNaSpracovanie.isEmpty()) {
 			QTNode currentNode = nodeNaSpracovanie.poll();
 
-			// pridanie pozemkov z aktualneho node
-			pozemky.addAll(currentNode.getPozemkySPrekrocenouHlbkou());
-			pozemky.addAll(currentNode.getPozemky());
+			// pridanie dat z aktualneho node
+			dataList.addAll(currentNode.getDataSPrekrocenouHlbkou());
+			dataList.addAll(currentNode.getData());
 
-			if (currentNode.jeList() && currentNode.getPozemok_data() != null) {
-				pozemky.add(currentNode.getPozemok_data());
+			if (currentNode.jeList() && currentNode.getDataListu() != null) {
+				dataList.add(currentNode.getDataListu());
 			} else {
 				// pridanie synov do zoznamu na spracovanie
 				nodeNaSpracovanie.addAll(currentNode.getSynovia());
 			}
 		}
 
-		return pozemky;
+		return dataList;
 	}
 
 	public Map findWithin(Ohranicenie ohranicenie) {
@@ -134,23 +134,23 @@ public class QuadTree {
 		}
 
 		var currentNode = node;
-		ArrayList<IPozemok> result = new ArrayList<>();
+		ArrayList<IData> result = new ArrayList<>();
 
 		while (true) {
 			if (currentNode.getSynovia().isEmpty()) {
-				result.addAll(currentNode.getPozemky());
-				result.addAll(currentNode.getPozemkySPrekrocenouHlbkou());
-				if (currentNode.getPozemok_data() != null) {
-					result.add(currentNode.getPozemok_data());
+				result.addAll(currentNode.getData());
+				result.addAll(currentNode.getDataSPrekrocenouHlbkou());
+				if (currentNode.getDataListu() != null) {
+					result.add(currentNode.getDataListu());
 				}
 				return Map.of(currentNode, result);
 			}
 			int index = currentNode.getKvadrantPreOhranicenie(ohranicenie);
 			if (index == -1) {
-				var najdenePozemky = getAllPozemkyFromNode(currentNode);
-				for (IPozemok pozemok : najdenePozemky) {
-					if (ohranicenie.zmestiSaDovnutra(pozemok.getGpsSuradnice())) {
-						result.add(pozemok);
+				var najdeneData = getAllDataFromNode(currentNode);
+				for (IData data : najdeneData) {
+					if (ohranicenie.zmestiSaDovnutra(data.getSekundarnyKluc())) {
+						result.add(data);
 					}
 				}
 				return Map.of(currentNode, result);
@@ -164,11 +164,11 @@ public class QuadTree {
 		}
 	}
 
-	public boolean deletePozemok(IPozemok pozemok) {
-		return deletePozemokFromNode(pozemok, root);
+	public boolean deleteData(IData data) {
+		return deleteDataFromNode(data, root);
 	}
 
-	public boolean deletePozemokFromNode(IPozemok pozemok, QTNode node) {
+	public boolean deleteDataFromNode(IData data, QTNode node) {
 		if (node == null) {
 			node = root;
 		}
@@ -176,44 +176,44 @@ public class QuadTree {
 		List<QTNode> parentNodes = new LinkedList<>();
 
 		while (true) {
-			// ak je current node list a ma pozemok, tak ho vymazeme
+			// ak je current node list a ma data, tak ho vymazeme
 			var result = false;
 			if (currentNode.jeList()) {
-				if (currentNode.getPozemok_data() != null && currentNode.getPozemok_data().equals(pozemok)) {
-					currentNode.setPozemok_data(null);
+				if (currentNode.getDataListu() != null && currentNode.getDataListu().equals(data)) {
+					currentNode.setDataListu(null);
 					result = true;
 				} else {
-					result = currentNode.getPozemkySPrekrocenouHlbkou().remove(pozemok);
+					result = currentNode.getDataSPrekrocenouHlbkou().remove(data);
 				}
 				vymazPraznychSynov(parentNodes, result);
 				if (result) {
-					pocetPozemkov--;
+					size--;
 				}
 				return result; // koncime uplne aj ked sme v liste nic nenasli
 			}
 
-			// ak ma synov, tak vymazeme pozemok z aktualneho node
-			if (currentNode.getPozemky().contains(pozemok)) {
-				result = currentNode.getPozemky().remove(pozemok);
+			// ak ma synov, tak vymazeme data z aktualneho node
+			if (currentNode.getData().contains(data)) {
+				result = currentNode.getData().remove(data);
 			}
 
 			if (result) { // nemozeme vratit negativny vysledok, mozno sa najde este v dalsich synoch
 				vymazPraznychSynov(parentNodes, result);
-				pocetPozemkov--;
+				size--;
 				return true;
 			}
-			if (currentNode.getPozemkySPrekrocenouHlbkou().contains(pozemok)) {
-				result = currentNode.getPozemkySPrekrocenouHlbkou().remove(pozemok);
+			if (currentNode.getDataSPrekrocenouHlbkou().contains(data)) {
+				result = currentNode.getDataSPrekrocenouHlbkou().remove(data);
 			}
 
 			if (result) { // nemozeme vratit negativny vysledok, mozno sa najde este v dalsich synoch
 				vymazPraznychSynov(parentNodes, result);
-				pocetPozemkov--;
+				size--;
 				return true;
 			}
 
-			// ak sa pozemok nenachadza v aktualnom node, tak sa posunieme na dalsi node
-			var indexSyna = currentNode.getKvadrantPrePozemok(pozemok);
+			// ak sa data nenachadzaju v aktualnom node, tak sa posunieme na dalsi node
+			var indexSyna = currentNode.getKvadrantPreData(data);
 			if (indexSyna == -1) {
 				return false;
 			}
@@ -229,7 +229,7 @@ public class QuadTree {
 				if (!dajuSaZmazatSynovia) {
 					break;
 				}
-				if (parentNode.getPozemky().isEmpty() && parentNode.getPozemkySPrekrocenouHlbkou().isEmpty() && parentNode.getPozemok_data() == null) {
+				if (parentNode.getData().isEmpty() && parentNode.getDataSPrekrocenouHlbkou().isEmpty() && parentNode.getDataListu() == null) {
 					parentNode.getSynovia().clear();
 					parentNode.zmenJeList(true);
 				} else {
@@ -239,15 +239,14 @@ public class QuadTree {
 		}
 	}
 
-	public boolean uprav(IPozemok povodnyPozemok, IPozemok pozemok, QTNode node) {
-		var najdene = findWithinFromNode(povodnyPozemok.getGpsSuradnice(), node).getPozemky();
+	public boolean uprav(IData povodneData, IData data, QTNode node) {
+		var najdene = findWithinFromNode(povodneData.getSekundarnyKluc(), node).getData();
 		if (najdene.isEmpty()) {
 			return false;
 		}
-		for (IPozemok pozemok1 : najdene) {
-			if (pozemok1.getSupisneCislo().equals(povodnyPozemok.getSupisneCislo())) {
-				pozemok1.setPopis(pozemok.getPopis());
-				pozemok1.setSupisneCislo(pozemok.getSupisneCislo());
+		for (IData iData : najdene) {
+			if (iData.getPrimarnyKluc().equals(povodneData.getPrimarnyKluc())) {
+				iData.setData(data);
 				return true;
 			}
 		}
@@ -268,29 +267,29 @@ public class QuadTree {
 			maxHlbka = hlbka;
 
 			for (QTNode node : nodes) {
-				ArrayList<IPozemok> pozemkyNaVlozenie = new ArrayList<>();
-				pozemkyNaVlozenie.add(node.getPozemok_data());
-				pozemkyNaVlozenie.addAll(node.getPozemky());
-				pozemkyNaVlozenie.addAll(node.getPozemkySPrekrocenouHlbkou());
+				ArrayList<IData> dataNaVlozenie = new ArrayList<>();
+				dataNaVlozenie.add(node.getDataListu());
+				dataNaVlozenie.addAll(node.getData());
+				dataNaVlozenie.addAll(node.getDataSPrekrocenouHlbkou());
 
-				for (IPozemok pozemok : pozemkyNaVlozenie) {
-					deletePozemok(pozemok); // vymazeme pozemok aby sme nemali duplicity
-					pridaj(pozemok);
+				for (IData data : dataNaVlozenie) {
+					deleteData(data); // vymazeme data aby sme nemali duplicity
+					pridaj(data);
 				}
 			}
 			return true;
 		}
 		if (hlbka > maxHlbka) {
-			Predicate<QTNode> predicate = node -> node.getHlbka() == maxHlbka && !node.getPozemkySPrekrocenouHlbkou().isEmpty();
+			Predicate<QTNode> predicate = node -> node.getHlbka() == maxHlbka && !node.getDataSPrekrocenouHlbkou().isEmpty();
 			var nodes = getNodesPodlaPredikatu(predicate);
 			maxHlbka = hlbka;
 
-			for (QTNode node : nodes) { // pre kazdy node s pozemkami s prekrocenou hlbkou
-				// pre kazdy pozemok s prekrocenou hlbkou sa pokusime znovu vlozit do stromu, vsetky sa musia odstranit!
-				for (IPozemok pozemok : node.getPozemkySPrekrocenouHlbkou()) {
-					if (pridajDoNode(pozemok, node)) { // nehladame kde sa zmeti, lebo uz vieme ze sa zmesti len do current node alebo nizsie
-						node.getPozemkySPrekrocenouHlbkou().remove(pozemok);
-						pocetPozemkov--; // ked ostranime zo zoznamu, musime znizit pocet pozemkov aby sme nepridali duplikat
+			for (QTNode node : nodes) { // pre kazdy node s datami s prekrocenou hlbkou
+				// pre kazde data s prekrocenou hlbkou sa pokusime znovu vlozit do stromu, vsetky sa musia odstranit!
+				for (IData data : node.getDataSPrekrocenouHlbkou()) {
+					if (pridajDoNode(data, node)) { // nehladame kde sa zmesti, lebo uz vieme ze sa zmesti len do current node alebo nizsie
+						node.getDataSPrekrocenouHlbkou().remove(data);
+						size--; // ked ostranime zo zoznamu, musime znizit pocet v zozname dat aby sme nepridali duplikat
 					}
 				}
 			}

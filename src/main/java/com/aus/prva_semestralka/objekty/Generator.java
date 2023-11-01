@@ -33,5 +33,4 @@ public class Generator {
 	private double vygenerujVOhraniceni(double min, double max) {
 		return random.nextDouble() * (max - min) + min;
 	}
-
 }

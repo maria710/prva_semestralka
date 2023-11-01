@@ -1,15 +1,10 @@
 package com.aus.prva_semestralka.objekty;
 
-public interface IPozemok {
+public interface IPozemok extends IData {
 
 	Ohranicenie getGpsSuradnice();
 	String toString();
-
 	Integer getSupisneCislo();
-
 	String getPopis();
-
 	void setPopis(String popis);
-
-	void setSupisneCislo(Integer supisneCislo);
 }
