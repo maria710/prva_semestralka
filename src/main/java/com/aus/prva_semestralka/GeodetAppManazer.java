@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.aus.prva_semestralka.fileManazer.Exporter;
 import com.aus.prva_semestralka.fileManazer.Importer;
+import com.aus.prva_semestralka.objekty.Generator;
 import com.aus.prva_semestralka.objekty.GeneratorKlucov;
 import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.IPozemok;
@@ -20,6 +21,8 @@ public class GeodetAppManazer {
 	private QuadTree parcely;
 	public static GeneratorKlucov generatorKlucov = new GeneratorKlucov();
 	private QTNode aktualnyNodePriVyhladavani;
+
+	private Generator generator = new Generator();
 
 	public void vytvorStromy(int maxHlbka, int sirka, int dlzka) {
 		nehnutelnosti = new QuadTree(maxHlbka, sirka, dlzka);
@@ -171,5 +174,17 @@ public class GeodetAppManazer {
 					   .filter(data -> data instanceof IPozemok)
 					   .map(data -> (IPozemok) data)
 					   .collect(Collectors.toList());
+	}
+
+	public List<IPozemok> generujParcely(int pocetParciel) {
+		var pozemky = generator.vygenerujPozemky(pocetParciel, parcely.getSirka(), parcely.getDlzka(), true);
+		pozemky.forEach(pozemok -> pridajParcelu((Parcela) pozemok));
+		return pozemky;
+	}
+
+	public List<IPozemok> generujNehnutelnosti(int pocetNehnutelnosti) {
+		var pozemky = generator.vygenerujPozemky(pocetNehnutelnosti, nehnutelnosti.getSirka(), nehnutelnosti.getDlzka(), false);
+		pozemky.forEach(pozemok -> pridajNehnutelnost((Nehnutelnost) pozemok));
+		return pozemky;
 	}
 }

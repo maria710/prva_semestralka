@@ -55,6 +55,15 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	public Label resultOptAZmenaLabel;
 
+	@FXML
+	public Button generovatButton;
+
+	@FXML
+	public TextField pocetnehnutelnostiNaGenerovanieField;
+
+	@FXML
+	public TextField pocetParcielNaGenerovanieField;
+
 	private GeodetAppManazer manazer;
 
 	@FXML
@@ -139,6 +148,16 @@ public class GeodetAppController implements Initializable {
 		pozemokChoiceBox.getItems().addAll(pozemky);
 		pozemokChoiceBox.setValue(pozemky.get(0));
 		spustiButton.setDisable(true);
+		generovatButton.setDisable(true);
+		nehnutelnostiImportMenuItem.setDisable(true);
+		nehnutelnostiExportMenuItem.setDisable(true);
+		parcelaImportMenuItem.setDisable(true);
+		parcelyExportMenuItem.setDisable(true);
+		vypisatNehnutelnostiButton.setDisable(true);
+		vypisParcelyButton.setDisable(true);
+		vymazatButton.setDisable(true);
+		optimalizovatButton.setDisable(true);
+		zmenitRozmerButton.setDisable(true);
 	}
 
 	public void onVytvoritButtonClick() {
@@ -150,6 +169,15 @@ public class GeodetAppController implements Initializable {
 		sirkaTextField.setDisable(true);
 		vyskaTextField.setDisable(true);
 		spustiButton.setDisable(false);
+		generovatButton.setDisable(false);
+		nehnutelnostiImportMenuItem.setDisable(false);
+		nehnutelnostiExportMenuItem.setDisable(false);
+		parcelaImportMenuItem.setDisable(false);
+		parcelyExportMenuItem.setDisable(false);
+		vypisatNehnutelnostiButton.setDisable(false);
+		vypisParcelyButton.setDisable(false);
+		optimalizovatButton.setDisable(false);
+		zmenitRozmerButton.setDisable(false);
 	}
 
 	@FXML
@@ -385,5 +413,16 @@ public class GeodetAppController implements Initializable {
 		} else {
 			resultOptAZmenaLabel.setText("Hĺbku sa nepodarilo zmeniť");
 		}
+	}
+
+	public void onGenerovatButton() {
+		int pocetParciel = Objects.equals(pocetParcielNaGenerovanieField.getText(), "") ? 0 : Integer.parseInt(pocetParcielNaGenerovanieField.getText());
+		int pocetNehnutelnosti = Objects.equals(pocetnehnutelnostiNaGenerovanieField.getText(), "") ? 0 : Integer.parseInt(pocetnehnutelnostiNaGenerovanieField.getText());
+
+		var listParciel = manazer.generujParcely(pocetParciel);
+		var listNehnutelnosti = manazer.generujNehnutelnosti(pocetNehnutelnosti);
+
+		refreshParcelyView(listParciel);
+		refreshNehnutelnostiView(listNehnutelnosti);
 	}
 }

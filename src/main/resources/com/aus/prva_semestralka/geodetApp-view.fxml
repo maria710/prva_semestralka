@@ -18,7 +18,6 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
-
 <VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aus.prva_semestralka.GeodetAppController">
     <MenuBar VBox.vgrow="NEVER">
         <Menu mnemonicParsing="false" text="Nehnuteľnosti">
@@ -137,7 +136,7 @@
         </ScrollPane>
         <AnchorPane>
          <children>
-            <VBox layoutX="-1.0" prefHeight="222.0" prefWidth="278.0">
+            <VBox layoutX="-1.0" prefHeight="222.0" prefWidth="278.0" spacing="20.0">
                <children>
                   <HBox alignment="CENTER" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
                      <children>
@@ -188,9 +187,46 @@
                         <Button fx:id="vytvoritButton" layoutX="161.0" layoutY="21.0" mnemonicParsing="false" onAction="#onVytvoritButtonClick" text="Vytvoriť" />
                      </children>
                   </HBox>
+                  <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
+                     <children>
+                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="113.0" text="Počet parciel">
+                           <opaqueInsets>
+                              <Insets bottom="20.0" left="20.0" right="10.0" top="100.0" />
+                           </opaqueInsets>
+                        </Label>
+                        <TextField fx:id="pocetParcielNaGenerovanieField" prefHeight="26.0" prefWidth="115.0" promptText="Počet parciel" />
+                     </children>
+                     <opaqueInsets>
+                        <Insets bottom="20.0" left="10.0" right="10.0" top="100.0" />
+                     </opaqueInsets>
+                  </HBox>
+                  <HBox alignment="CENTER" layoutX="10.0" layoutY="158.0" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
+                     <children>
+                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="113.0" text="Počet nehnuteľností">
+                           <opaqueInsets>
+                              <Insets bottom="20.0" left="20.0" right="10.0" top="100.0" />
+                           </opaqueInsets>
+                        </Label>
+                        <TextField fx:id="pocetnehnutelnostiNaGenerovanieField" prefHeight="26.0" prefWidth="115.0" promptText="Počet nehnuteľností" />
+                     </children>
+                     <opaqueInsets>
+                        <Insets bottom="20.0" left="10.0" right="10.0" top="100.0" />
+                     </opaqueInsets>
+                  </HBox>
+                  <HBox alignment="CENTER" layoutX="10.0" layoutY="188.0" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
+                     <opaqueInsets>
+                        <Insets bottom="20.0" left="10.0" right="10.0" top="100.0" />
+                     </opaqueInsets>
+                     <children>
+                        <Button fx:id="generovatButton" mnemonicParsing="false" onAction="#onGenerovatButton" text="Generovať " />
+                     </children>
+                  </HBox>
                </children>
+               <padding>
+                  <Insets bottom="10.0" top="10.0" />
+               </padding>
             </VBox>
-            <Label fx:id="resultOptAZmenaLabel" layoutX="48.0" layoutY="211.0" prefHeight="18.0" prefWidth="187.0">
+            <Label fx:id="resultOptAZmenaLabel" layoutX="45.0" layoutY="308.0" prefHeight="18.0" prefWidth="187.0">
                <opaqueInsets>
                   <Insets left="20.0" />
                </opaqueInsets>

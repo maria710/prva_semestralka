@@ -29,7 +29,7 @@ class QuadTreeTest {
 	void setUp() {
 		quadTree = new QuadTree(MAX_HLBKA, SIRKA, DLZKA);
 		pozemky = new ArrayList<>();
-		pozemky.addAll(generator.vygenerujPozemky(MAX_POCET_POZEMKOV, SIRKA, DLZKA));
+		pozemky.addAll(generator.vygenerujPozemky(MAX_POCET_POZEMKOV, SIRKA, DLZKA, false));
 	}
 
 	@Test

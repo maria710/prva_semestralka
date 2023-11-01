@@ -9,14 +9,24 @@ public class Generator {
 	private final Random random = new Random();
 	private final GeneratorKlucov generatorKlucov = new GeneratorKlucov();
 
-	public IPozemok vygenerujPozemok(int sirka, int dlzka) {
+	public IPozemok vygenerujNehnutelnost(int sirka, int dlzka) {
 		return new Nehnutelnost(generatorKlucov.getKluc(), "Nehnutelnost", getRandomOhranicenie(sirka, dlzka));
 	}
 
-	public List<IPozemok> vygenerujPozemky(int pocet, int sirka, int dlzka) {
+	public IPozemok vygenerujParcelu(int sirka, int dlzka) {
+		return new Parcela(generatorKlucov.getKluc(), "Parcela", getRandomOhranicenie(sirka, dlzka));
+	}
+
+	public List<IPozemok> vygenerujPozemky(int pocet, int sirka, int dlzka, boolean isParcela) {
 		ArrayList<IPozemok> pozemky = new ArrayList<>();
-		for (int i = 0; i < pocet; i++) {
-			pozemky.add(vygenerujPozemok(sirka, dlzka));
+		if (isParcela) {
+			for (int i = 0; i < pocet; i++) {
+				pozemky.add(vygenerujParcelu(sirka, dlzka));
+			}
+		} else {
+			for (int i = 0; i < pocet; i++) {
+				pozemky.add(vygenerujNehnutelnost(sirka, dlzka));
+			}
 		}
 		return pozemky;
 	}
