@@ -8,12 +8,17 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Stack;
 import java.util.function.Predicate;
 
 import com.aus.prva_semestralka.objekty.GpsPozicia;
 import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.Map;
 import com.aus.prva_semestralka.objekty.Ohranicenie;
+
+import static com.aus.prva_semestralka.objekty.Threshold.VELKOST_DATA_THRESHOLD;
+import static com.aus.prva_semestralka.objekty.Threshold.jePrekrocenyBalanceFactorThreshold;
+import static com.aus.prva_semestralka.objekty.Threshold.jePrekrocenyVelkostDataThreshold;
 
 @Data
 @RequiredArgsConstructor
@@ -312,5 +317,105 @@ public class QuadTree {
 			nodeNaSpracovanie.addAll(currentNode.getSynovia());
 		}
 		return nodes;
+	}
+
+	public Double getZdravie() {
+		vypocitajBalanceFaktorKazdehoNode(root);
+
+		LinkedList<QTNode> nodeNaSpracovanie = new LinkedList<>();
+		var pocetNodesNesplnajucichObeKriteria = 0;
+		var pocetNodesSplnajucichKriteriumBalanceFactor = 0;
+		var pocetNesplnajucichkriteriaDlzkyZoznamu = 0;
+		var pocetNodes = 0;
+
+		nodeNaSpracovanie.add(root);
+		pocetNodes++;
+
+		while (!nodeNaSpracovanie.isEmpty()) {
+			QTNode currentNode = nodeNaSpracovanie.poll();
+			if (!currentNode.getSynovia().isEmpty()) {
+				pocetNodes += currentNode.getSynovia().size();
+				nodeNaSpracovanie.addAll(currentNode.getSynovia());
+			}
+
+			if (jePrekrocenyBalanceFactorThreshold(currentNode.getBalanceFactor())) {
+				pocetNodesSplnajucichKriteriumBalanceFactor++;
+			}
+			if (jePrekrocenyVelkostDataThreshold(currentNode.getData().size())) {
+				pocetNesplnajucichkriteriaDlzkyZoznamu++;
+				if (currentNode.getData().size() > (size / 2)) { // ak nam nejaky zoznam v node obsahuje viac ako polovicu dat, tak musime zdravie velmi znizit
+					pocetNesplnajucichkriteriaDlzkyZoznamu += VELKOST_DATA_THRESHOLD;
+				}
+			}
+			if (jePrekrocenyBalanceFactorThreshold(currentNode.getBalanceFactor()) && jePrekrocenyVelkostDataThreshold(currentNode.getData().size())) {
+				pocetNodesNesplnajucichObeKriteria++;
+			}
+		}
+		// vypocitame si zdravie podla vzorca, mame 2 mnoziny a jeden prienik, potrebujeme vypocitat zjednotenie tychto mnozim ako K1 + K2 - OBE
+		return 100 - ((((pocetNesplnajucichkriteriaDlzkyZoznamu + pocetNodesSplnajucichKriteriumBalanceFactor - pocetNodesNesplnajucichObeKriteria) / (double) pocetNodes)) * 100);
+	}
+
+	private void vypocitajBalanceFaktorKazdehoNode(QTNode node) {
+		Stack<QTNode> stack = new Stack<>();
+		QTNode currentNode = node;
+		LinkedList<QTNode> spracovaneNodes = new LinkedList<>();
+
+		while (currentNode != null || !stack.isEmpty()) {
+			if (currentNode != null) {
+				stack.push(currentNode);
+				if (currentNode.getSynovia().isEmpty()) {
+					currentNode = null;
+				} else {
+					currentNode = currentNode.getSynovia().get(0); // ak current node nie je null, vyskusame pridat jeho synov na spracovanie
+				}
+			} else {
+				currentNode = stack.peek();
+
+				// nemozeme spracovat node ak nie su spracovany vsetci jeho synovia
+				boolean mozeSaSpracovatCurrentNode = true;
+				if (!currentNode.getSynovia().isEmpty()) {
+					for (int i = 0; i < 4; i++) {
+						// ak synovia nie su null, musime pozriet ci sme ich uz spracovali, najskor spracujeme synov, potom seba
+						if (!spracovaneNodes.contains(currentNode.getSynovia().get(i))) {
+							// If a child exists and hasn't been processed, we can't process this node yet
+							mozeSaSpracovatCurrentNode = false;
+							currentNode = currentNode.getSynovia().get(i);
+							break;
+						}
+					}
+				}
+
+				if (mozeSaSpracovatCurrentNode) {
+					int maxHeight = 0; // chcem tam jedna aby sa mi dobre pocital balance factor
+					if (!currentNode.getSynovia().isEmpty()) {
+						for (int i = 0; i < 4; i++) {
+							maxHeight = Math.max(maxHeight, currentNode.getSynovia().get(i).getHlbkaOdSpodu());
+							spracovaneNodes.remove(currentNode.getSynovia().get(i)); // nasli sme uz vsetky synov, tak ich mozeme vymazat, skrati sa nam vyhladavanie
+						}
+					}
+					currentNode.setHlbkaOdSpodu(maxHeight + 1);
+					currentNode.setBalanceFactor(getBalanceFactor(currentNode));
+					stack.pop();
+					spracovaneNodes.addLast(currentNode);
+					currentNode = null;
+				}
+			}
+		}
+	}
+
+	private int getBalanceFactor(QTNode node) {
+		if (node.getSynovia().isEmpty()) {
+			return 0;
+		}
+
+		var maxHlbka = 0; // najdeme si najdlhsiu vysku podstromu
+		var minHlbka = Integer.MAX_VALUE; // najdeme si najkratsiu vysku podstromu
+
+		for (int i = 0; i < 4; i++) {
+			int vyskaSyna = node.getSynovia().get(i).getHlbkaOdSpodu();
+			maxHlbka = Math.max(maxHlbka, vyskaSyna);
+			minHlbka = Math.min(minHlbka, vyskaSyna);
+		}
+		return maxHlbka - minHlbka;
 	}
 }

@@ -187,4 +187,12 @@ public class GeodetAppManazer {
 		pozemky.forEach(pozemok -> pridajNehnutelnost((Nehnutelnost) pozemok));
 		return pozemky;
 	}
+
+	public Double getZdraviePreParcely() {
+		return Math.round(parcely.getZdravie() * 100.0) / 100.0;
+	}
+
+	public Double getZdraviePreNehnutelnosti() {
+		return Math.round(nehnutelnosti.getZdravie() * 100.0) / 100.0;
+	}
 }

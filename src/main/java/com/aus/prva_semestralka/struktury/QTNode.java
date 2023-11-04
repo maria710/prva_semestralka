@@ -24,6 +24,8 @@ public class QTNode {
 	private List<IData> dataSPrekrocenouHlbkou;
 	private boolean jeList;
 	private Integer hlbka;
+	private int balanceFactor;
+	private int hlbkaOdSpodu;
 
 	public QTNode(Integer primarnyKluc, Ohranicenie ohranicenie, Integer hlbka) {
 		this.primarnyKluc = primarnyKluc;
@@ -33,6 +35,22 @@ public class QTNode {
 		this.dataSPrekrocenouHlbkou = new ArrayList<>(20);
 		this.jeList = true;
 		this.hlbka = hlbka;
+	}
+
+	public int getHlbkaOdSpodu() {
+		return hlbkaOdSpodu;
+	}
+
+	public void setHlbkaOdSpodu(int hlbka) {
+		this.hlbkaOdSpodu = hlbka;
+	}
+
+	public int getBalanceFactor() {
+		return this.balanceFactor;
+	}
+
+	public void setBalanceFactor(int balanceFactor) {
+		this.balanceFactor = balanceFactor;
 	}
 
 	public QTNode getSeverozapadnySyn() {

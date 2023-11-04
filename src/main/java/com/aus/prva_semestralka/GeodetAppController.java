@@ -64,6 +64,15 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	public TextField pocetParcielNaGenerovanieField;
 
+	@FXML
+	public Button vypocitatZdravieButton;
+
+	@FXML
+	public TextField zdravieParcelyField;
+
+	@FXML
+	public TextField zdravieNehnutelnostiField;
+
 	private GeodetAppManazer manazer;
 
 	@FXML
@@ -158,6 +167,9 @@ public class GeodetAppController implements Initializable {
 		vymazatButton.setDisable(true);
 		optimalizovatButton.setDisable(true);
 		zmenitRozmerButton.setDisable(true);
+		vypocitatZdravieButton.setDisable(true);
+		zdravieNehnutelnostiField.setDisable(true);
+		zdravieParcelyField.setDisable(true);
 	}
 
 	public void onVytvoritButtonClick() {
@@ -178,6 +190,7 @@ public class GeodetAppController implements Initializable {
 		vypisParcelyButton.setDisable(false);
 		optimalizovatButton.setDisable(false);
 		zmenitRozmerButton.setDisable(false);
+		vypocitatZdravieButton.setDisable(false);
 	}
 
 	@FXML
@@ -424,5 +437,13 @@ public class GeodetAppController implements Initializable {
 
 		refreshParcelyView(listParciel);
 		refreshNehnutelnostiView(listNehnutelnosti);
+	}
+
+	public void onVypocitatZdravieButton() {
+		Double zdravieParcely = manazer.getZdraviePreParcely();
+		Double zdravieNehnutelnosti = manazer.getZdraviePreNehnutelnosti();
+
+		zdravieParcelyField.setText(zdravieParcely.toString());
+		zdravieNehnutelnostiField.setText(zdravieNehnutelnosti.toString());
 	}
 }
