@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +44,10 @@ public class QuadTree {
 
 	public int getSize() {
 		return size;
+	}
+
+	public void setMaxHlbka(Integer maxHlbka) {
+		QuadTree.maxHlbka = maxHlbka;
 	}
 
 	public int getMaxHlbka() { return maxHlbka; }
@@ -317,6 +322,61 @@ public class QuadTree {
 			nodeNaSpracovanie.addAll(currentNode.getSynovia());
 		}
 		return nodes;
+	}
+
+	public QuadTree optimalizuj() {
+		// urci percento prvkov zo stromu podla ktorych budeme vytvarat novy strom
+		List<IData> dataZRoot = root.getData();
+		List<IData> vsetkyData = getAllData();
+
+		var pocet = (int) (dataZRoot.size() * 0.1); // chceme 10 percent napr
+
+		List<IData> najvacsieData = new ArrayList<>(pocet);
+		List<Double> najvacsieObsahy = dataZRoot.stream().map(data -> data.getSekundarnyKluc().getObsahOhranicenia()).sorted(Comparator.reverseOrder()).toList();
+		List<Double> prveNajvacsieObsahy = najvacsieObsahy.subList(0, pocet);
+
+		for (IData data : dataZRoot) {
+			if (prveNajvacsieObsahy.contains(data.getSekundarnyKluc().getObsahOhranicenia()) && najvacsieData.size() < pocet) {
+				najvacsieData.add(data);
+			}
+		}
+		// uz mame nase najvacie data, teraz podla nich vytvorime novu sirku a dlzku stromu
+		var optimalizovanyStrom = getNovyQuadTree(pocet, najvacsieData);
+		for (IData data : vsetkyData) {
+			optimalizovanyStrom.pridaj(data);
+		}
+		optimalizovanyStrom.setMaxHlbka(getMaxHlbka(root) + 1);
+		return optimalizovanyStrom;
+	}
+
+	public int getMaxHlbka(QTNode node) {
+		var maxHlbka = 0;
+		LinkedList<QTNode> nodeNaSpracovanie = new LinkedList<>();
+
+		nodeNaSpracovanie.add(node);
+
+		while (!nodeNaSpracovanie.isEmpty()) {
+			QTNode currentNode = nodeNaSpracovanie.poll();
+			if (maxHlbka < currentNode.getHlbka()) {
+				maxHlbka = currentNode.getHlbka();
+			}
+			nodeNaSpracovanie.addAll(currentNode.getSynovia());
+		}
+		return maxHlbka;
+	}
+
+	private QuadTree getNovyQuadTree(int pocet, List<IData> najvacsieData) {
+		var sirka = 0;
+		var dlzka = 0;
+		for (int i = 0; i < pocet; i++) {
+			sirka = Math.max(sirka, najvacsieData.get(i).getSekundarnyKluc().getSuradnicaPravyHorny().getX().intValue() * 4);
+			dlzka = Math.max(dlzka, najvacsieData.get(i).getSekundarnyKluc().getSuradnicaPravyHorny().getY().intValue() * 4);
+		}
+
+		// maxHlbku nastavime zatial na MAXINTEGER, nechame nech sa nastavia az na posledny mozny node
+		// ziskame si najhlbsiu hlbku + 1, to bude nova maxHlbka
+		maxHlbka = Integer.MAX_VALUE;
+		return new QuadTree(maxHlbka, sirka, dlzka);
 	}
 
 	public Double getZdravie() {

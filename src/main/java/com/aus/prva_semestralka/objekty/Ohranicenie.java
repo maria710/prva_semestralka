@@ -74,4 +74,8 @@ public class Ohranicenie {
 				suradnicaPravyHorny.getX().equals(ohranicenie.suradnicaPravyHorny.getX()) &&
 				suradnicaPravyHorny.getY().equals(ohranicenie.suradnicaPravyHorny.getY());
 	}
+
+	public double getObsahOhranicenia() {
+		return (suradnicaPravyHorny.getX() - suradnicaLavyDolny.getX()) * (suradnicaPravyHorny.getY() - suradnicaLavyDolny.getY());
+	}
 }

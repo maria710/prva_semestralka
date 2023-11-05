@@ -18,6 +18,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
+
 <VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aus.prva_semestralka.GeodetAppController">
     <MenuBar VBox.vgrow="NEVER">
         <Menu mnemonicParsing="false" text="Nehnuteľnosti">
@@ -228,7 +229,7 @@
                   </Label>
                   <HBox alignment="CENTER" layoutX="10.0" layoutY="203.0" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
                      <children>
-                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="127.0" text="Zdravie parciel">
+                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="138.0" text="Zdravie parciel (%)">
                            <opaqueInsets>
                               <Insets bottom="20.0" left="20.0" right="10.0" top="100.0" />
                            </opaqueInsets>
@@ -241,7 +242,7 @@
                   </HBox>
                   <HBox alignment="CENTER" layoutX="10.0" layoutY="248.0" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
                      <children>
-                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="125.0" text="Zdravie nehnuteľností">
+                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="139.0" text="Zdravie nehnuteľností (%)">
                            <opaqueInsets>
                               <Insets bottom="20.0" left="20.0" right="10.0" top="100.0" />
                            </opaqueInsets>

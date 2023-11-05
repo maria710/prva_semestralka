@@ -41,14 +41,16 @@ public class GeodetAppManazer {
 
 		List<IPozemok> parcelyZoznam = filterAndCastToIPozemok(parcely.getAllData());
 		pridajZavislostiNaPozemkoch(nehnutelnost, parcelyZoznam);
-		return nehnutelnosti.pridaj(nehnutelnost);
+		var result = nehnutelnosti.pridaj(nehnutelnost);
+		return result;
 	}
 
 	public boolean pridajParcelu(Parcela parcela) {
 
 		List<IPozemok> nehnutelnostiZoznam = filterAndCastToIPozemok(nehnutelnosti.getAllData());
 		pridajZavislostiNaPozemkoch(parcela, nehnutelnostiZoznam);
-		return parcely.pridaj(parcela);
+		var result = parcely.pridaj(parcela);
+		return result;
 	}
 
 	public boolean vymazNehnutelnost(Nehnutelnost nehnutelnost) {
@@ -159,7 +161,8 @@ public class GeodetAppManazer {
 	}
 
 	public void optimalizuj() {
-		// TODO
+		nehnutelnosti = nehnutelnosti.optimalizuj();
+		parcely = parcely.optimalizuj();
 	}
 
 	public boolean zmenHlbku(int hlbka) {
