@@ -41,16 +41,14 @@ public class GeodetAppManazer {
 
 		List<IPozemok> parcelyZoznam = filterAndCastToIPozemok(parcely.getAllData());
 		pridajZavislostiNaPozemkoch(nehnutelnost, parcelyZoznam);
-		var result = nehnutelnosti.pridaj(nehnutelnost);
-		return result;
+		return nehnutelnosti.pridaj(nehnutelnost);
 	}
 
 	public boolean pridajParcelu(Parcela parcela) {
 
 		List<IPozemok> nehnutelnostiZoznam = filterAndCastToIPozemok(nehnutelnosti.getAllData());
 		pridajZavislostiNaPozemkoch(parcela, nehnutelnostiZoznam);
-		var result = parcely.pridaj(parcela);
-		return result;
+		return parcely.pridaj(parcela);
 	}
 
 	public boolean vymazNehnutelnost(Nehnutelnost nehnutelnost) {

@@ -369,8 +369,8 @@ public class QuadTree {
 		var sirka = 0;
 		var dlzka = 0;
 		for (int i = 0; i < pocet; i++) {
-			sirka = Math.max(sirka, najvacsieData.get(i).getSekundarnyKluc().getSuradnicaPravyHorny().getX().intValue() * 4);
-			dlzka = Math.max(dlzka, najvacsieData.get(i).getSekundarnyKluc().getSuradnicaPravyHorny().getY().intValue() * 4);
+			sirka = Math.max(sirka, najvacsieData.get(i).getSekundarnyKluc().getSuradnicaPravyHorny().getX().intValue() * 3);
+			dlzka = Math.max(dlzka, najvacsieData.get(i).getSekundarnyKluc().getSuradnicaPravyHorny().getY().intValue() * 3);
 		}
 
 		// maxHlbku nastavime zatial na MAXINTEGER, nechame nech sa nastavia az na posledny mozny node

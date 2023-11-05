@@ -37,6 +37,19 @@ public class Generator {
 		double suradnicaX2 = vygenerujVOhraniceni(suradnicaX1, sirka);
 		double suradnicaY2 = vygenerujVOhraniceni(suradnicaY1, dlzka);
 
+		var randCislo = Math.random();
+		if (randCislo < 0.9 && randCislo > 0.4) {
+			suradnicaX1 /= 2;
+			suradnicaX2 /= 2;
+			suradnicaY1 /= 2;
+			suradnicaY2 /= 2;
+		} else if (randCislo < 0.3) {
+			suradnicaX1 /= 4;
+			suradnicaX2 /= 4;
+			suradnicaY1 /= 4;
+			suradnicaY2 /= 4;
+		}
+
 		return new Ohranicenie(new GpsPozicia("S", "Z", suradnicaX1, suradnicaY1), new GpsPozicia("J", "V", suradnicaX2, suradnicaY2));
 	}
 
