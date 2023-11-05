@@ -46,6 +46,14 @@ public class QuadTree {
 		return size;
 	}
 
+	public int getSirka() {
+		return sirka;
+	}
+
+	public int getDlzka() {
+		return dlzka;
+	}
+
 	public void setMaxHlbka(Integer maxHlbka) {
 		QuadTree.maxHlbka = maxHlbka;
 	}
