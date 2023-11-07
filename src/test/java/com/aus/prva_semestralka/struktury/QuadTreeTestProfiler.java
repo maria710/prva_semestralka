@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import com.aus.prva_semestralka.objekty.Generator;
+import com.aus.prva_semestralka.objekty.Generator2;
 import com.aus.prva_semestralka.objekty.IPozemok;
 
 public class QuadTreeTestProfiler {
@@ -13,7 +13,7 @@ public class QuadTreeTestProfiler {
 	private QuadTree quadTree;
 	private ArrayList<IPozemok> pozemky;
 	private ArrayList<IPozemok> pozemkyNaPridanieAVymazanie;
-	private final Generator generator = new Generator();
+	private final Generator2 generator = new Generator2();
 	private final int MAX_POCET_POZEMKOV = 20000;
 	private final int MAX_HLBKA = 50;
 	private final int SIRKA = 1000;

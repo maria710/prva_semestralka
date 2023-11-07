@@ -38,7 +38,7 @@ public class Parcela implements IPozemok {
 				.append(popis)
 				.append(", gps pozicie: ")
 				.append(gpsPozicie)
-				.append(", parcely: ");
+				.append(", nehnutelnosti: ");
 
 		nehnutelnosti.forEach(parcela -> sb.append(parcela.toStringZoznam()));
 

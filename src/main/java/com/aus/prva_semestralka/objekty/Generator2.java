@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Generator {
+public class Generator2 {
 
 	private final Random random = new Random();
 	private final GeneratorKlucov generatorKlucov = new GeneratorKlucov();
@@ -34,8 +34,8 @@ public class Generator {
 	public Ohranicenie getRandomOhranicenie(int sirka, int dlzka) {
 		double suradnicaX1 = vygenerujVOhraniceni(0, sirka);
 		double suradnicaY1 = vygenerujVOhraniceni(0, dlzka);
-		double suradnicaX2 = suradnicaX1 + 0.001;
-		double suradnicaY2 = suradnicaX2 + 0.001;
+		double suradnicaX2 = vygenerujVOhraniceni(suradnicaX1, sirka);
+		double suradnicaY2 = vygenerujVOhraniceni(suradnicaY1, dlzka);
 
 		var randCislo = Math.random();
 		if (randCislo < 0.9 && randCislo > 0.4) {

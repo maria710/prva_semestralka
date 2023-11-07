@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.aus.prva_semestralka.fileManazer.Exporter;
 import com.aus.prva_semestralka.fileManazer.Importer;
 import com.aus.prva_semestralka.objekty.Generator;
+import com.aus.prva_semestralka.objekty.Generator2;
 import com.aus.prva_semestralka.objekty.GeneratorKlucov;
 import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.IPozemok;

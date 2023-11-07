@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.aus.prva_semestralka.objekty.Generator;
+import com.aus.prva_semestralka.objekty.Generator2;
 import com.aus.prva_semestralka.objekty.IPozemok;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +17,7 @@ class QuadTreeTest {
 
 	private QuadTree quadTree;
 	private ArrayList<IPozemok> pozemky;
-	private final Generator generator = new Generator();
+	private final Generator2 generator = new Generator2();
 	private final int MAX_POCET_POZEMKOV = 10000;
 	private final int MAX_HLBKA = 10;
 	private final int SIRKA = 100;
