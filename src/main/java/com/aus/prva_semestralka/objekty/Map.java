@@ -4,25 +4,25 @@ import java.util.List;
 
 import com.aus.prva_semestralka.struktury.QTNode;
 
-public class Map {
+public class Map<T> {
 
-	private QTNode node;
-	private List<IData> data;
+	private final QTNode<T> node;
+	private final List<IData<T>> data;
 
-	public Map(QTNode node, List<IData> data) {
+	public Map(QTNode<T> node, List<IData<T>> data) {
 		this.node = node;
 		this.data = data;
 	}
 
-	public static Map of(QTNode currentNode, List<IData> result) {
-		return new Map(currentNode, result);
+	public Map<T> of(QTNode<T> currentNode, List<IData<T>> result) {
+		return new Map<T>(currentNode, result);
 	}
 
-	public QTNode getNode() {
+	public QTNode<T> getNode() {
 		return node;
 	}
 
-	public List<IData> getData() {
+	public List<IData<T>> getData() {
 		return data;
 	}
 }

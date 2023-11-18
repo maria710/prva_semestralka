@@ -1,8 +1,5 @@
 package com.aus.prva_semestralka.struktury;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,14 +18,12 @@ import static com.aus.prva_semestralka.objekty.Threshold.VELKOST_DATA_THRESHOLD;
 import static com.aus.prva_semestralka.objekty.Threshold.jePrekrocenyBalanceFactorThreshold;
 import static com.aus.prva_semestralka.objekty.Threshold.jePrekrocenyVelkostDataThreshold;
 
-@Data
-@RequiredArgsConstructor
-public class QuadTree {
+public class QuadTree<T> {
 
-	private QTNode root;
+	private final QTNode<T> root;
 	public static Integer maxHlbka;
-	private Integer sirka;
-	private Integer dlzka;
+	private final Integer sirka;
+	private final Integer dlzka;
 	private Integer size = 0;
 
 	public QuadTree(Integer maxHlbka, Integer sirka, Integer dlzka) {
@@ -38,7 +33,7 @@ public class QuadTree {
 		var prvaSuradnicaKorena = new GpsPozicia("S", "Z", 0.0, 0.0);
 		var druhaSuradnicaKorena = new GpsPozicia("S", "Z", sirka.doubleValue(), dlzka.doubleValue());
 		var ohranicenie = new Ohranicenie(prvaSuradnicaKorena, druhaSuradnicaKorena);
-		this.root = new QTNode(1, ohranicenie, 0);
+		this.root = new QTNode<>(ohranicenie, 0);
 		root.rozdel();
 	}
 
@@ -58,13 +53,11 @@ public class QuadTree {
 		QuadTree.maxHlbka = maxHlbka;
 	}
 
-	public int getMaxHlbka() { return maxHlbka; }
-
-	public boolean pridaj(IData data) {
+	public boolean pridaj(IData<T> data) {
 		return pridajDoNode(data, root);
 	}
 
-	public boolean pridajDoNode(IData data, QTNode node) {
+	public boolean pridajDoNode(IData<T> data, QTNode<T> node) {
 		if (data == null || !node.zmestiSa(data)) { // ak je sekundarny kluc velmi velky alebo data neexistuju, tak ho nepridavame
 			return false;
 		}
@@ -110,22 +103,22 @@ public class QuadTree {
 		}
 	}
 
-	public List<IData> getAllData() {
+	public List<IData<T>> getAllData() {
 		return getAllDataFromNode(root);
 	}
 
-	public List<IData> getAllDataFromNode(QTNode node) {
+	public List<IData<T>> getAllDataFromNode(QTNode<T> node) {
 		if (node == null) {
 			return Collections.emptyList();
 		}
 
-		List<IData> dataList = new ArrayList<>(4 ^ root.getHlbka());
-		LinkedList<QTNode> nodeNaSpracovanie = new LinkedList<>();
+		List<IData<T>> dataList = new ArrayList<>(4 ^ root.getHlbka());
+		LinkedList<QTNode<T>> nodeNaSpracovanie = new LinkedList<>();
 
 		nodeNaSpracovanie.add(node);
 
 		while (!nodeNaSpracovanie.isEmpty()) {
-			QTNode currentNode = nodeNaSpracovanie.poll();
+			QTNode<T> currentNode = nodeNaSpracovanie.poll();
 
 			// pridanie dat z aktualneho node
 			dataList.addAll(currentNode.getDataSPrekrocenouHlbkou());
@@ -142,17 +135,17 @@ public class QuadTree {
 		return dataList;
 	}
 
-	public Map findWithin(Ohranicenie ohranicenie) {
+	public Map<T> findWithin(Ohranicenie ohranicenie) {
 		return findWithinFromNode(ohranicenie, root);
 	}
 
-	public Map findWithinFromNode(Ohranicenie ohranicenie, QTNode node) {
+	public Map<T> findWithinFromNode(Ohranicenie ohranicenie, QTNode<T> node) {
 		if (node == null) {
 			node = root;
 		}
 
 		var currentNode = node;
-		ArrayList<IData> result = new ArrayList<>();
+		ArrayList<IData<T>> result = new ArrayList<>();
 
 		while (true) {
 			if (currentNode.getSynovia().isEmpty()) {
@@ -161,37 +154,37 @@ public class QuadTree {
 				if (currentNode.getDataListu() != null) {
 					result.add(currentNode.getDataListu());
 				}
-				return Map.of(currentNode, result);
+				return new Map<>(currentNode, result);
 			}
 			int index = currentNode.getKvadrantPreOhranicenie(ohranicenie);
 			if (index == -1) {
 				var najdeneData = getAllDataFromNode(currentNode);
-				for (IData data : najdeneData) {
+				for (IData<T> data : najdeneData) {
 					if (ohranicenie.zmestiSaDovnutra(data.getSekundarnyKluc())) {
 						result.add(data);
 					}
 				}
-				return Map.of(currentNode, result);
+				return new Map<>(currentNode, result);
 			} else {
 				var syn = currentNode.getSynovia().get(index - 1);
 				if (syn == null) {
-					return Map.of(null, Collections.emptyList());
+					return new Map<>(null, Collections.emptyList());
 				}
 				currentNode = syn;
 			}
 		}
 	}
 
-	public boolean deleteData(IData data) {
+	public boolean deleteData(IData<T> data) {
 		return deleteDataFromNode(data, root);
 	}
 
-	public boolean deleteDataFromNode(IData data, QTNode node) {
+	public boolean deleteDataFromNode(IData<T> data, QTNode<T> node) {
 		if (node == null) {
 			node = root;
 		}
 		var currentNode = node;
-		List<QTNode> parentNodes = new LinkedList<>();
+		List<QTNode<T>> parentNodes = new LinkedList<>();
 
 		while (true) {
 			// ak je current node list a ma data, tak ho vymazeme
@@ -240,9 +233,9 @@ public class QuadTree {
 		}
 	}
 
-	private void vymazPraznychSynov(List<QTNode> parentNodes, boolean result) {
+	private void vymazPraznychSynov(List<QTNode<T>> parentNodes, boolean result) {
 		if (result && !parentNodes.isEmpty()) {
-			for (QTNode parentNode : parentNodes) {
+			for (QTNode<T> parentNode : parentNodes) {
 				var dajuSaZmazatSynovia = parentNode.dajuSaZmazatSynovia();
 				if (!dajuSaZmazatSynovia) {
 					break;
@@ -257,12 +250,12 @@ public class QuadTree {
 		}
 	}
 
-	public boolean uprav(IData povodneData, IData data, QTNode node) {
-		var najdene = findWithinFromNode(povodneData.getSekundarnyKluc(), node).getData();
+	public boolean uprav(IData<T> povodneData, IData<T> data, QTNode<T> node) {
+		List<IData<T>> najdene = findWithinFromNode(povodneData.getSekundarnyKluc(), node).getData();
 		if (najdene.isEmpty()) {
 			return false;
 		}
-		for (IData iData : najdene) {
+		for (IData<T> iData : najdene) {
 			if (iData.getPrimarnyKluc().equals(povodneData.getPrimarnyKluc())) {
 				iData.setData(data);
 				return true;
@@ -280,17 +273,17 @@ public class QuadTree {
 			return true;
 		}
 		if (hlbka < root.getHlbka()) {
-			Predicate<QTNode> predicate = node -> node.getHlbka() > hlbka;
+			Predicate<QTNode<T>> predicate = node -> node.getHlbka() > hlbka;
 			var nodes = getNodesPodlaPredikatu(predicate);
 			maxHlbka = hlbka;
 
-			for (QTNode node : nodes) {
-				ArrayList<IData> dataNaVlozenie = new ArrayList<>();
+			for (QTNode<T> node : nodes) {
+				ArrayList<IData<T>> dataNaVlozenie = new ArrayList<>();
 				dataNaVlozenie.add(node.getDataListu());
 				dataNaVlozenie.addAll(node.getData());
 				dataNaVlozenie.addAll(node.getDataSPrekrocenouHlbkou());
 
-				for (IData data : dataNaVlozenie) {
+				for (IData<T> data : dataNaVlozenie) {
 					deleteData(data); // vymazeme data aby sme nemali duplicity
 					pridaj(data);
 				}
@@ -298,13 +291,13 @@ public class QuadTree {
 			return true;
 		}
 		if (hlbka > maxHlbka) {
-			Predicate<QTNode> predicate = node -> node.getHlbka() == maxHlbka && !node.getDataSPrekrocenouHlbkou().isEmpty();
+			Predicate<QTNode<T>> predicate = node -> node.getHlbka() == maxHlbka && !node.getDataSPrekrocenouHlbkou().isEmpty();
 			var nodes = getNodesPodlaPredikatu(predicate);
 			maxHlbka = hlbka;
 
-			for (QTNode node : nodes) { // pre kazdy node s datami s prekrocenou hlbkou
+			for (QTNode<T> node : nodes) { // pre kazdy node s datami s prekrocenou hlbkou
 				// pre kazde data s prekrocenou hlbkou sa pokusime znovu vlozit do stromu, vsetky sa musia odstranit!
-				for (IData data : node.getDataSPrekrocenouHlbkou()) {
+				for (IData<T> data : node.getDataSPrekrocenouHlbkou()) {
 					if (pridajDoNode(data, node)) { // nehladame kde sa zmesti, lebo uz vieme ze sa zmesti len do current node alebo nizsie
 						node.getDataSPrekrocenouHlbkou().remove(data);
 						size--; // ked ostranime zo zoznamu, musime znizit pocet v zozname dat aby sme nepridali duplikat
@@ -316,14 +309,14 @@ public class QuadTree {
 		return false;
 	}
 
-	public List<QTNode> getNodesPodlaPredikatu(Predicate<QTNode> predicate) {
-		List<QTNode> nodes = new ArrayList<>(4 ^ root.getHlbka());
-		LinkedList<QTNode> nodeNaSpracovanie = new LinkedList<>();
+	public List<QTNode<T>> getNodesPodlaPredikatu(Predicate<QTNode<T>> predicate) {
+		List<QTNode<T>> nodes = new ArrayList<>(4 ^ root.getHlbka());
+		LinkedList<QTNode<T>> nodeNaSpracovanie = new LinkedList<>();
 
 		nodeNaSpracovanie.add(root);
 
 		while (!nodeNaSpracovanie.isEmpty()) {
-			QTNode currentNode = nodeNaSpracovanie.poll();
+			QTNode<T> currentNode = nodeNaSpracovanie.poll();
 			if (predicate.test(currentNode)) {
 				nodes.add(currentNode);
 			}
@@ -332,39 +325,40 @@ public class QuadTree {
 		return nodes;
 	}
 
-	public QuadTree optimalizuj() {
+	public QuadTree<T> optimalizuj() {
 		// urci percento prvkov zo stromu podla ktorych budeme vytvarat novy strom
-		List<IData> dataZRoot = root.getData();
-		List<IData> vsetkyData = getAllData();
+		List<IData<T>> dataZRoot = root.getData();
+		List<IData<T>> vsetkyData = getAllData();
 
 		var pocet = (int) (dataZRoot.size() * 0.1); // chceme 10 percent napr
 
-		List<IData> najvacsieData = new ArrayList<>(pocet);
-		List<Double> najvacsieObsahy = dataZRoot.stream().map(data -> data.getSekundarnyKluc().getObsahOhranicenia()).sorted(Comparator.reverseOrder()).toList();
+		List<IData<T>> najvacsieData = new ArrayList<>(pocet);
+		List<Double> najvacsieObsahy = dataZRoot.stream().map(data -> data.getSekundarnyKluc().getObsahOhranicenia()).sorted(Comparator.reverseOrder())
+												.toList();
 		List<Double> prveNajvacsieObsahy = najvacsieObsahy.subList(0, pocet);
 
-		for (IData data : dataZRoot) {
+		for (IData<T> data : dataZRoot) {
 			if (prveNajvacsieObsahy.contains(data.getSekundarnyKluc().getObsahOhranicenia()) && najvacsieData.size() < pocet) {
 				najvacsieData.add(data);
 			}
 		}
 		// uz mame nase najvacie data, teraz podla nich vytvorime novu sirku a dlzku stromu
 		var optimalizovanyStrom = getNovyQuadTree(pocet, najvacsieData);
-		for (IData data : vsetkyData) {
+		for (IData<T> data : vsetkyData) {
 			optimalizovanyStrom.pridaj(data);
 		}
 		optimalizovanyStrom.setMaxHlbka(getMaxHlbka(root) + 1);
 		return optimalizovanyStrom;
 	}
 
-	public int getMaxHlbka(QTNode node) {
+	public int getMaxHlbka(QTNode<T> node) {
 		var maxHlbka = 0;
-		LinkedList<QTNode> nodeNaSpracovanie = new LinkedList<>();
+		LinkedList<QTNode<T>> nodeNaSpracovanie = new LinkedList<>();
 
 		nodeNaSpracovanie.add(node);
 
 		while (!nodeNaSpracovanie.isEmpty()) {
-			QTNode currentNode = nodeNaSpracovanie.poll();
+			QTNode<T> currentNode = nodeNaSpracovanie.poll();
 			if (maxHlbka < currentNode.getHlbka()) {
 				maxHlbka = currentNode.getHlbka();
 			}
@@ -373,7 +367,7 @@ public class QuadTree {
 		return maxHlbka;
 	}
 
-	private QuadTree getNovyQuadTree(int pocet, List<IData> najvacsieData) {
+	private QuadTree<T> getNovyQuadTree(int pocet, List<IData<T>> najvacsieData) {
 		var sirka = 0;
 		var dlzka = 0;
 		for (int i = 0; i < pocet; i++) {
@@ -384,13 +378,13 @@ public class QuadTree {
 		// maxHlbku nastavime zatial na MAXINTEGER, nechame nech sa nastavia az na posledny mozny node
 		// ziskame si najhlbsiu hlbku + 1, to bude nova maxHlbka
 		maxHlbka = Integer.MAX_VALUE;
-		return new QuadTree(maxHlbka, sirka, dlzka);
+		return new QuadTree<>(maxHlbka, sirka, dlzka);
 	}
 
 	public Double getZdravie() {
 		vypocitajBalanceFaktorKazdehoNode(root);
 
-		LinkedList<QTNode> nodeNaSpracovanie = new LinkedList<>();
+		LinkedList<QTNode<T>> nodeNaSpracovanie = new LinkedList<>();
 		var pocetNodesNesplnajucichObeKriteria = 0;
 		var pocetNodesSplnajucichKriteriumBalanceFactor = 0;
 		var pocetNesplnajucichkriteriaDlzkyZoznamu = 0;
@@ -400,7 +394,7 @@ public class QuadTree {
 		pocetNodes++;
 
 		while (!nodeNaSpracovanie.isEmpty()) {
-			QTNode currentNode = nodeNaSpracovanie.poll();
+			QTNode<T> currentNode = nodeNaSpracovanie.poll();
 			if (!currentNode.getSynovia().isEmpty()) {
 				pocetNodes += currentNode.getSynovia().size();
 				nodeNaSpracovanie.addAll(currentNode.getSynovia());
@@ -420,13 +414,14 @@ public class QuadTree {
 			}
 		}
 		// vypocitame si zdravie podla vzorca, mame 2 mnoziny a jeden prienik, potrebujeme vypocitat zjednotenie tychto mnozim ako K1 + K2 - OBE
-		return 100 - ((((pocetNesplnajucichkriteriaDlzkyZoznamu + pocetNodesSplnajucichKriteriumBalanceFactor - pocetNodesNesplnajucichObeKriteria) / (double) pocetNodes)) * 100);
+		return 100 - ((((pocetNesplnajucichkriteriaDlzkyZoznamu + pocetNodesSplnajucichKriteriumBalanceFactor - pocetNodesNesplnajucichObeKriteria) /
+				(double) pocetNodes)) * 100);
 	}
 
-	private void vypocitajBalanceFaktorKazdehoNode(QTNode node) {
-		Stack<QTNode> stack = new Stack<>();
-		QTNode currentNode = node;
-		LinkedList<QTNode> spracovaneNodes = new LinkedList<>();
+	private void vypocitajBalanceFaktorKazdehoNode(QTNode<T> node) {
+		Stack<QTNode<T>> stack = new Stack<>();
+		QTNode<T> currentNode = node;
+		LinkedList<QTNode<T>> spracovaneNodes = new LinkedList<>();
 
 		while (currentNode != null || !stack.isEmpty()) {
 			if (currentNode != null) {
@@ -458,7 +453,8 @@ public class QuadTree {
 					if (!currentNode.getSynovia().isEmpty()) {
 						for (int i = 0; i < 4; i++) {
 							maxHeight = Math.max(maxHeight, currentNode.getSynovia().get(i).getHlbkaOdSpodu());
-							spracovaneNodes.remove(currentNode.getSynovia().get(i)); // nasli sme uz vsetky synov, tak ich mozeme vymazat, skrati sa nam vyhladavanie
+							spracovaneNodes.remove(
+									currentNode.getSynovia().get(i)); // nasli sme uz vsetky synov, tak ich mozeme vymazat, skrati sa nam vyhladavanie
 						}
 					}
 					currentNode.setHlbkaOdSpodu(maxHeight + 1);
@@ -471,7 +467,7 @@ public class QuadTree {
 		}
 	}
 
-	private int getBalanceFactor(QTNode node) {
+	private int getBalanceFactor(QTNode<T> node) {
 		if (node.getSynovia().isEmpty()) {
 			return 0;
 		}

@@ -1,8 +1,14 @@
-package com.aus.prva_semestralka.objekty;
+package com.aus.prva_semestralka.generatory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import com.aus.prva_semestralka.objekty.GpsPozicia;
+import com.aus.prva_semestralka.objekty.IPozemok;
+import com.aus.prva_semestralka.objekty.Nehnutelnost;
+import com.aus.prva_semestralka.objekty.Ohranicenie;
+import com.aus.prva_semestralka.objekty.Parcela;
 
 public class Generator {
 

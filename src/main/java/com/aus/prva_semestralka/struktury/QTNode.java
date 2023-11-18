@@ -1,8 +1,5 @@
 package com.aus.prva_semestralka.struktury;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -10,25 +7,19 @@ import java.util.Objects;
 import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.Ohranicenie;
 
-import static com.aus.prva_semestralka.GeodetAppManazer.generatorKlucov;
+public class QTNode<T> {
 
-@Data
-@RequiredArgsConstructor
-public class QTNode {
-
-	private Integer primarnyKluc;
-	private Ohranicenie ohranicenie;
-	private List<QTNode> synovia;
-	private IData dataListu;
-	private List<IData> data;
-	private List<IData> dataSPrekrocenouHlbkou;
+	private final Ohranicenie ohranicenie;
+	private final List<QTNode<T>> synovia;
+	private IData<T> dataListu;
+	private final List<IData<T>> data;
+	private final List<IData<T>> dataSPrekrocenouHlbkou;
 	private boolean jeList;
-	private Integer hlbka;
+	private final Integer hlbka;
 	private int balanceFactor;
 	private int hlbkaOdSpodu;
 
-	public QTNode(Integer primarnyKluc, Ohranicenie ohranicenie, Integer hlbka) {
-		this.primarnyKluc = primarnyKluc;
+	public QTNode(Ohranicenie ohranicenie, Integer hlbka) {
 		this.ohranicenie = ohranicenie;
 		this.synovia = new ArrayList<>(4);
 		this.data = new ArrayList<>(10);
@@ -53,23 +44,23 @@ public class QTNode {
 		this.balanceFactor = balanceFactor;
 	}
 
-	public QTNode getSeverozapadnySyn() {
+	public QTNode<T> getSeverozapadnySyn() {
 		return synovia.get(0);
 	}
 
-	public QTNode getSeverovychodnySyn() {
+	public QTNode<T> getSeverovychodnySyn() {
 		return synovia.get(1);
 	}
 
-	public QTNode getJuhovychodnySyn() {
+	public QTNode<T> getJuhovychodnySyn() {
 		return synovia.get(2);
 	}
 
-	public QTNode getJuhozapadnySyn() {
+	public QTNode<T> getJuhozapadnySyn() {
 		return synovia.get(3);
 	}
 
-	public IData getDataListu() {
+	public IData<T> getDataListu() {
 		return dataListu;
 	}
 
@@ -81,43 +72,43 @@ public class QTNode {
 		return hlbka;
 	}
 
-	public List<QTNode> getSynovia() {
+	public List<QTNode<T>> getSynovia() {
 		return synovia;
 	}
 
-	public List<IData> getData() {
+	public List<IData<T>> getData() {
 		return data;
 	}
 
-	public List<IData> getDataSPrekrocenouHlbkou() {
+	public List<IData<T>> getDataSPrekrocenouHlbkou() {
 		return dataSPrekrocenouHlbkou;
 	}
 
-	public void setDataListu(IData dataListu) {
+	public void setDataListu(IData<T> dataListu) {
 		this.dataListu = dataListu;
 	}
 
-	public void setSeverozapadnySyn(QTNode syn) {
+	public void setSeverozapadnySyn(QTNode<T> syn) {
 		this.jeList = false;
 		synovia.add(0, syn);
 	}
 
-	public void setSeverovychodnySyn(QTNode syn) {
+	public void setSeverovychodnySyn(QTNode<T> syn) {
 		this.jeList = false;
 		synovia.add(1, syn);
 	}
 
-	public void setJuhovychodnySyn(QTNode syn) {
+	public void setJuhovychodnySyn(QTNode<T> syn) {
 		this.jeList = false;
 		synovia.add(2, syn);
 	}
 
-	public void setJuhozapadnySyn(QTNode syn) {
+	public void setJuhozapadnySyn(QTNode<T> syn) {
 		this.jeList = false;
 		synovia.add(3, syn);
 	}
 
-	public boolean zaradDoKvadratu(IData data) {
+	public boolean zaradDoKvadratu(IData<T> data) {
 		int indexSyna = getKvadrantPreData(data);
 		if (indexSyna == -1) {
 			this.data.add(data);
@@ -166,17 +157,17 @@ public class QTNode {
 	public void rozdel() {
 		var ohranicenia = ohranicenie.rozdel();
 
-		setSeverozapadnySyn(new QTNode(generatorKlucov.getKluc(), ohranicenia.get(0), hlbka + 1));
-		setSeverovychodnySyn(new QTNode(generatorKlucov.getKluc(), ohranicenia.get(1), hlbka + 1));
-		setJuhovychodnySyn(new QTNode(generatorKlucov.getKluc(), ohranicenia.get(2), hlbka + 1));
-		setJuhozapadnySyn(new QTNode(generatorKlucov.getKluc(), ohranicenia.get(3), hlbka + 1));
+		setSeverozapadnySyn(new QTNode<>(ohranicenia.get(0), hlbka + 1));
+		setSeverovychodnySyn(new QTNode<>(ohranicenia.get(1), hlbka + 1));
+		setJuhovychodnySyn(new QTNode<>(ohranicenia.get(2), hlbka + 1));
+		setJuhozapadnySyn(new QTNode<T>(ohranicenia.get(3), hlbka + 1));
 	}
 
-	public boolean zmestiSa(IData data) {
+	public boolean zmestiSa(IData<T> data) {
 		return ohranicenie.zmestiSaDovnutra(data.getSekundarnyKluc());
 	}
 
-	public int getKvadrantPreData(IData data) {
+	public int getKvadrantPreData(IData<T> data) {
 		if (getSeverozapadnySyn().zmestiSa(data)) {
 			return 1;
 		}
@@ -213,7 +204,7 @@ public class QTNode {
 	}
 
 	public boolean dajuSaZmazatSynovia() {
-		for (QTNode syn : synovia) {
+		for (QTNode<T> syn : synovia) {
 			if (!syn.mozeSaVymazat()) {
 				return false;
 			}

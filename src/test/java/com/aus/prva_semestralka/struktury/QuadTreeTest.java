@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.aus.prva_semestralka.objekty.Generator2;
+import com.aus.prva_semestralka.generatory.Generator2;
 import com.aus.prva_semestralka.objekty.IPozemok;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

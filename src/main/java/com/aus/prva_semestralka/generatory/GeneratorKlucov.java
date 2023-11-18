@@ -1,4 +1,4 @@
-package com.aus.prva_semestralka.objekty;
+package com.aus.prva_semestralka.generatory;
 
 public class GeneratorKlucov {
 

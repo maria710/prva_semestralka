@@ -1,14 +1,9 @@
 package com.aus.prva_semestralka.objekty;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Objects.*;
-
-@RequiredArgsConstructor
 public class Nehnutelnost implements IPozemok {
 
 	private Integer supisneCislo;
@@ -78,7 +73,7 @@ public class Nehnutelnost implements IPozemok {
 	}
 
 	@Override
-	public void setData(IData data) {
+	public void setData(IData<Integer> data) {
 		if (data instanceof Nehnutelnost nehnutelnost) {
 			this.supisneCislo = nehnutelnost.supisneCislo;
 			this.popis = nehnutelnost.popis;
@@ -88,7 +83,7 @@ public class Nehnutelnost implements IPozemok {
 	}
 
 	@Override
-	public boolean equals(IData o) {
+	public boolean equals(IData<Integer> o) {
 		return Objects.equals(o.getPrimarnyKluc(), this.supisneCislo) && gpsPozicie.equalsOhranicenie(o.getSekundarnyKluc());
 	}
 }

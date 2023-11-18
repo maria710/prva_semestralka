@@ -1,9 +1,9 @@
 package com.aus.prva_semestralka.objekty;
 
-public interface IData {
+public interface IData<T> {
 
-	Integer getPrimarnyKluc();
+	Comparable<T> getPrimarnyKluc();
 	Ohranicenie getSekundarnyKluc();
-	void setData(IData data);
-	boolean equals(IData o);
+	void setData(IData<T> data);
+	boolean equals(IData<T> o);
 }

@@ -10,7 +10,7 @@ import com.aus.prva_semestralka.objekty.IPozemok;
 
 public class Exporter {
 
-	public static void exportToCSV(List<IData> dataList, String csvFilePath) {
+	public static void exportToCSV(List<IData<Integer>> dataList, String csvFilePath) {
 		List<IPozemok> pozemkyList = dataList.stream()
 											 .filter(data -> data instanceof IPozemok)
 											 .map(data -> (IPozemok) data)

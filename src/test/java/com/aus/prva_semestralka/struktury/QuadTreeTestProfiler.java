@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import com.aus.prva_semestralka.objekty.Generator2;
+import com.aus.prva_semestralka.generatory.Generator2;
 import com.aus.prva_semestralka.objekty.IPozemok;
 
 public class QuadTreeTestProfiler {

@@ -5,9 +5,8 @@ import java.util.stream.Collectors;
 
 import com.aus.prva_semestralka.fileManazer.Exporter;
 import com.aus.prva_semestralka.fileManazer.Importer;
-import com.aus.prva_semestralka.objekty.Generator;
-import com.aus.prva_semestralka.objekty.Generator2;
-import com.aus.prva_semestralka.objekty.GeneratorKlucov;
+import com.aus.prva_semestralka.generatory.Generator;
+import com.aus.prva_semestralka.generatory.GeneratorKlucov;
 import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.IPozemok;
 import com.aus.prva_semestralka.objekty.Nehnutelnost;
@@ -18,16 +17,16 @@ import com.aus.prva_semestralka.struktury.QuadTree;
 
 public class GeodetAppManazer {
 
-	private QuadTree nehnutelnosti;
-	private QuadTree parcely;
+	private QuadTree<Integer> nehnutelnosti;
+	private QuadTree<Integer> parcely;
 	public static GeneratorKlucov generatorKlucov = new GeneratorKlucov();
-	private QTNode aktualnyNodePriVyhladavani;
+	private QTNode<Integer> aktualnyNodePriVyhladavani;
 
-	private Generator generator = new Generator();
+	private final Generator generator = new Generator();
 
 	public void vytvorStromy(int maxHlbka, int sirka, int dlzka) {
-		nehnutelnosti = new QuadTree(maxHlbka, sirka, dlzka);
-		parcely = new QuadTree(maxHlbka, sirka, dlzka);
+		nehnutelnosti = new QuadTree<>(maxHlbka, sirka, dlzka);
+		parcely = new QuadTree<>(maxHlbka, sirka, dlzka);
 	}
 
 	public List<IPozemok> getNehnutelnosti() {
@@ -171,7 +170,7 @@ public class GeodetAppManazer {
 		return nehnutelnosti.zmenHlbku(hlbka) && parcely.zmenHlbku(hlbka);
 	}
 
-	private List<IPozemok> filterAndCastToIPozemok(List<IData> dataList) {
+	private List<IPozemok> filterAndCastToIPozemok(List<IData<Integer>> dataList) {
 		return dataList.stream()
 					   .filter(data -> data instanceof IPozemok)
 					   .map(data -> (IPozemok) data)
