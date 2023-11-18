@@ -1,6 +1,7 @@
 package com.aus.prva_semestralka.objekty;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -85,5 +86,30 @@ public class Nehnutelnost implements IPozemok {
 	@Override
 	public boolean equals(IData<Integer> o) {
 		return Objects.equals(o.getPrimarnyKluc(), this.supisneCislo) && gpsPozicie.equalsOhranicenie(o.getSekundarnyKluc());
+	}
+
+	@Override
+	public boolean equals(IRecord<Integer> o) {
+		return false;
+	}
+
+	@Override
+	public BitSet getHash() {
+		return null;
+	}
+
+	@Override
+	public int getSize() {
+		return 0;
+	}
+
+	@Override
+	public Byte[] toByteArray() {
+		return new Byte[0];
+	}
+
+	@Override
+	public List<IRecord<Integer>> fromByteArray(Byte[] data) {
+		return null;
 	}
 }
