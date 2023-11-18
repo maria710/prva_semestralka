@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class QuadTreeTest {
 
-	private QuadTree quadTree;
+	private QuadTree<Integer> quadTree;
 	private ArrayList<IPozemok> pozemky;
 	private final Generator2 generator = new Generator2();
 	private final int MAX_POCET_POZEMKOV = 10000;
@@ -27,7 +27,7 @@ class QuadTreeTest {
 
 	@BeforeEach
 	void setUp() {
-		quadTree = new QuadTree(MAX_HLBKA, SIRKA, DLZKA);
+		quadTree = new QuadTree<>(MAX_HLBKA, SIRKA, DLZKA);
 		pozemky = new ArrayList<>();
 		pozemky.addAll(generator.vygenerujPozemky(MAX_POCET_POZEMKOV, SIRKA, DLZKA, false));
 	}

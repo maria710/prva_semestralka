@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import com.aus.prva_semestralka.generatory.Generator2;
 import com.aus.prva_semestralka.objekty.IPozemok;
 
-public class QuadTreeTestProfiler {
+public class QuadTreeProfilerTest {
 
-	private QuadTree quadTree;
+	private QuadTree<Integer> quadTree;
 	private ArrayList<IPozemok> pozemky;
 	private ArrayList<IPozemok> pozemkyNaPridanieAVymazanie;
 	private final Generator2 generator = new Generator2();
@@ -21,7 +21,7 @@ public class QuadTreeTestProfiler {
 
 	@BeforeEach
 	void setUp() {
-		quadTree = new QuadTree(MAX_HLBKA, SIRKA, DLZKA);
+		quadTree = new QuadTree<>(MAX_HLBKA, SIRKA, DLZKA);
 		pozemky = new ArrayList<>(MAX_POCET_POZEMKOV);
 		pozemkyNaPridanieAVymazanie = new ArrayList<>(3000);
 		pozemky.addAll(generator.vygenerujPozemky(MAX_POCET_POZEMKOV, SIRKA, DLZKA, false));
