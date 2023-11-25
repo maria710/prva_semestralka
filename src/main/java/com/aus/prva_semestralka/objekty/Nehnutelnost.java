@@ -1,5 +1,10 @@
 package com.aus.prva_semestralka.objekty;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -12,6 +17,10 @@ public class Nehnutelnost implements IPozemok {
 
 	private List<Parcela> parcely;
 	private Ohranicenie gpsPozicie;
+
+	public Nehnutelnost() {
+		this.parcely = new ArrayList<>();
+	}
 
 	public Nehnutelnost(Integer i, String popis, Ohranicenie gpsPozicia1Parcela) {
 		this.supisneCislo = i;
@@ -89,27 +98,70 @@ public class Nehnutelnost implements IPozemok {
 	}
 
 	@Override
-	public boolean equals(IRecord<Integer> o) {
-		return false;
+	public boolean equals(IRecord o) {
+		return o.getHash(0).equals(this.getHash(0));
 	}
 
 	@Override
-	public BitSet getHash() {
-		return null;
+	public BitSet getHash(int pocetBitov) {
+		if (pocetBitov <= 0) {
+			pocetBitov = Integer.SIZE;
+		}
+
+		int hash = 17 * (31 + 3 * this.supisneCislo);
+
+		BitSet bitSet = new BitSet(pocetBitov);
+		for (int i = 0; i < pocetBitov; i++) {
+			bitSet.set(i, (hash & (1 << i)) != 0);
+		}
+
+		return bitSet;
 	}
 
 	@Override
 	public int getSize() {
-		return 0;
+		return Double.SIZE * 4 + Integer.SIZE + Properties.POCET_PLATNYCH_ZNAKOV * Character.SIZE; // kolko bajtov sa bude do suboru zapisovat
 	}
 
 	@Override
-	public Byte[] toByteArray() {
-		return new Byte[0];
+	public byte[] toByteArray() {
+		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			 ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+
+			objectOutputStream.writeInt(supisneCislo);
+			objectOutputStream.writeUTF(popis);
+			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getX());
+			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getY());
+			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getX());
+			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getY());
+			return byteArrayOutputStream.toByteArray();
+
+		} catch (IOException e) {
+			throw new RuntimeException("Chyba pri serializacii objektu: " + this + " do pola bajtov. ERROR:" + e.getMessage());
+		}
 	}
 
 	@Override
-	public List<IRecord<Integer>> fromByteArray(Byte[] data) {
-		return null;
+	public IRecord fromByteArray(byte[] data) {
+		try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
+			 ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
+
+			Integer supisneCislo = objectInputStream.readInt();
+			String popis = objectInputStream.readUTF();
+			double x1 = objectInputStream.readDouble();
+			double y1 = objectInputStream.readDouble();
+			double x2 = objectInputStream.readDouble();
+			double y2 = objectInputStream.readDouble();
+
+			return new Parcela(supisneCislo, popis, new Ohranicenie(new GpsPozicia("S", "V", x1, y1), new GpsPozicia("S", "V" , x2, y2)));
+
+		} catch (IOException e) {
+			throw new RuntimeException("Chyba pri deserializacii objektu z pola bajtov. ERROR:" + e.getMessage());
+		}
+	}
+
+	@Override
+	public Nehnutelnost dajObjekt() {
+		return new Nehnutelnost();
 	}
 }

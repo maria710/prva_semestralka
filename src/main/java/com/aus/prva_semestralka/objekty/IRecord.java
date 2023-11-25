@@ -1,14 +1,14 @@
 package com.aus.prva_semestralka.objekty;
 
 import java.util.BitSet;
-import java.util.List;
 
-public interface IRecord<T> {
+public interface IRecord {
 
-	boolean equals(IRecord<T> o);
-	BitSet getHash();
+	boolean equals(IRecord o);
+	BitSet getHash(int pocetBitov);
 	int getSize();
-	Byte[] toByteArray();
-	List<IRecord<T>> fromByteArray(Byte[] data);
+	byte[] toByteArray();
+	IRecord fromByteArray(byte[] data);
+	IRecord dajObjekt();
 
 }

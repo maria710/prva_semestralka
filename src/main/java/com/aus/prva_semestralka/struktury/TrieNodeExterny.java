@@ -1,11 +1,9 @@
 package com.aus.prva_semestralka.struktury;
 
-import com.aus.prva_semestralka.objekty.Blok;
-
 public class TrieNodeExterny<T> extends TrieNode<T> {
 
 	private int indexBloku;
-	private int pocetRecordov; // kolko zaznamov je na adrese
+	private int pocetRecordov; // kolko zaznamov je na adrese (v bloku)
 
 	public TrieNodeExterny(TrieNode<T> parent, int pocetRecordov) {
 		super(parent);

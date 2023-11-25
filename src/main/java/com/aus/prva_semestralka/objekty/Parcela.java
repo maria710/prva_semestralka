@@ -5,17 +5,25 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 
-public class Parcela implements IPozemok {
+public class Parcela implements IPozemok, Serializable, IRecord {
 
 	private Integer supisneCislo;
 	private String popis;
 	private List<Nehnutelnost> nehnutelnosti;
 	private Ohranicenie gpsPozicie;
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	public Parcela() {
+		this.nehnutelnosti = new ArrayList<>();
+	}
 
 	public Parcela(Integer i, String popis, Ohranicenie gpsPozicia1Parcela) {
 		this.supisneCislo = i;
@@ -93,16 +101,16 @@ public class Parcela implements IPozemok {
 	}
 
 	@Override
-	public boolean equals(IRecord<Integer> o) {
-		return o.getHash().equals(this.getHash());
+	public boolean equals(IRecord o) {
+		return o.getHash(0).equals(this.getHash(0));
 	}
 
 	@Override
-	public BitSet getHash() {
+	public BitSet getHash(int pocetBitov) {
 		int hash = 17 * (31 + 3 * this.supisneCislo);
 
 		BitSet bitSet = new BitSet(Integer.SIZE);
-		for (int i = 0; i < Integer.SIZE; i++) {
+		for (int i = 0; i < pocetBitov; i++) {
 			bitSet.set(i, (hash & (1 << i)) != 0);
 		}
 
@@ -111,61 +119,48 @@ public class Parcela implements IPozemok {
 
 	@Override
 	public int getSize() {
-		return toByteArray().length; // kolko bajtov sa bude do suboru zapisovat
+		return Double.SIZE * 4 + Integer.SIZE + Properties.POCET_PLATNYCH_ZNAKOV * Character.SIZE; // kolko bajtov sa bude do suboru zapisovat
 	}
 
 	@Override
-	public Byte[] toByteArray() {
+	public byte[] toByteArray() {
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			 ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
 
-			// Serialize the object
-			objectOutputStream.writeObject(this);
-
-			// Convert the byte array to Byte[]
-			byte[] byteArray = byteArrayOutputStream.toByteArray();
-			Byte[] byteArrayWrapper = new Byte[byteArray.length];
-			for (int i = 0; i < byteArray.length; i++) {
-				byteArrayWrapper[i] = byteArray[i];
-			}
-
-			return byteArrayWrapper;
+			objectOutputStream.writeInt(supisneCislo);
+			objectOutputStream.writeUTF(popis);
+			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getX());
+			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getY());
+			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getX());
+			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getY());
+			return byteArrayOutputStream.toByteArray();
 
 		} catch (IOException e) {
-			e.printStackTrace(); // Handle the exception appropriately
-			return null;
+			throw new RuntimeException("Chyba pri serializacii objektu: " + this + " do pola bajtov. ERROR:" + e.getMessage());
 		}
 	}
 
 	@Override
-	public List<IRecord<Integer>> fromByteArray(Byte[] data) {
-		try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toPrimitiveByteArray(data));
+	public IRecord fromByteArray(byte[] data) {
+		try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
 			 ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
 
-			// Deserialize the object
-			Object object = objectInputStream.readObject();
+			Integer supisneCislo = objectInputStream.readInt();
+			String popis = objectInputStream.readUTF();
+			double x1 = objectInputStream.readDouble();
+			double y1 = objectInputStream.readDouble();
+			double x2 = objectInputStream.readDouble();
+			double y2 = objectInputStream.readDouble();
 
-			if (object instanceof Parcela) {
-				List<Parcela> parcelaList = new ArrayList<>();
-				parcelaList.add((Parcela) object);
-				return null;
-				// return parcelaList;
-			} else {
-				// Handle the case where the deserialized object is not a Parcela
-				return null;
-			}
+			return new Parcela(supisneCislo, popis, new Ohranicenie(new GpsPozicia("S", "V", x1, y1), new GpsPozicia("S", "V" , x2, y2)));
 
-		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace(); // Handle the exception appropriately
-			return null;
+		} catch (IOException e) {
+			throw new RuntimeException("Chyba pri deserializacii objektu z pola bajtov. ERROR:" + e.getMessage());
 		}
 	}
 
-	private byte[] toPrimitiveByteArray(Byte[] byteArrayWrapper) {
-		byte[] byteArray = new byte[byteArrayWrapper.length];
-		for (int i = 0; i < byteArrayWrapper.length; i++) {
-			byteArray[i] = byteArrayWrapper[i];
-		}
-		return byteArray;
+	@Override
+	public Parcela dajObjekt() {
+		return new Parcela();
 	}
 }
