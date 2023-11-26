@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import com.aus.prva_semestralka.generatory.Generator;
 import com.aus.prva_semestralka.generatory.Generator2;
 import com.aus.prva_semestralka.objekty.IPozemok;
 import com.aus.prva_semestralka.objekty.IRecord;
@@ -17,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DynamickeHashovanieTest {
 
-	DynamickeHashovanie<Parcela> hashovanie = new DynamickeHashovanie<>(Parcela.class, 10,  "parcela/parcela.bin");
+	DynamickeHashovanie<Parcela> hashovanie = new DynamickeHashovanie<>(Parcela.class, 3,  "subor.bin");
 	private ArrayList<IRecord> pozemky;
-	private final Generator2 generator = new Generator2();
-	private final int BLOKOVACI_FAKTOR = 10;
+	private final Generator generator = new Generator();
+	private final int BLOKOVACI_FAKTOR = 2;
 
 	private final Logger logger = Logger.getLogger(QuadTreeTest.class.getName());
 
@@ -30,13 +31,15 @@ class DynamickeHashovanieTest {
 	@BeforeEach
 	void setUp() {
 		pozemky = new ArrayList<>();
-		pozemky.addAll(generator.vygenerujPozemky(10000, 100, 100, false));
+		pozemky.addAll(generator.vygenerujPozemky(10000, 100, 100, true));
 	}
 
 	@Test
 	void insert() {
 		for (IRecord pozemok: pozemky) {
 			assertTrue(hashovanie.insert((Parcela) pozemok));
+			hashovanie.print();
+			System.out.println("**********************************************************************************************");
 		}
 	}
 

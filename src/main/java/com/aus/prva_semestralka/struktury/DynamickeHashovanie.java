@@ -3,6 +3,7 @@ package com.aus.prva_semestralka.struktury;
 import java.io.FileNotFoundException;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Stack;
 
 import com.aus.prva_semestralka.fileManazer.FileManazer;
 import com.aus.prva_semestralka.objekty.Blok;
@@ -87,10 +88,21 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 		// ak je blok plny
 		while (true) {
-			TrieNodeInterny<T> newTrieNodeInterny = new TrieNodeInterny<>(currentNodeExterny.getParent()); // z externeho sa stal interny lebo sa rozdeli
-			int indexBlokuLavy = alokujBlok();
+			var parent = currentNodeExterny.getParent();
+			TrieNodeInterny<T> newTrieNodeInterny = new TrieNodeInterny<>(parent); // z externeho sa stal interny lebo sa rozdeli
+			if (parent == null) { // ak je to koren
+				root = newTrieNodeInterny;
+			} else {
+				if (((TrieNodeInterny<T>) parent).getLavySyn() == currentNodeExterny) {
+					((TrieNodeInterny<T>) parent).setLavySyn(newTrieNodeInterny);
+				} else {
+					((TrieNodeInterny<T>) parent).setPravySyn(newTrieNodeInterny);
+				}
+			}
+			int indexBlokuLavy = indexBlokuNode;
 			int indexBlokuPravy = alokujBlok();
 			Blok<T> blokLavy = citajBlokZoSuboru(indexBlokuLavy);
+			blokLavy.clear();
 			Blok<T> blokPravy = citajBlokZoSuboru(indexBlokuPravy);
 
 			((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).setIndexBloku(indexBlokuLavy);
@@ -106,9 +118,11 @@ public class DynamickeHashovanie<T extends IRecord> {
 				if (bitset.get(bitIndex)) {
 					padloDoPrava = true;
 					blokPravy.pridaj(iRecord);
+					((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).zvysPocetRecordov();
 				} else {
 					padloDoLava = true;
 					blokLavy.pridaj(iRecord);
+					((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
 				}
 			}
 
@@ -116,11 +130,11 @@ public class DynamickeHashovanie<T extends IRecord> {
 				BitSet bitset = getHash(record);
 				if (bitset.get(bitIndex)) {
 					blokPravy.pridaj(record);
-					zapisBlokDoSubor(blokPravy, indexBlokuLavy);
 				} else {
 					blokLavy.pridaj(record);
-					zapisBlokDoSubor(blokLavy, indexBlokuLavy);
 				}
+				zapisBlokDoSubor(blokPravy, indexBlokuLavy);
+				zapisBlokDoSubor(blokLavy, indexBlokuLavy);
 				return true;
 			}
 
@@ -148,9 +162,9 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private int alokujBlok() {
 		int index = 0;
 		if (prvyVolnyBlok == null) { // ak nemam ziadny volny blok alokujem na konci
-			Blok<T> blok = new Blok<>();
+			Blok<T> blok = new Blok<>(classType);
 			index = pocetBlokov; // mam 5 blokov od 0..4, ziadny volny tak priradim index 5 novemu bloku
-			blok.setNasledovnik(index);
+			blok.setNasledovnik(-1);
 			blok.setPredchodca(-1);
 			zapisBlokDoSubor(blok, index);
 			pocetBlokov++;
@@ -184,7 +198,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 	}
 
 	private void zapisBlokDoSubor(Blok<T> blok, int indexBloku) {
-		byte[] data = blok.toByteArray();
+		byte[] data = blok.toByteArray(blokovaciFaktor);
 		this.fileManazer.write(data, indexBloku);
 	}
 
@@ -195,6 +209,34 @@ public class DynamickeHashovanie<T extends IRecord> {
 	}
 
 	private BitSet getHash(IRecord record) {
-		return record.getHash(0); // tu budem prenastavovat pocet bitov
+		return record.getHash(Integer.SIZE); // tu budem prenastavovat pocet bitov
+	}
+
+	public void close() throws Exception {
+		this.fileManazer.close();
+	}
+
+	public void print() {
+
+		Stack<TrieNode<T>> stack = new Stack<>();
+		TrieNode<T> current = root;
+
+		while (current != null || !stack.isEmpty()) {
+			while (current instanceof TrieNodeInterny) {
+				stack.push(current);
+				current = ((TrieNodeInterny<T>) current).getLavySyn();
+			}
+
+			// mame externy vrchol
+			if (current instanceof TrieNodeExterny<T> externy) {
+				citajBlokZoSuboru(externy.getIndexBloku()).print(externy.getIndexBloku());
+			}
+
+			if (stack.isEmpty()) {
+				break;
+			} else {
+				current = ((TrieNodeInterny<T>) stack.pop()).getPravySyn(); // spracujeme praveho syn
+			}
+		}
 	}
 }

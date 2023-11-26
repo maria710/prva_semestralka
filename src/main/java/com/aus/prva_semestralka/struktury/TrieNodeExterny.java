@@ -26,4 +26,8 @@ public class TrieNodeExterny<T> extends TrieNode<T> {
 	public void setPocetRecordov(int pocetRecordov) {
 		this.pocetRecordov = pocetRecordov;
 	}
+
+	public void zvysPocetRecordov() {
+		this.pocetRecordov++;
+	}
 }

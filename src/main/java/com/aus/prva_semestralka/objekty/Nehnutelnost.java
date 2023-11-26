@@ -120,7 +120,7 @@ public class Nehnutelnost implements IPozemok {
 
 	@Override
 	public int getSize() {
-		return Double.SIZE * 4 + Integer.SIZE + Properties.POCET_PLATNYCH_ZNAKOV * Character.SIZE; // kolko bajtov sa bude do suboru zapisovat
+		return (Double.SIZE * 4) / 8 + Integer.SIZE / 8 + Properties.POCET_PLATNYCH_ZNAKOV * (Character.SIZE / 8); // kolko bajtov sa bude do suboru zapisovat
 	}
 
 	@Override
@@ -128,8 +128,10 @@ public class Nehnutelnost implements IPozemok {
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			 ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
 
+			String popisNaSerializaciu = convertujString(popis);
+
 			objectOutputStream.writeInt(supisneCislo);
-			objectOutputStream.writeUTF(popis);
+			objectOutputStream.writeChars(popisNaSerializaciu); // zapise string ako pole charov, 1 char su 2 bajty - kvoli UTF-16 Character.SIZE=16
 			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getX());
 			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getY());
 			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getX());
@@ -147,7 +149,13 @@ public class Nehnutelnost implements IPozemok {
 			 ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
 
 			Integer supisneCislo = objectInputStream.readInt();
-			String popis = objectInputStream.readUTF();
+
+			StringBuilder popisBuilder = new StringBuilder(Properties.POCET_PLATNYCH_ZNAKOV);
+			for (int i = 0; i < Properties.POCET_PLATNYCH_ZNAKOV; i++) {
+				popisBuilder.append(objectInputStream.readChar());
+			}
+			String popis = popisBuilder.toString().trim();
+
 			double x1 = objectInputStream.readDouble();
 			double y1 = objectInputStream.readDouble();
 			double x2 = objectInputStream.readDouble();
@@ -163,5 +171,13 @@ public class Nehnutelnost implements IPozemok {
 	@Override
 	public Nehnutelnost dajObjekt() {
 		return new Nehnutelnost();
+	}
+
+	private String convertujString(String povodnyPopis) {
+		if (povodnyPopis.length() > Properties.POCET_PLATNYCH_ZNAKOV) {
+			return povodnyPopis.substring(0, Properties.POCET_PLATNYCH_ZNAKOV);
+		} else {
+			return String.format("%-" + Properties.POCET_PLATNYCH_ZNAKOV + "s", povodnyPopis); // pridame medzery na koniec
+		}
 	}
 }
