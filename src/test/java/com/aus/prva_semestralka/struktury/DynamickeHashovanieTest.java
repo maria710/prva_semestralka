@@ -40,8 +40,8 @@ class DynamickeHashovanieTest {
 	void insert() {
 		for (IRecord pozemok: pozemky) {
 			assertTrue(hashovanie.insert((Parcela) pozemok));
-//			hashovanie.print();
-//			System.out.println("**********************************************************************************************");
+			hashovanie.print();
+			System.out.println("**********************************************************************************************");
 		}
 
 		Parcela parcela = new Parcela(99930, "testovacia parcela velka",
