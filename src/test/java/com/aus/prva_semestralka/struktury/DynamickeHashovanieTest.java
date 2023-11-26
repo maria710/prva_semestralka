@@ -59,7 +59,6 @@ class DynamickeHashovanieTest {
 			assertNotNull(hashovanie.najdiZaznam(pozemok));
 		}
 
-		// create new parcela and try to find it
 		Parcela parcela = new Parcela(99930, "test", null);
 		assertNull(hashovanie.najdiZaznam(parcela));
 	}

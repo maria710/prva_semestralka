@@ -18,6 +18,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private int pocetBlokov;
 	private final Class<T> classType;
 	private final FileManazer fileManazer;
+	private int currentBitIndex = -1;
 
 	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path) throws FileNotFoundException {
 		root = new TrieNodeExterny<>(null, 0);
@@ -30,52 +31,24 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 	public IRecord najdiZaznam(IRecord record) {
 		BitSet bitSet = getHash(record);
-		int bitIndex = -1;
-		int maxBitIndex = bitSet.length() - 1;
+		TrieNodeExterny<T> externalNode = najdiExternyNode(bitSet);
 
-		TrieNode<T> currentNode = root;
-		while (maxBitIndex != bitIndex && currentNode instanceof TrieNodeInterny) {
-			bitIndex++;
-			if(bitSet.get(bitIndex)) {
-				currentNode = ((TrieNodeInterny<T>) currentNode).getPravySyn();
-			} else {
-				currentNode = ((TrieNodeInterny<T>) currentNode).getLavySyn();
-			}
-		}
-
-		TrieNodeExterny<T> currentNodeExterny = (TrieNodeExterny<T>) currentNode;
-		int indexBlokuNode = currentNodeExterny.getIndexBloku();
+		int indexBlokuNode = externalNode.getIndexBloku();
 		Blok<T> blok = citajBlokZoSuboru(indexBlokuNode);
 
-		return blok == null ? null : blok.findRecord(record, Integer.SIZE);
+		return blok == null ? null : blok.najdiZaznam(record, Integer.SIZE);
 	}
 
 	public boolean insert(T record) {
 		// aplikujem hashovaciu funkciu na primarny kluc
 		BitSet bitSet = getHash(record);
-		int bitIndex = -1;
-		int maxBitIndex = bitSet.length() - 1;
 
-		TrieNode<T> currentNode = root;
-		while (currentNode instanceof TrieNodeInterny) {
-			bitIndex++;
-			if(bitSet.get(bitIndex)) {
-				currentNode = ((TrieNodeInterny<T>) currentNode).getPravySyn();
-			} else {
-				currentNode = ((TrieNodeInterny<T>) currentNode).getLavySyn();
-			}
-		}
-
-		// mam externy vrchol
-		TrieNodeExterny<T> currentNodeExterny = (TrieNodeExterny<T>) currentNode;
+		TrieNodeExterny<T> currentNodeExterny = najdiExternyNode(bitSet);
 		int indexBlokuNode = currentNodeExterny.getIndexBloku();
 
+		// mam externy vrchol
 		if (indexBlokuNode == -1) { // ak este nemame blok
-			int indexBloku = alokujBlok();
-			var blok = citajBlokZoSuboru(indexBloku);
-			blok.pridaj(record);
-			currentNodeExterny.setIndexBloku(indexBloku);
-			zapisBlokDoSubor(blok, indexBloku);
+			zapisDoNovehoBloku(record, currentNodeExterny);
 			return true;
 		}
 
@@ -88,110 +61,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 		}
 
 		// ak je blok plny
-		while (true) {
-			var parent = currentNodeExterny.getParent();
-			TrieNodeInterny<T> newTrieNodeInterny = new TrieNodeInterny<>(parent); // z externeho sa stal interny lebo sa rozdeli
-			if (parent == null) { // ak je to koren
-				root = newTrieNodeInterny;
-			} else {
-				if (((TrieNodeInterny<T>) parent).getLavySyn() == currentNodeExterny) {
-					((TrieNodeInterny<T>) parent).setLavySyn(newTrieNodeInterny);
-				} else {
-					((TrieNodeInterny<T>) parent).setPravySyn(newTrieNodeInterny);
-				}
-			}
-
-			List<T> records = new ArrayList<>(blok.getRecords());
-
-			int indexBlokuLavy = indexBlokuNode;
-			int indexBlokuPravy = alokujBlok();
-			Blok<T> blokLavy = blok;
-			blokLavy.clear();
-			Blok<T> blokPravy = citajBlokZoSuboru(indexBlokuPravy);
-
-			((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).setIndexBloku(indexBlokuLavy);
-			((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).setIndexBloku(indexBlokuPravy);
-
-			bitIndex++;
-			boolean padloDoLava = false;
-			boolean padloDoPrava = false;
-
-			for (T iRecord : records) { // presunieme vsetky zaznamy do novych blokov
-				BitSet bitset = getHash(iRecord);
-				if (bitset.get(bitIndex)) {
-					padloDoPrava = true;
-					blokPravy.pridaj(iRecord);
-					((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).zvysPocetRecordov();
-				} else {
-					padloDoLava = true;
-					blokLavy.pridaj(iRecord);
-					((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
-				}
-			}
-
-			if (padloDoLava && padloDoPrava) { // ak sa roztriedili do oboch tak mozeme pridat vkladany zaznam -> vytvorili sme miesto
-				BitSet bitset = getHash(record);
-				if (bitset.get(bitIndex)) {
-					blokPravy.pridaj(record);
-					((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).zvysPocetRecordov();
-				} else {
-					blokLavy.pridaj(record);
-					((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
-				}
-				zapisBlokDoSubor(blokLavy, indexBlokuLavy);
-				zapisBlokDoSubor(blokPravy, indexBlokuPravy);
-				return true;
-			}
-
-			// dealokujeme nepouzity blok
-			if (!padloDoPrava) {
-				((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).setIndexBloku(-1);
-			}
-			if (!padloDoLava) {
-				((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).setIndexBloku(-1);
-			}
-
-			if (bitIndex >= maxBitIndex) {
-				// tu sa bude ukladat do preplnovacieho suboru
-				return false;
-			}
-			// pokracujeme v cykle
-			if(bitSet.get(bitIndex)) {
-				currentNodeExterny = (TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn();
-			} else {
-				currentNodeExterny = (TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn();
-			}
-		}
-	}
-
-	private int alokujBlok() {
-		int index = 0;
-		if (prvyVolnyBlok == null) { // ak nemam ziadny volny blok alokujem na konci
-			Blok<T> blok = new Blok<>(classType);
-			index = pocetBlokov; // mam 5 blokov od 0..4, ziadny volny tak priradim index 5 novemu bloku
-			blok.setNasledovnik(-1);
-			blok.setPredchodca(-1);
-			zapisBlokDoSubor(blok, index);
-			pocetBlokov++;
-			return pocetBlokov - 1;
-		}
-
-		// najdem index prveho volneho bloku a vratim ho, do neho zapiseme "novy" blok
-		var currentBlok = citajBlokZoSuboru(index); // zaciname citat od prveho bloku
-		while (currentBlok != null && currentBlok != prvyVolnyBlok) {
-			index++;
-			currentBlok = citajBlokZoSuboru(index);
-		}
-		return index;
-	}
-
-	private void dealokujBlok(int indexBloku) {
-		Blok<T> blok = citajBlokZoSuboru(indexBloku);
-		blok.setIndex(indexBloku);
-		prvyVolnyBlok.setPredchodca(indexBloku);
-		blok.setNasledovnik(prvyVolnyBlok.getIndex());
-		blok.setPredchodca(-1);
-		prvyVolnyBlok = blok;
+		return rozdelNodeAZapis(record, currentNodeExterny, blok, indexBlokuNode, bitSet);
 	}
 
 	public boolean delete() {
@@ -243,5 +113,134 @@ public class DynamickeHashovanie<T extends IRecord> {
 				current = ((TrieNodeInterny<T>) stack.pop()).getPravySyn(); // spracujeme praveho syn
 			}
 		}
+	}
+
+	private TrieNodeExterny<T> najdiExternyNode(BitSet bitSet) {
+		currentBitIndex = -1;
+		int maxcurrentBitIndex = bitSet.length() - 1;
+
+		TrieNode<T> currentNode = root;
+		while (maxcurrentBitIndex != currentBitIndex && currentNode instanceof TrieNodeInterny) {
+			currentBitIndex++;
+			currentNode = bitSet.get(currentBitIndex) ? ((TrieNodeInterny<T>) currentNode).getPravySyn() : ((TrieNodeInterny<T>) currentNode).getLavySyn();
+		}
+
+		return (TrieNodeExterny<T>) currentNode;
+	}
+
+	private boolean rozdelNodeAZapis(T record, TrieNodeExterny<T> currentNodeExterny, Blok<T> blok, int indexBlokuNode, BitSet bitSet) {
+		while (true) {
+			var parent = currentNodeExterny.getParent();
+			TrieNodeInterny<T> newTrieNodeInterny = new TrieNodeInterny<>(parent); // z externeho sa stal interny lebo sa rozdeli
+			if (parent == null) { // ak je to koren
+				root = newTrieNodeInterny;
+			} else {
+				if (((TrieNodeInterny<T>) parent).getLavySyn() == currentNodeExterny) {
+					((TrieNodeInterny<T>) parent).setLavySyn(newTrieNodeInterny);
+				} else {
+					((TrieNodeInterny<T>) parent).setPravySyn(newTrieNodeInterny);
+				}
+			}
+
+			List<T> records = new ArrayList<>(blok.getRecords());
+
+			int indexBlokuLavy = indexBlokuNode;
+			int indexBlokuPravy = alokujBlok();
+			Blok<T> blokLavy = blok;
+			blokLavy.clear();
+			Blok<T> blokPravy = citajBlokZoSuboru(indexBlokuPravy);
+
+			((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).setIndexBloku(indexBlokuLavy);
+			((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).setIndexBloku(indexBlokuPravy);
+
+			currentBitIndex++;
+			boolean padloDoLava = false;
+			boolean padloDoPrava = false;
+
+			for (T iRecord : records) { // presunieme vsetky zaznamy do novych blokov
+				BitSet bitset = getHash(iRecord);
+				if (bitset.get(currentBitIndex)) {
+					padloDoPrava = true;
+					blokPravy.pridaj(iRecord);
+					((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).zvysPocetRecordov();
+				} else {
+					padloDoLava = true;
+					blokLavy.pridaj(iRecord);
+					((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
+				}
+			}
+
+			if (padloDoLava && padloDoPrava) { // ak sa roztriedili do oboch tak mozeme pridat vkladany zaznam -> vytvorili sme miesto
+				BitSet bitset = getHash(record);
+				if (bitset.get(currentBitIndex)) {
+					blokPravy.pridaj(record);
+					((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).zvysPocetRecordov();
+				} else {
+					blokLavy.pridaj(record);
+					((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
+				}
+				zapisBlokDoSubor(blokLavy, indexBlokuLavy);
+				zapisBlokDoSubor(blokPravy, indexBlokuPravy);
+				return true;
+			}
+
+			// dealokujeme nepouzity blok
+			if (!padloDoPrava) {
+				((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).setIndexBloku(-1);
+			}
+			if (!padloDoLava) {
+				((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).setIndexBloku(-1);
+			}
+
+			int maxBitIndex = bitSet.length() - 1;
+			if (currentBitIndex >= maxBitIndex) {
+				// tu sa bude ukladat do preplnovacieho suboru
+				return false;
+			}
+			// pokracujeme v cykle
+			if(bitSet.get(currentBitIndex)) {
+				currentNodeExterny = (TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn();
+			} else {
+				currentNodeExterny = (TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn();
+			}
+		}
+	}
+
+	private void zapisDoNovehoBloku(T record, TrieNodeExterny<T> currentNodeExterny) {
+		int indexBloku = alokujBlok();
+		var blok = citajBlokZoSuboru(indexBloku);
+		blok.pridaj(record);
+		currentNodeExterny.setIndexBloku(indexBloku);
+		zapisBlokDoSubor(blok, indexBloku);
+	}
+
+	private int alokujBlok() {
+		int index = 0;
+		if (prvyVolnyBlok == null) { // ak nemam ziadny volny blok alokujem na konci
+			Blok<T> blok = new Blok<>(classType);
+			index = pocetBlokov; // mam 5 blokov od 0..4, ziadny volny tak priradim index 5 novemu bloku
+			blok.setNasledovnik(-1);
+			blok.setPredchodca(-1);
+			zapisBlokDoSubor(blok, index);
+			pocetBlokov++;
+			return pocetBlokov - 1;
+		}
+
+		// najdem index prveho volneho bloku a vratim ho, do neho zapiseme "novy" blok
+		var currentBlok = citajBlokZoSuboru(index); // zaciname citat od prveho bloku
+		while (currentBlok != null && currentBlok != prvyVolnyBlok) {
+			index++;
+			currentBlok = citajBlokZoSuboru(index);
+		}
+		return index;
+	}
+
+	private void dealokujBlok(int indexBloku) {
+		Blok<T> blok = citajBlokZoSuboru(indexBloku);
+		blok.setIndex(indexBloku);
+		prvyVolnyBlok.setPredchodca(indexBloku);
+		blok.setNasledovnik(prvyVolnyBlok.getIndex());
+		blok.setPredchodca(-1);
+		prvyVolnyBlok = blok;
 	}
 }
