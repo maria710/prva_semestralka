@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Blok<T extends IRecord> {
 
-	private ArrayList<T> records;
+	private final ArrayList<T> records;
 	private int predchodca;
 	private int nasledovnik;
 	private int aktualnyPocetRecordov;
@@ -20,11 +20,6 @@ public class Blok<T extends IRecord> {
 
 	public Blok() {
 		records = new ArrayList<>();
-	}
-
-	public Blok(int aktualnyPocetRecordov, ArrayList<T> records) {
-		this.records = records;
-		this.aktualnyPocetRecordov = aktualnyPocetRecordov;
 	}
 
 	public Blok(Class<T> classType) {
@@ -40,51 +35,12 @@ public class Blok<T extends IRecord> {
 		this.classType = classType;
 	}
 
-	public void pridaj(T data) {
-		aktualnyPocetRecordov++;
-		records.add(data);
-	}
-
 	public void setIndex(int index) {
 		this.index = index;
 	}
 
 	public int getIndex() {
 		return this.index;
-	}
-
-	public void vymazRecord(T IRecord) {
-		records.remove(IRecord);
-	}
-
-	public int getAktualnyPocetRecordov() {
-		return this.aktualnyPocetRecordov;
-	}
-
-	public void vymazRecord(int index) {
-		records.remove(index);
-	}
-
-	public T getRecord(int index) {
-		return records.get(index);
-	}
-
-	public List<T> getRecords() {
-		return records;
-	}
-
-	public int getSize(int blokovaciFaktor) {
-
-		int recordSize;
-		try {
-			// vytvor novu instanciu IRecord
-			IRecord novaIntancia = classType.getDeclaredConstructor().newInstance().dajObjekt();
-			recordSize = novaIntancia.getSize();
-		} catch (Exception e) {
-			throw new RuntimeException("Chyba pri vytrvarani novej instancie " + classType.getName(), e);
-		}
-
-		return ((3 * Integer.SIZE) / 8) + blokovaciFaktor * recordSize + (blokovaciFaktor * Integer.SIZE / 8); // blokovaci faktor * 1 = boolean hodnoty ci je zaznam pritomny
 	}
 
 	public int getPredchodca() {
@@ -103,6 +59,44 @@ public class Blok<T extends IRecord> {
 		this.nasledovnik = nasledovnik;
 	}
 
+	public List<T> getRecords() {
+		return records;
+	}
+
+	public int getAktualnyPocetRecordov() {
+		return this.aktualnyPocetRecordov;
+	}
+
+	public void pridaj(T data) {
+		aktualnyPocetRecordov++;
+		records.add(data);
+	}
+
+	public IRecord najdiZaznam(IRecord record, int pocetBitov) {
+		for (IRecord r : records) {
+			if (r.equals(record, pocetBitov)) {
+				return r;
+			}
+		}
+		return null;
+	}
+
+	public void vymazRecord(T IRecord) {
+		records.remove(IRecord);
+	}
+
+	public int getSize(int blokovaciFaktor) {
+		int recordSize;
+		try {
+			T novaIntancia = classType.getDeclaredConstructor().newInstance();
+			recordSize = novaIntancia.getSize();
+		} catch (Exception e) {
+			throw new RuntimeException("Chyba pri vytrvarani novej instancie " + classType.getName(), e);
+		}
+
+		return ((3 * Integer.SIZE) / 8) + blokovaciFaktor * recordSize + (blokovaciFaktor * Integer.SIZE / 8);
+	}
+
 	public byte[] toByteArray(int blokovaciFaktor) {
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			 DataOutputStream objectOutputStream = new DataOutputStream(byteArrayOutputStream)) {
@@ -116,7 +110,7 @@ public class Blok<T extends IRecord> {
 					objectOutputStream.writeInt(1); // mame zaznam
 					objectOutputStream.write(records.get(i).toByteArray());
 				} else {
-					objectOutputStream.writeInt(-1); // nemame ziadny zaznam
+					objectOutputStream.writeInt(-1); // nemame ziadny zaznam, doplnime prazdne miesto
 					IRecord novaIntancia = classType.getDeclaredConstructor().newInstance().dajObjekt();
 					objectOutputStream.write(new byte[novaIntancia.getSize()]);
 				}
@@ -124,10 +118,8 @@ public class Blok<T extends IRecord> {
 
 			return byteArrayOutputStream.toByteArray();
 
-		} catch (IOException e) {
+		} catch (IOException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException("Chyba pri serializacii objektu: " + this + " do pola bajtov. ERROR:" + e.getMessage());
-		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-			throw new RuntimeException(e);
 		}
 	}
 
@@ -140,50 +132,24 @@ public class Blok<T extends IRecord> {
 			int nasledovnik = objectInputStream.readInt();
 
 			ArrayList<T> records = new ArrayList<>();
+			T novaInstancia = classType.getDeclaredConstructor().newInstance();
 
 			for (int i = 0; i < aktualnyPocetRecordov; i++) {
-				int mameZaznam = objectInputStream.readInt();
-				if (mameZaznam == 1) {
-					// Deserialize the record
-					byte[] recordData = new byte[classType.getDeclaredConstructor().newInstance().dajObjekt().getSize()];
+				int zaznamFlag = objectInputStream.readInt();
+				if (zaznamFlag == 1) {
+					byte[] recordData = new byte[novaInstancia.getSize()];
 					objectInputStream.readFully(recordData);
-					IRecord record = classType.getDeclaredConstructor().newInstance().dajObjekt().fromByteArray(recordData);
+					IRecord record = novaInstancia.fromByteArray(recordData);
 					records.add((T) record);
 				} else {
-					// Skip the placeholder bytes
-					IRecord novaInstancia = classType.getDeclaredConstructor().newInstance().dajObjekt();
 					objectInputStream.skipBytes(novaInstancia.getSize());
 				}
 			}
-
 			return new Blok<>(aktualnyPocetRecordov, records, predchodca, nasledovnik, classType);
 
-		} catch (IOException e) {
+		} catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
 			throw new RuntimeException("Error deserializing Blok from byte array: " + e.getMessage());
-		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-			throw new RuntimeException(e);
 		}
-	}
-
-
-	private boolean isAllZeroes(byte[] data) {
-		for (byte b : data) {
-			if (b != 0) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-
-	public IRecord findRecord(IRecord record, int pocetBitov) {
-		for (IRecord r : records) {
-			if (r.equals(record, pocetBitov)) {
-				return r;
-			}
-		}
-
-		return null;
 	}
 
 	public void print(int index) {
