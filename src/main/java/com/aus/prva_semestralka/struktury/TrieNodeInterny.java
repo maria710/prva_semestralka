@@ -11,8 +11,8 @@ public class TrieNodeInterny<T> extends TrieNode<T> {
 
 	public TrieNodeInterny(TrieNode<T> parent) {
 		super(parent);
-		this.lavySyn = new TrieNodeExterny<>(parent, 0);
-		this.pravySyn = new TrieNodeExterny<>(parent, 0);
+		this.lavySyn = new TrieNodeExterny<>(this, 0);
+		this.pravySyn = new TrieNodeExterny<>(this, 0);
 	}
 
 	public TrieNode<T> getLavySyn() {

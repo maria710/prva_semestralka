@@ -5,8 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -103,8 +101,8 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 	}
 
 	@Override
-	public boolean equals(IRecord o) {
-		return o.getHash(0).equals(this.getHash(0));
+	public boolean equals(IRecord o, int pocetBitov) {
+		return o.getHash(pocetBitov).equals(this.getHash(pocetBitov));
 	}
 
 	@Override

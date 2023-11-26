@@ -98,8 +98,8 @@ public class Nehnutelnost implements IPozemok {
 	}
 
 	@Override
-	public boolean equals(IRecord o) {
-		return o.getHash(0).equals(this.getHash(0));
+	public boolean equals(IRecord o,  int pocetBitov) {
+		return o.getHash(pocetBitov).equals(this.getHash(pocetBitov));
 	}
 
 	@Override

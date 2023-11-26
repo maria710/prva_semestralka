@@ -1,6 +1,7 @@
 package com.aus.prva_semestralka.struktury;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Stack;
@@ -33,7 +34,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 		int maxBitIndex = bitSet.length() - 1;
 
 		TrieNode<T> currentNode = root;
-		while (maxBitIndex != bitIndex || currentNode instanceof TrieNodeInterny) {
+		while (maxBitIndex != bitIndex && currentNode instanceof TrieNodeInterny) {
 			bitIndex++;
 			if(bitSet.get(bitIndex)) {
 				currentNode = ((TrieNodeInterny<T>) currentNode).getPravySyn();
@@ -46,7 +47,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 		int indexBlokuNode = currentNodeExterny.getIndexBloku();
 		Blok<T> blok = citajBlokZoSuboru(indexBlokuNode);
 
-		return blok == null ? null : blok.findRecord(record);
+		return blok == null ? null : blok.findRecord(record, Integer.SIZE);
 	}
 
 	public boolean insert(T record) {
@@ -99,16 +100,18 @@ public class DynamickeHashovanie<T extends IRecord> {
 					((TrieNodeInterny<T>) parent).setPravySyn(newTrieNodeInterny);
 				}
 			}
+
+			List<T> records = new ArrayList<>(blok.getRecords());
+
 			int indexBlokuLavy = indexBlokuNode;
 			int indexBlokuPravy = alokujBlok();
-			Blok<T> blokLavy = citajBlokZoSuboru(indexBlokuLavy);
+			Blok<T> blokLavy = blok;
 			blokLavy.clear();
 			Blok<T> blokPravy = citajBlokZoSuboru(indexBlokuPravy);
 
 			((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).setIndexBloku(indexBlokuLavy);
 			((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).setIndexBloku(indexBlokuPravy);
 
-			List<T> records = blok.getRecords();
 			bitIndex++;
 			boolean padloDoLava = false;
 			boolean padloDoPrava = false;
@@ -130,11 +133,13 @@ public class DynamickeHashovanie<T extends IRecord> {
 				BitSet bitset = getHash(record);
 				if (bitset.get(bitIndex)) {
 					blokPravy.pridaj(record);
+					((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).zvysPocetRecordov();
 				} else {
 					blokLavy.pridaj(record);
+					((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
 				}
-				zapisBlokDoSubor(blokPravy, indexBlokuLavy);
 				zapisBlokDoSubor(blokLavy, indexBlokuLavy);
+				zapisBlokDoSubor(blokPravy, indexBlokuPravy);
 				return true;
 			}
 
@@ -199,12 +204,12 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 	private void zapisBlokDoSubor(Blok<T> blok, int indexBloku) {
 		byte[] data = blok.toByteArray(blokovaciFaktor);
-		this.fileManazer.write(data, indexBloku);
+		this.fileManazer.write(data, indexBloku * blok.getSize(blokovaciFaktor));
 	}
 
 	private Blok<T> citajBlokZoSuboru(int indexBloku) {
 		Blok<T> blok = new Blok<>(classType);
-		byte[] data = this.fileManazer.read(blok.getSize(blokovaciFaktor), indexBloku);
+		byte[] data = this.fileManazer.read(blok.getSize(blokovaciFaktor), indexBloku * blok.getSize(blokovaciFaktor));
 		return blok.fromByteArray(data);
 	}
 

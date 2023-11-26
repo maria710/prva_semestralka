@@ -5,8 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,9 +176,9 @@ public class Blok<T extends IRecord> {
 	}
 
 
-	public IRecord findRecord(IRecord record) {
+	public IRecord findRecord(IRecord record, int pocetBitov) {
 		for (IRecord r : records) {
-			if (r.equals(record)) {
+			if (r.equals(record, pocetBitov)) {
 				return r;
 			}
 		}
@@ -190,15 +188,14 @@ public class Blok<T extends IRecord> {
 
 	public void print(int index) {
 		System.out.print("--------------------------------------------------------------------------------------- \n");
-		System.out.println("Blok: " + index + "\n");
-		System.out.println("Aktualny pocet recordov: " + aktualnyPocetRecordov + "\n");
-		System.out.println("Predchodca: " + predchodca + "\n");
-		System.out.println("Nasledovnik: " + nasledovnik + "\n");
+		System.out.println("Blok: " + index);
+		System.out.println("Aktualny pocet recordov: " + aktualnyPocetRecordov);
+		System.out.println("Predchodca: " + predchodca);
+		System.out.println("Nasledovnik: " + nasledovnik);
 		System.out.println("Zaznamy:");
 		for (T record : records) {
 			System.out.println(record.toString() + "\n");
 		}
-		System.out.print("--------------------------------------------------------------------------------------- \n");
 	}
 
 	public void clear() {
