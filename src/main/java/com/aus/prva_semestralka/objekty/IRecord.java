@@ -9,5 +9,4 @@ public interface IRecord {
 	int getSize();
 	byte[] toByteArray();
 	IRecord fromByteArray(byte[] data);
-	IRecord dajObjekt();
 }

@@ -125,50 +125,45 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 	@Override
 	public byte[] toByteArray() {
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			 DataOutputStream objectOutputStream = new DataOutputStream(byteArrayOutputStream)) {
+			 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
 
 			String popisNaSerializaciu = convertujString(popis);
 
-			objectOutputStream.writeInt(supisneCislo);
-			objectOutputStream.writeChars(popisNaSerializaciu); // zapise string ako pole charov, 1 char su 2 bajty - kvoli UTF-16 Character.SIZE=16
-			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getX());
-			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getY());
-			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getX());
-			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getY());
+			dataOutputStream.writeInt(supisneCislo);
+			dataOutputStream.writeChars(popisNaSerializaciu); // zapise string ako pole charov, 1 char su 2 bajty - kvoli UTF-16 Character.SIZE=16
+			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getX());
+			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getY());
+			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getX());
+			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getY());
 			return byteArrayOutputStream.toByteArray();
 
 		} catch (IOException e) {
-			throw new RuntimeException("Chyba pri serializacii objektu: " + this + " do pola bajtov. ERROR:" + e.getMessage());
+			throw new RuntimeException("Chyba pri serializacii triedy Parcela:" + e.getMessage());
 		}
 	}
 
 	@Override
 	public IRecord fromByteArray(byte[] data) {
 		try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-			 DataInputStream objectInputStream = new DataInputStream(byteArrayInputStream)) {
+			 DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream)) {
 
-			Integer supisneCislo = objectInputStream.readInt();
+			Integer supisneCislo = dataInputStream.readInt();
 			StringBuilder popisBuilder = new StringBuilder(Properties.POCET_PLATNYCH_ZNAKOV);
 			for (int i = 0; i < Properties.POCET_PLATNYCH_ZNAKOV; i++) {
-				popisBuilder.append(objectInputStream.readChar());
+				popisBuilder.append(dataInputStream.readChar());
 			}
 			String popis = popisBuilder.toString().trim();
 
-			double x1 = objectInputStream.readDouble();
-			double y1 = objectInputStream.readDouble();
-			double x2 = objectInputStream.readDouble();
-			double y2 = objectInputStream.readDouble();
+			double x1 = dataInputStream.readDouble();
+			double y1 = dataInputStream.readDouble();
+			double x2 = dataInputStream.readDouble();
+			double y2 = dataInputStream.readDouble();
 
 			return new Parcela(supisneCislo, popis, new Ohranicenie(new GpsPozicia("S", "V", x1, y1), new GpsPozicia("S", "V" , x2, y2)));
 
 		} catch (IOException e) {
-			throw new RuntimeException("Chyba pri deserializacii objektu z pola bajtov. ERROR:" + e.getMessage());
+			throw new RuntimeException("Chyba pri deserializacii triedy Parcela" + e.getMessage());
 		}
-	}
-
-	@Override
-	public Parcela dajObjekt() {
-		return new Parcela();
 	}
 
 	private String convertujString(String povodnyPopis) {

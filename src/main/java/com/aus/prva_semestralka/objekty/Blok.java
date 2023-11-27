@@ -15,7 +15,6 @@ public class Blok<T extends IRecord> {
 	private int predchodca;
 	private int nasledovnik;
 	private int aktualnyPocetRecordov;
-	private int index;
 	private Class<T> classType;
 
 	public Blok() {
@@ -33,14 +32,6 @@ public class Blok<T extends IRecord> {
 		this.predchodca = predchodca;
 		this.nasledovnik = nasledovnik;
 		this.classType = classType;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
-	}
-
-	public int getIndex() {
-		return this.index;
 	}
 
 	public int getPredchodca() {
@@ -99,56 +90,56 @@ public class Blok<T extends IRecord> {
 
 	public byte[] toByteArray(int blokovaciFaktor) {
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			 DataOutputStream objectOutputStream = new DataOutputStream(byteArrayOutputStream)) {
+			 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
 
-			objectOutputStream.writeInt(aktualnyPocetRecordov);
-			objectOutputStream.writeInt(predchodca);
-			objectOutputStream.writeInt(nasledovnik);
+			dataOutputStream.writeInt(aktualnyPocetRecordov);
+			dataOutputStream.writeInt(predchodca);
+			dataOutputStream.writeInt(nasledovnik);
 
 			for (int i = 0; i < blokovaciFaktor; i++) {
 				if (i < aktualnyPocetRecordov) {
-					objectOutputStream.writeInt(1); // mame zaznam
-					objectOutputStream.write(records.get(i).toByteArray());
+					dataOutputStream.writeInt(1); // mame zaznam
+					dataOutputStream.write(records.get(i).toByteArray());
 				} else {
-					objectOutputStream.writeInt(-1); // nemame ziadny zaznam, doplnime prazdne miesto
-					IRecord novaIntancia = classType.getDeclaredConstructor().newInstance().dajObjekt();
-					objectOutputStream.write(new byte[novaIntancia.getSize()]);
+					dataOutputStream.writeInt(-1); // nemame ziadny zaznam, doplnime prazdne miesto
+					T novaIntancia = classType.getDeclaredConstructor().newInstance();
+					dataOutputStream.write(new byte[novaIntancia.getSize()]);
 				}
 			}
 
 			return byteArrayOutputStream.toByteArray();
 
 		} catch (IOException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException("Chyba pri serializacii objektu: " + this + " do pola bajtov. ERROR:" + e.getMessage());
+			throw new RuntimeException("Chyba pri serializacii triedy Blok:" + e.getMessage());
 		}
 	}
 
 	public Blok<T> fromByteArray(byte[] data) {
 		try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-			 DataInputStream objectInputStream = new DataInputStream(byteArrayInputStream)) {
+			 DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream)) {
 
-			int aktualnyPocetRecordov = objectInputStream.readInt();
-			int predchodca = objectInputStream.readInt();
-			int nasledovnik = objectInputStream.readInt();
+			int aktualnyPocetRecordov = dataInputStream.readInt();
+			int predchodca = dataInputStream.readInt();
+			int nasledovnik = dataInputStream.readInt();
 
 			ArrayList<T> records = new ArrayList<>();
 			T novaInstancia = classType.getDeclaredConstructor().newInstance();
 
 			for (int i = 0; i < aktualnyPocetRecordov; i++) {
-				int zaznamFlag = objectInputStream.readInt();
+				int zaznamFlag = dataInputStream.readInt();
 				if (zaznamFlag == 1) {
 					byte[] recordData = new byte[novaInstancia.getSize()];
-					objectInputStream.readFully(recordData);
+					dataInputStream.readFully(recordData);
 					IRecord record = novaInstancia.fromByteArray(recordData);
 					records.add((T) record);
 				} else {
-					objectInputStream.skipBytes(novaInstancia.getSize());
+					dataInputStream.skipBytes(novaInstancia.getSize());
 				}
 			}
 			return new Blok<>(aktualnyPocetRecordov, records, predchodca, nasledovnik, classType);
 
 		} catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-			throw new RuntimeException("Error deserializing Blok from byte array: " + e.getMessage());
+			throw new RuntimeException("Chyba pri deserializaci triedy Blok: " + e.getMessage());
 		}
 	}
 

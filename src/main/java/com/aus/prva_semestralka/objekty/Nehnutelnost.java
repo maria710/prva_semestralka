@@ -2,9 +2,9 @@ package com.aus.prva_semestralka.objekty;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -104,13 +104,9 @@ public class Nehnutelnost implements IPozemok {
 
 	@Override
 	public BitSet getHash(int pocetBitov) {
-		if (pocetBitov <= 0) {
-			pocetBitov = Integer.SIZE;
-		}
-
 		int hash = 17 * (31 + 3 * this.supisneCislo);
 
-		BitSet bitSet = new BitSet(pocetBitov);
+		BitSet bitSet = new BitSet(Integer.SIZE);
 		for (int i = 0; i < pocetBitov; i++) {
 			bitSet.set(i, (hash & (1 << i)) != 0);
 		}
@@ -126,51 +122,46 @@ public class Nehnutelnost implements IPozemok {
 	@Override
 	public byte[] toByteArray() {
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			 ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+			 DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
 
 			String popisNaSerializaciu = convertujString(popis);
 
-			objectOutputStream.writeInt(supisneCislo);
-			objectOutputStream.writeChars(popisNaSerializaciu); // zapise string ako pole charov, 1 char su 2 bajty - kvoli UTF-16 Character.SIZE=16
-			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getX());
-			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getY());
-			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getX());
-			objectOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getY());
+			dataOutputStream.writeInt(supisneCislo);
+			dataOutputStream.writeChars(popisNaSerializaciu); // zapise string ako pole charov, 1 char su 2 bajty - kvoli UTF-16 Character.SIZE=16
+			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getX());
+			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getY());
+			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getX());
+			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getY());
 			return byteArrayOutputStream.toByteArray();
 
 		} catch (IOException e) {
-			throw new RuntimeException("Chyba pri serializacii objektu: " + this + " do pola bajtov. ERROR:" + e.getMessage());
+			throw new RuntimeException("Chyba pri serializacii triedy Nehnutelnost:" + e.getMessage());
 		}
 	}
 
 	@Override
 	public IRecord fromByteArray(byte[] data) {
 		try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-			 ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
+			 DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream)) {
 
-			Integer supisneCislo = objectInputStream.readInt();
+			Integer supisneCislo = dataInputStream.readInt();
 
 			StringBuilder popisBuilder = new StringBuilder(Properties.POCET_PLATNYCH_ZNAKOV);
 			for (int i = 0; i < Properties.POCET_PLATNYCH_ZNAKOV; i++) {
-				popisBuilder.append(objectInputStream.readChar());
+				popisBuilder.append(dataInputStream.readChar());
 			}
 			String popis = popisBuilder.toString().trim();
 
-			double x1 = objectInputStream.readDouble();
-			double y1 = objectInputStream.readDouble();
-			double x2 = objectInputStream.readDouble();
-			double y2 = objectInputStream.readDouble();
+			double x1 = dataInputStream.readDouble();
+			double y1 = dataInputStream.readDouble();
+			double x2 = dataInputStream.readDouble();
+			double y2 = dataInputStream.readDouble();
 
 			return new Parcela(supisneCislo, popis, new Ohranicenie(new GpsPozicia("S", "V", x1, y1), new GpsPozicia("S", "V" , x2, y2)));
 
 		} catch (IOException e) {
-			throw new RuntimeException("Chyba pri deserializacii objektu z pola bajtov. ERROR:" + e.getMessage());
+			throw new RuntimeException("Chyba pri deserializacii triedy Nehnutelnost:" + e.getMessage());
 		}
-	}
-
-	@Override
-	public Nehnutelnost dajObjekt() {
-		return new Nehnutelnost();
 	}
 
 	private String convertujString(String povodnyPopis) {
