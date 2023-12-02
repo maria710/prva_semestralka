@@ -41,6 +41,9 @@ public class DynamickeHashovanie<T extends IRecord> {
 		TrieNodeExterny<T> externalNode = najdiExternyNode(bitSet);
 
 		int indexBlokuNode = externalNode.getIndexBloku();
+		if (indexBlokuNode == -1) {
+			return null;
+		}
 		Blok<T> blok = citajBlokZoSuboru(fileManazer, indexBlokuNode, blokovaciFaktor);
 
 		return blok == null ? null : blok.najdiZaznam(record, Integer.SIZE);
