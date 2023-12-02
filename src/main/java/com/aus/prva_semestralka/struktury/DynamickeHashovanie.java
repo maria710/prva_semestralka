@@ -111,6 +111,8 @@ public class DynamickeHashovanie<T extends IRecord> {
 			return false;
 		}
 
+		FileManazer fileManazer = this.fileManazer;
+		int blokovaciFaktor = this.blokovaciFaktor;
 		Blok<T> blok = citajBlokZoSuboru(fileManazer, indexBlokuNode, blokovaciFaktor);
 
 		while (true) {
@@ -122,7 +124,10 @@ public class DynamickeHashovanie<T extends IRecord> {
 			if (blok.getNasledovnik() == -1) {
 				return false;
 			}
-			blok = citajBlokZoSuboru(fileManazerPreplnovaci, blok.getNasledovnik(), blokovaciFaktorPreplnovaci);
+			fileManazer = fileManazerPreplnovaci;
+			blokovaciFaktor = blokovaciFaktorPreplnovaci;
+			indexBlokuNode = blok.getNasledovnik();
+			blok = citajBlokZoSuboru(fileManazer, indexBlokuNode, blokovaciFaktor);
 		}
 	}
 
