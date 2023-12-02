@@ -25,7 +25,7 @@ public class FileManazer {
 			file.seek(offset); // presunieme sa na pozadovanu poziciu
 			file.write(data);
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Nepodarilo sa zapisat do suboru: " + Arrays.toString(e.getStackTrace()));
+			logger.log(Level.SEVERE, "Nepodarilo sa zapisat do suboru: " + offset/data.length);
 		}
 	}
 
@@ -44,10 +44,27 @@ public class FileManazer {
 				return buffer;
 			}
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Nepodarilo sa citat zo suboru: " + Arrays.toString(e.getStackTrace()));
+			logger.log(Level.SEVERE, "Nepodarilo sa citat zo suboru na index: " + offset/size);
 		}
 
 		return null;
+	}
+
+	public void clear() {
+		try {
+			file.setLength(0);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Nepodarilo sa vycistit subor: " + Arrays.toString(e.getStackTrace()));
+		}
+	}
+
+	public long getFileSize() {
+		try {
+			return file.length();
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Nepodarilo sa ziskat velkost suboru: " + Arrays.toString(e.getStackTrace()));
+		}
+		return 0;
 	}
 
 }

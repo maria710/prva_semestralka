@@ -16,7 +16,7 @@ public class Blok<T extends IRecord> {
 	private int nasledovnik;
 	private int aktualnyPocetRecordov;
 	private Class<T> classType;
-	private int indexPreplnujucehoBloku;
+	private int index;
 
 	public Blok() {
 		records = new ArrayList<>();
@@ -64,9 +64,9 @@ public class Blok<T extends IRecord> {
 		records.add(data);
 	}
 
-	public IRecord najdiZaznam(IRecord record, int pocetBitov) {
+	public IRecord najdiZaznam(IRecord record) {
 		for (IRecord r : records) {
-			if (r.equals(record, pocetBitov)) {
+			if (r.equals(record)) {
 				return r;
 			}
 		}
@@ -144,16 +144,19 @@ public class Blok<T extends IRecord> {
 		}
 	}
 
-	public void print(int index) {
-		System.out.print("--------------------------------------------------------------------------------------- \n");
-		System.out.println("Blok: " + index);
-		System.out.println("Aktualny pocet recordov: " + aktualnyPocetRecordov);
-		System.out.println("Predchodca: " + predchodca);
-		System.out.println("Nasledovnik: " + nasledovnik);
-		System.out.println("Zaznamy:");
+	public String print(int index) {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("--------------------------------------------------------------------------------------- \n");
+		stringBuilder.append("Blok: ").append(index).append("\n");
+		stringBuilder.append("Aktualny pocet recordov: ").append(aktualnyPocetRecordov).append("\n");
+		stringBuilder.append("Predchodca: ").append(predchodca).append("\n");
+		stringBuilder.append("Nasledovnik: ").append(nasledovnik).append("\n");
+		stringBuilder.append("Zaznamy: \n");
 		for (T record : records) {
-			System.out.println(record.toString() + "\n");
+			stringBuilder.append(record.toString()).append("\n");
 		}
+
+		return stringBuilder.toString();
 	}
 
 	public void clear() {
@@ -161,5 +164,22 @@ public class Blok<T extends IRecord> {
 		aktualnyPocetRecordov = 0;
 		predchodca = -1;
 		nasledovnik = -1;
+		index = -1;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public String printPreplnovaci(int indexPreplnovaciehoBloku) {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("PREPLNUJUCI BLOK").append("\n");
+		stringBuilder.append(print(indexPreplnovaciehoBloku));
+
+		return stringBuilder.toString();
 	}
 }

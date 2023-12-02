@@ -4,7 +4,7 @@ import java.util.BitSet;
 
 public interface IRecord {
 
-	boolean equals(IRecord o,  int pocetBitov);
+	boolean equals(IRecord o);
 	BitSet getHash(int pocetBitov);
 	int getSize();
 	byte[] toByteArray();

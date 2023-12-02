@@ -101,15 +101,15 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 	}
 
 	@Override
-	public boolean equals(IRecord o, int pocetBitov) {
-		return o.getHash(pocetBitov).equals(this.getHash(pocetBitov));
+	public boolean equals(IRecord o) {
+		return Objects.equals(this.supisneCislo, ((Parcela) o).supisneCislo);
 	}
 
 	@Override
 	public BitSet getHash(int pocetBitov) {
 		int hash = 17 * (31 + 3 * this.supisneCislo);
 
-		BitSet bitSet = new BitSet(Integer.SIZE);
+		BitSet bitSet = new BitSet(pocetBitov);
 		for (int i = 0; i < pocetBitov; i++) {
 			bitSet.set(i, (hash & (1 << i)) != 0);
 		}

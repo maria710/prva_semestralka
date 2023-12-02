@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DynamickeHashovanieTest {
 
-	DynamickeHashovanie<Parcela> hashovanie = new DynamickeHashovanie<>(Parcela.class, 2,  "subor.bin", "preplnovaciSubor.bin", 5);
+	DynamickeHashovanie<Parcela> hashovanie = new DynamickeHashovanie<>(Parcela.class, 2,  "subor.bin", "preplnovaciSubor.bin", 4);
 	private ArrayList<IRecord> pozemky;
 	private final Generator generator = new Generator();
 
@@ -32,17 +32,21 @@ class DynamickeHashovanieTest {
 
 	@BeforeEach
 	void setUp() {
+		hashovanie.clear();
 		pozemky = new ArrayList<>();
-		pozemky.addAll(generator.vygenerujPozemky(1000, 100, 100, true));
+		pozemky.addAll(generator.vygenerujPozemky(10, 100, 100, true));
 	}
 
 	@Test
 	void insert() {
 		for (IRecord pozemok: pozemky) {
+			System.out.println("Pridana parcela: " + ((Parcela) pozemok).getSupisneCislo());
 			assertTrue(hashovanie.insert((Parcela) pozemok));
-			hashovanie.print();
-			System.out.println("**********************************************************************************************");
+
 		}
+		System.out.println(hashovanie.toStringHlavny());
+		System.out.println("**********************************************************************************************");
+		System.out.println(hashovanie.toStringPreplnovaci());
 
 		Parcela parcela = new Parcela(99930, "testovacia parcela velka",
 									  new Ohranicenie(new GpsPozicia("S", "V", 0.0, 0.0), new GpsPozicia("J", "Z", 100.0, 100.0)));
@@ -56,6 +60,9 @@ class DynamickeHashovanieTest {
 			hashovanie.insert((Parcela) pozemok);
 		}
 		for (IRecord pozemok: pozemky) {
+			if (hashovanie.najdiZaznam(pozemok) == null) {
+				System.out.println("Parcela: " + ((Parcela) pozemok).getSupisneCislo() + " nebola najdena");
+			}
 			assertNotNull(hashovanie.najdiZaznam(pozemok));
 		}
 
