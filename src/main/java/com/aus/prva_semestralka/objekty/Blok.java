@@ -73,8 +73,15 @@ public class Blok<T extends IRecord> {
 		return null;
 	}
 
-	public void vymazRecord(T IRecord) {
-		records.remove(IRecord);
+	public boolean vymazRecord(T IRecord) {
+		for (int i = 0; i < records.size(); i++) {
+			if (records.get(i).equals(IRecord)) {
+				records.remove(i);
+				aktualnyPocetRecordov--;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public int getSize(int blokovaciFaktor) {

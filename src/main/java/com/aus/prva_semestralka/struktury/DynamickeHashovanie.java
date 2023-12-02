@@ -24,7 +24,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private int pocetBlokovPreplnovaci;
 	private final FileManazer fileManazerPreplnovaci;
 
-	private int pocetBitovVHash = 2;
+	private final int pocetBitovVHash = 2;
 
 	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path, String pathPreplnovaci, int blokovaciFaktorPreplnovaci) throws FileNotFoundException {
 		root = new TrieNodeExterny<>(null, 0);
@@ -97,8 +97,33 @@ public class DynamickeHashovanie<T extends IRecord> {
 		return rozdelNodeAZapis(record, currentNodeExterny, blok, indexBlokuNode);
 	}
 
-	public boolean delete() {
-		return false;
+	public boolean delete(T record) {
+
+		if (najdiZaznam(record) == null) { // musime skontrolovat ci tam uz je, ak nie nema vyznam mazat
+			return false;
+		}
+
+		BitSet bitSet = getHash(record);
+		TrieNodeExterny<T> externalNode = najdiExternyNode(bitSet);
+
+		int indexBlokuNode = externalNode.getIndexBloku();
+		if (indexBlokuNode == -1) {
+			return false;
+		}
+
+		Blok<T> blok = citajBlokZoSuboru(fileManazer, indexBlokuNode, blokovaciFaktor);
+
+		while (true) {
+			var vyzalSa = blok.vymazRecord(record);
+			if (vyzalSa) {
+				zapisBlokDoSubor(fileManazer, blok, indexBlokuNode, blokovaciFaktor);
+				return true;
+			}
+			if (blok.getNasledovnik() == -1) {
+				return false;
+			}
+			blok = citajBlokZoSuboru(fileManazerPreplnovaci, blok.getNasledovnik(), blokovaciFaktorPreplnovaci);
+		}
 	}
 
 	public boolean edit() {
@@ -340,18 +365,24 @@ public class DynamickeHashovanie<T extends IRecord> {
 			prvyVolnyBlok.setPredchodca(indexBloku);
 			zapisBlokDoSubor(fileManazer, prvyVolnyBlok, prvyVolnyBlokIndex, blokovaciFaktor);
 		} else {
-
-			if (indexBloku == 7) {
-				System.out.println("break");
-			}
 			prvyVolnyBlokIndex = indexBloku;
 		}
 
 		pocetBlokov--;
 		zapisBlokDoSubor(fileManazer, blok, indexBloku, blokovaciFaktor);
 
-		// TODO odstranit prazdne bloky
-		// ak index bloku je rovny poctu blokov tak je to posledny blok a mazem vsetky prazdne bloky od konca
+		int pocetBlokovNaOdstranenie = 0;
+		if (indexBloku == pocetBlokov) {
+			for (int i = pocetBlokov - 1; i >= 0; i--) {
+				Blok<T> blokNaOdstranenie = citajBlokZoSuboru(fileManazer, i, blokovaciFaktor);
+				if (blokNaOdstranenie.getAktualnyPocetRecordov() == 0) {
+					pocetBlokovNaOdstranenie++;
+				} else {
+					break;
+				}
+			}
+			this.fileManazer.skratSubor((pocetBlokov - pocetBlokovNaOdstranenie) * blok.getSize(blokovaciFaktor));
+		}
 	}
 
 	public void print() {

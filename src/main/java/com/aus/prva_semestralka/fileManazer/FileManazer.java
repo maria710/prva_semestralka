@@ -67,4 +67,11 @@ public class FileManazer {
 		return 0;
 	}
 
+	public void skratSubor(int i) {
+		try {
+			file.setLength(i);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Nepodarilo sa skratit subor: " + Arrays.toString(e.getStackTrace()));
+		}
+	}
 }

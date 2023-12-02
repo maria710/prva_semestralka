@@ -70,6 +70,19 @@ class DynamickeHashovanieTest {
 		assertNull(hashovanie.najdiZaznam(parcela));
 	}
 
+	@Test
+	void delete() {
+		for (IRecord pozemok: pozemky) {
+			hashovanie.insert((Parcela) pozemok);
+		}
+		for (IRecord pozemok: pozemky) {
+			assertTrue(hashovanie.delete((Parcela) pozemok));
+		}
+		for (IRecord pozemok: pozemky) {
+			assertNull(hashovanie.najdiZaznam(pozemok));
+		}
+	}
+
 	@AfterEach
 	public void tearDown() throws Exception {
 		hashovanie.close();
