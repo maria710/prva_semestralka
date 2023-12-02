@@ -16,17 +16,24 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private final int blokovaciFaktor; // velkost bloku
 	private Blok<T> prvyVolnyBlok;
 	private int pocetBlokov;
-	private final Class<T> classType;
 	private final FileManazer fileManazer;
 	private int currentBitIndex = -1;
+	private final Class<T> classType;
 
-	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path) throws FileNotFoundException {
+	private final int blokovaciFaktorPreplnovaci; // velkost bloku pre preplnovaci subor
+	private int prvyVolnyBlokPreplnovaci;
+	private int pocetBlokovPreplnovaci;
+	private final FileManazer fileManazerPreplnovaci;
+
+	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path, String pathPreplnovaci, int blokovaciFaktorPreplnovaci) throws FileNotFoundException {
 		root = new TrieNodeExterny<>(null, 0);
 		prvyVolnyBlok = null;
 		this.classType = classType;
 		this.blokovaciFaktor = blokovaciFaktor;
 		pocetBlokov = 0;
 		this.fileManazer = new FileManazer(path);
+		this.fileManazerPreplnovaci = new FileManazer(pathPreplnovaci);
+		this.blokovaciFaktorPreplnovaci = blokovaciFaktorPreplnovaci;
 	}
 
 	public IRecord najdiZaznam(IRecord record) {
@@ -34,12 +41,17 @@ public class DynamickeHashovanie<T extends IRecord> {
 		TrieNodeExterny<T> externalNode = najdiExternyNode(bitSet);
 
 		int indexBlokuNode = externalNode.getIndexBloku();
-		Blok<T> blok = citajBlokZoSuboru(indexBlokuNode);
+		Blok<T> blok = citajBlokZoSuboru(fileManazer, indexBlokuNode, blokovaciFaktor);
 
 		return blok == null ? null : blok.najdiZaznam(record, Integer.SIZE);
 	}
 
 	public boolean insert(T record) {
+
+		if (najdiZaznam(record) != null) { // zaznamy v strome musia byt unikatne
+			return false;
+		}
+
 		// aplikujem hashovaciu funkciu
 		BitSet bitSet = getHash(record);
 
@@ -53,10 +65,10 @@ public class DynamickeHashovanie<T extends IRecord> {
 		}
 
 		// ak uz je vytvoreny blok, moze byt plny alebo nie
-		var blok = citajBlokZoSuboru(indexBlokuNode);
+		var blok = citajBlokZoSuboru(fileManazer, indexBlokuNode, blokovaciFaktor);
 		if (blok.getAktualnyPocetRecordov() != blokovaciFaktor) {
 			blok.pridaj(record);
-			zapisBlokDoSubor(blok, indexBlokuNode);
+			zapisBlokDoSubor(fileManazer, blok, indexBlokuNode, blokovaciFaktor);
 			return true;
 		}
 
@@ -72,14 +84,14 @@ public class DynamickeHashovanie<T extends IRecord> {
 		return false;
 	}
 
-	private void zapisBlokDoSubor(Blok<T> blok, int indexBloku) {
+	private void zapisBlokDoSubor(FileManazer fileManazer, Blok<T> blok, int indexBloku, int blokovaciFaktor) {
 		byte[] data = blok.toByteArray(blokovaciFaktor);
-		this.fileManazer.write(data, indexBloku * blok.getSize(blokovaciFaktor));
+		fileManazer.write(data, indexBloku * blok.getSize(blokovaciFaktor));
 	}
 
-	private Blok<T> citajBlokZoSuboru(int indexBloku) {
+	private Blok<T> citajBlokZoSuboru(FileManazer fileManazer, int indexBloku, int blokovaciFaktor) {
 		Blok<T> blok = new Blok<>(classType);
-		byte[] data = this.fileManazer.read(blok.getSize(blokovaciFaktor), indexBloku * blok.getSize(blokovaciFaktor));
+		byte[] data = fileManazer.read(blok.getSize(blokovaciFaktor), indexBloku * blok.getSize(blokovaciFaktor));
 		return blok.fromByteArray(data);
 	}
 
@@ -104,7 +116,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 			// mame externy vrchol
 			if (current instanceof TrieNodeExterny<T> externy) {
-				citajBlokZoSuboru(externy.getIndexBloku()).print(externy.getIndexBloku());
+				citajBlokZoSuboru(fileManazer, externy.getIndexBloku(), blokovaciFaktor).print(externy.getIndexBloku());
 			}
 
 			if (stack.isEmpty()) {
@@ -130,11 +142,16 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 	private boolean rozdelNodeAZapis(T record, TrieNodeExterny<T> currentNodeExterny, Blok<T> blok, int indexBlokuNode, BitSet bitSet) {
 		while (true) {
+
+			if (currentBitIndex >= bitSet.length()) { // skontrolujeme ci sme nepresiahli pocet bitov
+				return ulozDoPreplnovaciehoSuboru(record);
+			}
+
 			TrieNodeInterny<T> newTrieNodeInterny = vytvorNovyInternyNode(currentNodeExterny); // z externeho sa stal interny lebo sa rozdeli
 			List<T> records = new ArrayList<>(blok.getRecords());
 
 			int indexBlokuPravy = alokujBlok();
-			Blok<T> blokPravy = citajBlokZoSuboru(indexBlokuPravy);
+			Blok<T> blokPravy = citajBlokZoSuboru(fileManazer, indexBlokuPravy, blokovaciFaktor);
 			blok.clear();
 
 			((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).setIndexBloku(indexBlokuNode);
@@ -166,8 +183,8 @@ public class DynamickeHashovanie<T extends IRecord> {
 					blok.pridaj(record);
 					((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
 				}
-				zapisBlokDoSubor(blok, indexBlokuNode);
-				zapisBlokDoSubor(blokPravy, indexBlokuPravy);
+				zapisBlokDoSubor(fileManazer, blok, indexBlokuNode, blokovaciFaktor);
+				zapisBlokDoSubor(fileManazer, blokPravy, indexBlokuPravy, blokovaciFaktor);
 				return true;
 			}
 
@@ -188,12 +205,49 @@ public class DynamickeHashovanie<T extends IRecord> {
 		}
 	}
 
+	private boolean ulozDoPreplnovaciehoSuboru(T record) {
+		int index = alokujIndexVPreplnujucomSubore();
+		Blok<T> blok = citajBlokZoSuboru(fileManazerPreplnovaci, index, blokovaciFaktorPreplnovaci);
+		blok.pridaj(record);
+		fileManazerPreplnovaci.write(blok.toByteArray(blokovaciFaktorPreplnovaci), index * blok.getSize(blokovaciFaktorPreplnovaci));
+		return true;
+	}
+
+	private int alokujIndexVPreplnujucomSubore() {
+		int index;
+		if (prvyVolnyBlokPreplnovaci == -1) { // ak nemam ziadny volny blok alokujem na konci
+			Blok<T> blok = new Blok<>(classType);
+			index = pocetBlokovPreplnovaci;
+			blok.setNasledovnik(-1);
+			blok.setPredchodca(-1);
+			zapisBlokDoSubor(fileManazerPreplnovaci, blok, index, blokovaciFaktorPreplnovaci); // musime zapisay
+			pocetBlokovPreplnovaci++;
+			return pocetBlokovPreplnovaci - 1;
+		}
+
+		var prvyVolnyBlok = citajBlokZoSuboru(fileManazerPreplnovaci, prvyVolnyBlokPreplnovaci, blokovaciFaktorPreplnovaci);
+		int indexNasledovnika = prvyVolnyBlok.getNasledovnik();
+		var nasledovnik = citajBlokZoSuboru(fileManazerPreplnovaci, indexNasledovnika, blokovaciFaktorPreplnovaci);
+
+		nasledovnik.setPredchodca(-1);
+		prvyVolnyBlok.setNasledovnik(-1);
+		prvyVolnyBlok.setPredchodca(-1);
+
+		zapisBlokDoSubor(fileManazerPreplnovaci, prvyVolnyBlok, prvyVolnyBlokPreplnovaci, blokovaciFaktorPreplnovaci);
+		zapisBlokDoSubor(fileManazerPreplnovaci, nasledovnik, indexNasledovnika, blokovaciFaktorPreplnovaci);
+
+		index = prvyVolnyBlokPreplnovaci;
+		prvyVolnyBlokPreplnovaci = indexNasledovnika;
+
+		return index;
+	}
+
 	private void zapisDoNovehoBloku(T record, TrieNodeExterny<T> currentNodeExterny) {
 		int indexBloku = alokujBlok();
-		var blok = citajBlokZoSuboru(indexBloku);
+		var blok = citajBlokZoSuboru(fileManazer, indexBloku, blokovaciFaktor);
 		blok.pridaj(record);
 		currentNodeExterny.setIndexBloku(indexBloku);
-		zapisBlokDoSubor(blok, indexBloku);
+		zapisBlokDoSubor(fileManazer, blok, indexBloku, blokovaciFaktor);
 	}
 
 	private TrieNodeInterny<T> vytvorNovyInternyNode(TrieNodeExterny<T> currentNodeExterny) {
@@ -218,22 +272,22 @@ public class DynamickeHashovanie<T extends IRecord> {
 			index = pocetBlokov; // mam 5 blokov od 0..4, ziadny volny tak priradim index 5 novemu bloku
 			blok.setNasledovnik(-1);
 			blok.setPredchodca(-1);
-			zapisBlokDoSubor(blok, index);
+			zapisBlokDoSubor(fileManazer, blok, index, blokovaciFaktor);
 			pocetBlokov++;
 			return pocetBlokov - 1;
 		}
 
 		// najdem index prveho volneho bloku a vratim ho, do neho zapiseme "novy" blok
-		var currentBlok = citajBlokZoSuboru(index); // zaciname citat od prveho bloku
+		var currentBlok = citajBlokZoSuboru(fileManazer, index, blokovaciFaktor); // zaciname citat od prveho bloku
 		while (currentBlok != null && currentBlok != prvyVolnyBlok) {
 			index++;
-			currentBlok = citajBlokZoSuboru(index);
+			currentBlok = citajBlokZoSuboru(fileManazer, index, blokovaciFaktor);
 		}
 		return index;
 	}
 
 	private void dealokujBlok(int indexBloku) {
-		Blok<T> blok = citajBlokZoSuboru(indexBloku);
+		Blok<T> blok = citajBlokZoSuboru(fileManazer, indexBloku, blokovaciFaktor);
 		prvyVolnyBlok.setPredchodca(indexBloku);
 		//blok.setNasledovnik(dajIndexBloku(prvyVolnyBlok));
 		blok.setPredchodca(-1);

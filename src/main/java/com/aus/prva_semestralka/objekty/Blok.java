@@ -16,6 +16,7 @@ public class Blok<T extends IRecord> {
 	private int nasledovnik;
 	private int aktualnyPocetRecordov;
 	private Class<T> classType;
+	private int indexPreplnujucehoBloku;
 
 	public Blok() {
 		records = new ArrayList<>();
