@@ -4,6 +4,7 @@ public class TrieNodeExterny<T> extends TrieNode<T> {
 
 	private int indexBloku;
 	private int pocetRecordov; // kolko zaznamov je na adrese (v bloku)
+	private int pocetBlokovVZretazeni = 0;
 
 	public TrieNodeExterny(TrieNode<T> parent, int pocetRecordov) {
 		super(parent);
@@ -23,11 +24,23 @@ public class TrieNodeExterny<T> extends TrieNode<T> {
 		return pocetRecordov;
 	}
 
-	public void setPocetRecordov(int pocetRecordov) {
-		this.pocetRecordov = pocetRecordov;
-	}
-
 	public void zvysPocetRecordov() {
 		this.pocetRecordov++;
+	}
+
+	public void znizPocetRecordov() {
+		this.pocetRecordov--;
+	}
+
+	public int getPocetBlokovVZretazeni() {
+		return pocetBlokovVZretazeni;
+	}
+
+	public void zvysPocetBlokovVZretazeni() {
+		this.pocetBlokovVZretazeni++;
+	}
+
+	public void znizPocetBlokovVZretazeni() {
+		this.pocetBlokovVZretazeni--;
 	}
 }
