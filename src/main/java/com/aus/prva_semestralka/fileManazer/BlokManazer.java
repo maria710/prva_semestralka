@@ -65,4 +65,51 @@ public class BlokManazer<T extends IRecord> {
 
 		return index;
 	}
+
+	public void dealokujBlok(int indexBloku) {
+		Blok<T> blok = citajBlokZoSuboru(indexBloku);
+		blok.clear();
+		blok.setNasledovnik(prvyVolnyBlokIndex);
+
+		if (prvyVolnyBlokIndex != -1) {
+			Blok<T> prvyVolnyBlok = citajBlokZoSuboru(prvyVolnyBlokIndex);
+			prvyVolnyBlok.setPredchodca(indexBloku);
+			zapisBlokDoSubor(prvyVolnyBlok, prvyVolnyBlokIndex);
+		} else {
+			prvyVolnyBlokIndex = indexBloku;
+		}
+
+		zapisBlokDoSubor(blok, indexBloku);
+
+		int pocetBlokovNaOdstranenie = 0;
+		var pocetBlokovVSubore = (int) fileManazer.getFileSize()/blok.getSize(blokovaciFaktor);
+		if (indexBloku == pocetBlokovVSubore) {
+			for (int i = pocetBlokovVSubore - 1; i >= 0; i--) {
+				Blok<T> blokNaOdstranenie = citajBlokZoSuboru(i);
+				if (blokNaOdstranenie.getNasledovnik() != -1) {
+					// nastav nasledovnika predchodcovi
+					Blok<T> nasledovnik = citajBlokZoSuboru(blokNaOdstranenie.getNasledovnik());
+					nasledovnik.setPredchodca(blokNaOdstranenie.getPredchodca());
+					zapisBlokDoSubor(nasledovnik, blokNaOdstranenie.getNasledovnik());
+				}
+				if (blokNaOdstranenie.getPredchodca() != -1) {
+					Blok<T> predchodca = citajBlokZoSuboru(blokNaOdstranenie.getPredchodca());
+					predchodca.setNasledovnik(blokNaOdstranenie.getNasledovnik());
+					zapisBlokDoSubor(predchodca, blokNaOdstranenie.getPredchodca());
+				}
+
+				if (blokNaOdstranenie.getIndex() == prvyVolnyBlokIndex) {
+					prvyVolnyBlokIndex = blokNaOdstranenie.getNasledovnik();
+				}
+
+				if (blokNaOdstranenie.getAktualnyPocetRecordov() == 0) {
+					pocetBlokovNaOdstranenie++;
+				} else {
+					break;
+				}
+			}
+			this.fileManazer.skratSubor((pocetBlokovVSubore + 1 - pocetBlokovNaOdstranenie) * blok.getSize(blokovaciFaktor));
+		}
+	}
+
 }
