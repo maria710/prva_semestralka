@@ -174,6 +174,11 @@ public class Blok<T extends IRecord> {
 		index = -1;
 	}
 
+	public void clearRecords() {
+		records.clear();
+		aktualnyPocetRecordov = 0;
+	}
+
 	public void setIndex(int index) {
 		this.index = index;
 	}

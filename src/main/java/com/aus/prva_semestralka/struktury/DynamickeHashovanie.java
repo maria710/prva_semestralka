@@ -114,7 +114,8 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 		FileManazer fileManazer = this.fileManazer;
 		int blokovaciFaktor = this.blokovaciFaktor;
-		Blok<T> blok = citajBlokZoSuboru(fileManazer, indexBlokuNode, blokovaciFaktor);
+		Blok<T> blokHlavny = citajBlokZoSuboru(fileManazer, indexBlokuNode, blokovaciFaktor);
+		Blok<T> blok = blokHlavny;
 
 		while (true) {
 			var vyzalSa = blok.vymazRecord(record);
@@ -164,6 +165,21 @@ public class DynamickeHashovanie<T extends IRecord> {
 		if (index == pocetBlokovVSubore - 1) {
 			for (int i = pocetBlokovVSubore - 1; i >= 0; i--) {
 				Blok<T> blokNaOdstranenie = citajBlokZoSuboru(fileManazerPreplnovaci, i, blokovaciFaktorPreplnovaci);
+				if (blokNaOdstranenie.getNasledovnik() != -1) {
+					// nastav nasledovnika predchodcovi
+					Blok<T> nasledovnik = citajBlokZoSuboru(fileManazerPreplnovaci, blokNaOdstranenie.getNasledovnik(), blokovaciFaktorPreplnovaci);
+					nasledovnik.setPredchodca(blokNaOdstranenie.getPredchodca());
+					zapisBlokDoSubor(fileManazerPreplnovaci, nasledovnik, blokNaOdstranenie.getNasledovnik(), blokovaciFaktorPreplnovaci);
+				}
+				if (blokNaOdstranenie.getPredchodca() != -1) {
+					Blok<T> predchodca = citajBlokZoSuboru(fileManazerPreplnovaci, blokNaOdstranenie.getPredchodca(), blokovaciFaktorPreplnovaci);
+					predchodca.setNasledovnik(blokNaOdstranenie.getNasledovnik());
+					zapisBlokDoSubor(fileManazerPreplnovaci, predchodca, blokNaOdstranenie.getPredchodca(), blokovaciFaktorPreplnovaci);
+				}
+
+				if (blokNaOdstranenie.getIndex() == prvyVolnyBlokIndex) {
+					prvyVolnyBlokIndex = blokNaOdstranenie.getNasledovnik();
+				}
 				if (blokNaOdstranenie.getAktualnyPocetRecordov() == 0) {
 					if (i == prvyVolnyBlokPreplnovaciIndex) {
 						prvyVolnyBlokPreplnovaciIndex = - 1;
@@ -198,6 +214,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 				dalsiBlok.setIndex(dalsi);
 				blokyVZretazeni.add(dalsiBlok);
 				zaznamy.addAll(dalsiBlok.getRecords());
+				dalsiBlok.clearRecords();
 				dalsi = dalsiBlok.getNasledovnik();
 			}
 			int pocetDoHlavneho = blokovaciFaktor - hlavnyBlok.getAktualnyPocetRecordov();
@@ -210,13 +227,20 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 			while (!zaznamy.isEmpty()) { // naplnime bloky v zretazeni, jeden musi ostat prazdny
 				for (int i = 0; i < blokyVZretazeni.size() - 1; i++) {
-					for (int j = 0; j < blokovaciFaktor; j++) {
+					for (int j = 0; j < blokovaciFaktorPreplnovaci; j++) {
 						if (!zaznamy.isEmpty()) {
 							blokyVZretazeni.get(i).pridaj(zaznamy.remove(0));
 						}
 					}
 					zapisBlokDoSubor(fileManazerPreplnovaci, blokyVZretazeni.get(i), blokyVZretazeni.get(i).getIndex(), blokovaciFaktorPreplnovaci);
 				}
+			}
+			if (blokyVZretazeni.size() > 1) {
+				blokyVZretazeni.get(blokyVZretazeni.size() - 2).setNasledovnik(-1);
+				zapisBlokDoSubor(fileManazerPreplnovaci, blokyVZretazeni.get(blokyVZretazeni.size() - 2), blokyVZretazeni.get(blokyVZretazeni.size() - 2).getIndex(), blokovaciFaktorPreplnovaci);
+			} else {
+				hlavnyBlok.setNasledovnik(-1);
+				zapisBlokDoSubor(fileManazer, hlavnyBlok, indexBloku, blokovaciFaktor);
 			}
 		    return blokyVZretazeni.get(blokyVZretazeni.size() - 1); // vratime posledny blok v zretazeni
 		} else {
@@ -244,7 +268,9 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private Blok<T> citajBlokZoSuboru(FileManazer fileManazer, int indexBloku, int blokovaciFaktor) {
 		Blok<T> blok = new Blok<>(classType);
 		byte[] data = fileManazer.read(blok.getSize(blokovaciFaktor), indexBloku * blok.getSize(blokovaciFaktor));
-		return blok.fromByteArray(data);
+		var blokReturn = blok.fromByteArray(data);
+		blokReturn.setIndex(indexBloku);
+		return blokReturn;
 	}
 
 	private BitSet getHash(IRecord record) {
@@ -477,16 +503,33 @@ public class DynamickeHashovanie<T extends IRecord> {
 		zapisBlokDoSubor(fileManazer, blok, indexBloku, blokovaciFaktor);
 
 		int pocetBlokovNaOdstranenie = 0;
-		if (indexBloku == pocetBlokov) {
-			for (int i = pocetBlokov - 1; i >= 0; i--) {
+		var pocetBlokovVSubore = (int) fileManazer.getFileSize()/blok.getSize(blokovaciFaktor);
+		if (indexBloku == pocetBlokovVSubore) {
+			for (int i = pocetBlokovVSubore - 1; i >= 0; i--) {
 				Blok<T> blokNaOdstranenie = citajBlokZoSuboru(fileManazer, i, blokovaciFaktor);
+				if (blokNaOdstranenie.getNasledovnik() != -1) {
+					// nastav nasledovnika predchodcovi
+					Blok<T> nasledovnik = citajBlokZoSuboru(fileManazer, blokNaOdstranenie.getNasledovnik(), blokovaciFaktor);
+					nasledovnik.setPredchodca(blokNaOdstranenie.getPredchodca());
+					zapisBlokDoSubor(fileManazer, nasledovnik, blokNaOdstranenie.getNasledovnik(), blokovaciFaktor);
+				}
+				if (blokNaOdstranenie.getPredchodca() != -1) {
+					Blok<T> predchodca = citajBlokZoSuboru(fileManazer, blokNaOdstranenie.getPredchodca(), blokovaciFaktor);
+					predchodca.setNasledovnik(blokNaOdstranenie.getNasledovnik());
+					zapisBlokDoSubor(fileManazer, predchodca, blokNaOdstranenie.getPredchodca(), blokovaciFaktor);
+				}
+
+				if (blokNaOdstranenie.getIndex() == prvyVolnyBlokIndex) {
+					prvyVolnyBlokIndex = blokNaOdstranenie.getNasledovnik();
+				}
+
 				if (blokNaOdstranenie.getAktualnyPocetRecordov() == 0) {
 					pocetBlokovNaOdstranenie++;
 				} else {
 					break;
 				}
 			}
-			this.fileManazer.skratSubor((pocetBlokov - pocetBlokovNaOdstranenie) * blok.getSize(blokovaciFaktor));
+			this.fileManazer.skratSubor((pocetBlokovVSubore + 1 - pocetBlokovNaOdstranenie) * blok.getSize(blokovaciFaktor));
 		}
 	}
 
