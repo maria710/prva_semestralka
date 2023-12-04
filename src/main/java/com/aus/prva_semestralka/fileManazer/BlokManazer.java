@@ -11,11 +11,11 @@ public class BlokManazer<T extends IRecord> {
 	private int prvyVolnyBlokIndex;
 	private int pocetBlokov = 0;
 
-	public BlokManazer(Class<T> classType, FileManazer fileManazer, int blokovaciFaktor, int prvyVolnyBlokIndex) {
+	public BlokManazer(Class<T> classType, FileManazer fileManazer, int blokovaciFaktor) {
 		this.classType = classType;
 		this.fileManazer = fileManazer;
 		this.blokovaciFaktor = blokovaciFaktor;
-		this.prvyVolnyBlokIndex = prvyVolnyBlokIndex;
+		this.prvyVolnyBlokIndex = - 1;
 	}
 
 	public Blok<T> citajBlokZoSuboru(int indexBloku) {

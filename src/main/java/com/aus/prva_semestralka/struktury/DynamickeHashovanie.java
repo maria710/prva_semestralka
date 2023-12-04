@@ -14,18 +14,13 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 	TrieNode<T> root;
 	private final int blokovaciFaktor; // velkost bloku
-	private int prvyVolnyBlokIndex;
+	private final int blokovaciFaktorPreplnovaci; // velkost bloku pre preplnovaci subor
 	private final FileManazer fileManazer;
+	private final FileManazer fileManazerPreplnovaci;
 	private int currentBitIndex = -1;
 	private final Class<T> classType;
 
-	private final int blokovaciFaktorPreplnovaci; // velkost bloku pre preplnovaci subor
-	private int prvyVolnyBlokPreplnovaciIndex;
-	private int pocetBlokovPreplnovaci;
-	private final FileManazer fileManazerPreplnovaci;
-
 	private final int pocetBitovVHash = 2;
-
 
 	private final BlokManazer<T> blokManazer;
 	private final BlokManazer<T> blokManazerPreplnovaci;
@@ -34,16 +29,14 @@ public class DynamickeHashovanie<T extends IRecord> {
 	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path, String pathPreplnovaci, int blokovaciFaktorPreplnovaci)
 			throws FileNotFoundException {
 		root = new TrieNodeExterny<>(null, 0);
-		prvyVolnyBlokIndex = -1;
 		this.classType = classType;
 		this.blokovaciFaktor = blokovaciFaktor;
 		this.fileManazer = new FileManazer(path);
 		this.fileManazerPreplnovaci = new FileManazer(pathPreplnovaci);
 		this.blokovaciFaktorPreplnovaci = blokovaciFaktorPreplnovaci;
-		this.prvyVolnyBlokPreplnovaciIndex = -1;
 
-		this.blokManazer = new BlokManazer<>(classType, fileManazer, blokovaciFaktor, prvyVolnyBlokIndex);
-		this.blokManazerPreplnovaci = new BlokManazer<>(classType, fileManazerPreplnovaci, blokovaciFaktorPreplnovaci, prvyVolnyBlokPreplnovaciIndex);
+		this.blokManazer = new BlokManazer<>(classType, fileManazer, blokovaciFaktor);
+		this.blokManazerPreplnovaci = new BlokManazer<>(classType, fileManazerPreplnovaci, blokovaciFaktorPreplnovaci);
 	}
 
 	public IRecord najdiZaznam(T record) {
