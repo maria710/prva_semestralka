@@ -16,4 +16,5 @@ module com.aus.prva_semestralka {
     exports com.aus.prva_semestralka.objekty;
 	exports com.aus.prva_semestralka.struktury;
 	exports com.aus.prva_semestralka.generatory;
+	exports com.aus.prva_semestralka.fileManazer;
 }

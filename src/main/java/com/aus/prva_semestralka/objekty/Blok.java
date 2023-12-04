@@ -186,12 +186,4 @@ public class Blok<T extends IRecord> {
 	public int getIndex() {
 		return index;
 	}
-
-	public String printPreplnovaci(int indexPreplnovaciehoBloku) {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("PREPLNUJUCI BLOK").append("\n");
-		stringBuilder.append(print(indexPreplnovaciehoBloku));
-
-		return stringBuilder.toString();
-	}
 }

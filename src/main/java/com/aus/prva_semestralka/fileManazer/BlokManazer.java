@@ -2,6 +2,7 @@ package com.aus.prva_semestralka.fileManazer;
 
 import com.aus.prva_semestralka.objekty.Blok;
 import com.aus.prva_semestralka.objekty.IRecord;
+import com.aus.prva_semestralka.struktury.TrieNodeExterny;
 
 public class BlokManazer<T extends IRecord> {
 
@@ -110,6 +111,20 @@ public class BlokManazer<T extends IRecord> {
 			}
 			this.fileManazer.skratSubor((pocetBlokovVSubore + 1 - pocetBlokovNaOdstranenie) * blok.getSize(blokovaciFaktor));
 		}
+	}
+
+	public void zapisDoNovehoBloku(T record, TrieNodeExterny<T> currentNodeExterny) {
+		int indexBloku = alokujBlok();
+		var blok = citajBlokZoSuboru(indexBloku);
+		blok.pridaj(record);
+		currentNodeExterny.setIndexBloku(indexBloku);
+		currentNodeExterny.zvysPocetRecordov();
+		zapisBlokDoSubor(blok, indexBloku);
+	}
+
+	public int getVelkostSuboru() {
+		Blok<T> blok = new Blok<>(classType);
+		return (int) (this.fileManazer.getFileSize() / blok.getSize(blokovaciFaktor));
 	}
 
 }

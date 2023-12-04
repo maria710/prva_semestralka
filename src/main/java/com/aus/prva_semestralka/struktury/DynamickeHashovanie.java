@@ -18,8 +18,6 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private final FileManazer fileManazer;
 	private final FileManazer fileManazerPreplnovaci;
 	private int currentBitIndex = -1;
-	private final Class<T> classType;
-
 	private final int pocetBitovVHash = 2;
 
 	private final BlokManazer<T> blokManazer;
@@ -29,7 +27,6 @@ public class DynamickeHashovanie<T extends IRecord> {
 	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path, String pathPreplnovaci, int blokovaciFaktorPreplnovaci)
 			throws FileNotFoundException {
 		root = new TrieNodeExterny<>(null, 0);
-		this.classType = classType;
 		this.blokovaciFaktor = blokovaciFaktor;
 		this.fileManazer = new FileManazer(path);
 		this.fileManazerPreplnovaci = new FileManazer(pathPreplnovaci);
@@ -75,7 +72,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 		// mam externy vrchol
 		if (indexBlokuNode == -1) { // ak este nemame blok
-			zapisDoNovehoBloku(record, currentNodeExterny);
+			blokManazer.zapisDoNovehoBloku(record, currentNodeExterny);
 			return true;
 		}
 
@@ -140,6 +137,11 @@ public class DynamickeHashovanie<T extends IRecord> {
 		}
 	}
 
+	public boolean edit(T record) {
+		return false;
+	}
+
+
 	private Blok<T> dajBlokNaStriasanie(TrieNodeExterny<T> nodeExterny) {
 		if (nodeExterny.getPocetRecordov() == 0 || nodeExterny.getPocetBlokovVZretazeni() == 0) {
 			return null;
@@ -199,30 +201,6 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 		// ak je celkovy pocet recordov mensi ako celkova kapacita minus velkost bloku pre preplnovaci subor, mozeme ziskat volny blok
 		return pocetRecordov <= celkovaKapacita - blokovaciFaktorPreplnovaci;
-	}
-
-	public boolean edit() {
-		return false;
-	}
-
-	private BitSet getHash(IRecord record) {
-		return record.getHash(pocetBitovVHash); // tu budem prenastavovat pocet bitov
-	}
-
-	public void close() throws Exception {
-		this.fileManazer.close();
-	}
-
-	private TrieNodeExterny<T> najdiExternyNode(BitSet bitSet) {
-		currentBitIndex = 0;
-
-		TrieNode<T> currentNode = root;
-		while (currentNode instanceof TrieNodeInterny) {
-			currentNode = bitSet.get(currentBitIndex) ? ((TrieNodeInterny<T>) currentNode).getPravySyn() : ((TrieNodeInterny<T>) currentNode).getLavySyn();
-			currentBitIndex++;
-		}
-
-		return (TrieNodeExterny<T>) currentNode;
 	}
 
 	private boolean rozdelNodeAZapis(T record, TrieNodeExterny<T> currentNodeExterny, Blok<T> blok, int indexBlokuNode) {
@@ -307,7 +285,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 		while (true) {
 			var blok = blokManazerPreplnovaci.citajBlokZoSuboru(index);
-			if (blok.getAktualnyPocetRecordov() != blokovaciFaktorPreplnovaci) {
+			if (blok.getAktualnyPocetRecordov() != blokovaciFaktorPreplnovaci) { // ak sa zmesti do nasledovnika
 				blok.pridaj(record);
 				blokManazerPreplnovaci.zapisBlokDoSubor(blok, index);
 				return true;
@@ -322,13 +300,16 @@ public class DynamickeHashovanie<T extends IRecord> {
 		}
 	}
 
-	private void zapisDoNovehoBloku(T record, TrieNodeExterny<T> currentNodeExterny) {
-		int indexBloku = blokManazer.alokujBlok();
-		var blok = blokManazer.citajBlokZoSuboru(indexBloku);
-		blok.pridaj(record);
-		currentNodeExterny.setIndexBloku(indexBloku);
-		currentNodeExterny.zvysPocetRecordov();
-		blokManazer.zapisBlokDoSubor(blok, indexBloku);
+	private TrieNodeExterny<T> najdiExternyNode(BitSet bitSet) {
+		currentBitIndex = 0;
+
+		TrieNode<T> currentNode = root;
+		while (currentNode instanceof TrieNodeInterny) {
+			currentNode = bitSet.get(currentBitIndex) ? ((TrieNodeInterny<T>) currentNode).getPravySyn() : ((TrieNodeInterny<T>) currentNode).getLavySyn();
+			currentBitIndex++;
+		}
+
+		return (TrieNodeExterny<T>) currentNode;
 	}
 
 	private TrieNodeInterny<T> vytvorNovyInternyNode(TrieNodeExterny<T> currentNodeExterny) {
@@ -347,25 +328,18 @@ public class DynamickeHashovanie<T extends IRecord> {
 	}
 
 	public String toStringPreplnovaci() {
-
-		StringBuilder stringBuilder = new StringBuilder();
-		Blok<T> blok = new Blok<>(classType);
-		for (int i = 0; i < this.fileManazerPreplnovaci.getFileSize() / blok.getSize(blokovaciFaktorPreplnovaci); i++) {
-
-			Blok<T> blok2 = blokManazerPreplnovaci.citajBlokZoSuboru(i);
-			stringBuilder.append(blok2.printPreplnovaci(i));
-		}
-		return stringBuilder.toString();
+		return toStringSubor(blokManazerPreplnovaci);
 	}
 
 	public String toStringHlavny() {
+		return toStringSubor(blokManazer);
+	}
 
+	public String toStringSubor(BlokManazer<T> blokManazer) {
 		StringBuilder stringBuilder = new StringBuilder();
-		Blok<T> blok = new Blok<>(classType);
-		for (int i = 0; i < this.fileManazer.getFileSize() / blok.getSize(blokovaciFaktor); i++) {
-
-			Blok<T> blok2 = blokManazer.citajBlokZoSuboru(i);
-			stringBuilder.append(blok2.print(i));
+		for (int i = 0; i < blokManazer.getVelkostSuboru(); i++) {
+			Blok<T> blok = blokManazer.citajBlokZoSuboru(i);
+			stringBuilder.append(blok.print(i));
 		}
 		return stringBuilder.toString();
 	}
@@ -374,4 +348,11 @@ public class DynamickeHashovanie<T extends IRecord> {
 		fileManazer.clear();
 		fileManazerPreplnovaci.clear();
 	}
-}
+
+	private BitSet getHash(IRecord record) {
+		return record.getHash(pocetBitovVHash); // tu budem prenastavovat pocet bitov
+	}
+
+	public void close() throws Exception {
+		this.fileManazer.close();
+	}}
