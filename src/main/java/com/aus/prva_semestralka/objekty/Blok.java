@@ -171,7 +171,6 @@ public class Blok<T extends IRecord> {
 		aktualnyPocetRecordov = 0;
 		predchodca = -1;
 		nasledovnik = -1;
-		index = -1;
 	}
 
 	public void clearRecords() {

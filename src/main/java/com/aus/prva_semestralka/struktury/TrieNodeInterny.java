@@ -21,6 +21,10 @@ public class TrieNodeInterny<T> extends TrieNode<T> {
 
 	public void setLavySyn(TrieNode<T> lavySyn) {
 		this.lavySyn = lavySyn;
+		// If the new node is not an external node, update its parent to this node
+		if (!(lavySyn instanceof TrieNodeExterny)) {
+			lavySyn.setParent(this);
+		}
 	}
 
 	public TrieNode<T> getPravySyn() {
@@ -29,6 +33,10 @@ public class TrieNodeInterny<T> extends TrieNode<T> {
 
 	public void setPravySyn(TrieNode<T> pravySyn) {
 		this.pravySyn = pravySyn;
+		// Similar update for the right child
+		if (!(pravySyn instanceof TrieNodeExterny)) {
+			pravySyn.setParent(this);
+		}
 	}
 
 }

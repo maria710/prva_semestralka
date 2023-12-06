@@ -112,8 +112,8 @@ public class DynamickeHashovanie<T extends IRecord> {
 		Blok<T> blok = blokManazer.citajBlokZoSuboru(indexBlokuNode);
 
 		while (true) {
-			var vyzalSa = blok.vymazRecord(record);
-			if (vyzalSa) {
+			var vymazalSa = blok.vymazRecord(record);
+			if (vymazalSa) {
 				externalNode.znizPocetRecordov();
 				blokManazerCurrent.zapisBlokDoSubor(blok, indexBlokuNode);
 				Blok<T> blokNaStrasenie = dajBlokNaStriasanie(externalNode);
@@ -121,11 +121,18 @@ public class DynamickeHashovanie<T extends IRecord> {
 					blokManazerPreplnovaci.dealokujBlok(blokNaStrasenie.getIndex());
 					externalNode.znizPocetBlokovVZretazeni();
 				}
-				// dealokujeme blok ak je prazdny a nema nasledovnika
-				if (blok.getAktualnyPocetRecordov() == 0 && blok.getNasledovnik() == - 1) {
-					externalNode.setIndexBloku(-1);
-					blokManazer.dealokujBlok(indexBlokuNode);
+//				// dealokujeme blok ak je prazdny a nema nasledovnika
+//				if (blok.getAktualnyPocetRecordov() == 0 && blok.getNasledovnik() == - 1) {
+//					externalNode.setIndexBloku(-1);
+//					blokManazer.dealokujBlok(indexBlokuNode);
+//				}
+
+				var zruseny = zrusInternyNodeAkSaDa((TrieNodeInterny<T>) externalNode.getParent());
+
+				while(zruseny != null) {
+					zruseny = zrusInternyNodeAkSaDa((TrieNodeInterny<T>) zruseny.getParent());
 				}
+
 				return true;
 			}
 			if (blok.getNasledovnik() == -1) {
@@ -237,15 +244,8 @@ public class DynamickeHashovanie<T extends IRecord> {
 				}
 			}
 
-			if (padloDoLava && padloDoPrava) { // ak sa roztriedili do oboch tak mozeme pridat vkladany zaznam -> vytvorili sme miesto
-				BitSet bitset = getHash(record);
-				if (bitset.get(currentBitIndex)) {
-					blokPravy.pridaj(record);
-					((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
-				} else {
-					blok.pridaj(record);
-					((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).zvysPocetRecordov();
-				}
+			// ak sa roztriedili do oboch tak mozeme pridat vkladany zaznam -> vytvorili sme miesto
+			if (skusVlozitZaznam(record, blok, blokPravy, newTrieNodeInterny)) {
 				blokManazer.zapisBlokDoSubor(blok, indexBlokuNode);
 				blokManazer.zapisBlokDoSubor(blokPravy, indexBlokuPravy);
 				return true;
@@ -274,13 +274,34 @@ public class DynamickeHashovanie<T extends IRecord> {
 		}
 	}
 
+	private boolean skusVlozitZaznam(T record, Blok<T> blok, Blok<T> blokPravy, TrieNodeInterny<T> newTrieNodeInterny) {
+		BitSet bitset = getHash(record);
+		if (bitset.get(currentBitIndex)) {
+			if (blokPravy.getAktualnyPocetRecordov() != blokovaciFaktor) {
+				blokPravy.pridaj(record);
+				((TrieNodeExterny<T>) newTrieNodeInterny.getPravySyn()).zvysPocetRecordov();
+				return true;
+			}
+		} else {
+			if (blok.getAktualnyPocetRecordov() != blokovaciFaktor) {
+				blok.pridaj(record);
+				((TrieNodeExterny<T>) newTrieNodeInterny.getLavySyn()).zvysPocetRecordov();
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private boolean ulozDoPreplnovaciehoSuboru(T record, Blok<T> blokVHlavnomSubore, TrieNodeExterny<T> currentNodeExterny) {
 		int index = blokVHlavnomSubore.getNasledovnik();
 		if (index == -1) { // robim len pre hlavny subor
 			index = blokManazerPreplnovaci.alokujBlok();
-			blokVHlavnomSubore.setNasledovnik(index);
+			var blokVPreplnovacomSubore = blokManazerPreplnovaci.citajBlokZoSuboru(index);
+			blokVHlavnomSubore.setNasledovnik(blokVPreplnovacomSubore.getIndex());
+			blokVPreplnovacomSubore.setPredchodca(blokVHlavnomSubore.getIndex());
 			currentNodeExterny.zvysPocetBlokovVZretazeni();
 			blokManazer.zapisBlokDoSubor(blokVHlavnomSubore, blokVHlavnomSubore.getIndex());
+			blokManazerPreplnovaci.zapisBlokDoSubor(blokVPreplnovacomSubore, blokVPreplnovacomSubore.getIndex());
 		}
 
 		while (true) {
@@ -326,6 +347,57 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 		return newTrieNodeInterny;
 	}
+
+	private TrieNodeExterny<T> zrusInternyNodeAkSaDa(TrieNodeInterny<T> trieNodeInterny) {
+		if (trieNodeInterny == null || trieNodeInterny.getLavySyn() instanceof TrieNodeInterny<T> || trieNodeInterny.getPravySyn() instanceof TrieNodeInterny<T>) {
+			return null;
+		}
+
+		TrieNodeInterny<T> parent = (TrieNodeInterny<T>) trieNodeInterny.getParent();
+
+		TrieNodeExterny<T> lavySynInterneho = (TrieNodeExterny<T>) trieNodeInterny.getLavySyn();
+		TrieNodeExterny<T> pravySynInterneho = (TrieNodeExterny<T>) trieNodeInterny.getPravySyn();
+
+		if (lavySynInterneho.getPocetRecordov() + pravySynInterneho.getPocetRecordov() > blokovaciFaktor) { // ak sa nezmesia, koncime
+			return null;
+		}
+
+		TrieNodeExterny<T> nodeNaVymenu = lavySynInterneho.getIndexBloku() != -1 ? lavySynInterneho : pravySynInterneho;
+		TrieNodeExterny<T> nodeNaVyhodenie = lavySynInterneho.getIndexBloku() == -1 ? lavySynInterneho : pravySynInterneho;
+
+		Blok<T> blokNaVymenu = blokManazer.citajBlokZoSuboru(nodeNaVymenu.getIndexBloku());
+		Blok<T> blokNaVyhodenie = nodeNaVyhodenie.getIndexBloku() == -1 ? null : blokManazer.citajBlokZoSuboru(nodeNaVyhodenie.getIndexBloku());
+
+		if (blokNaVymenu.getNasledovnik() != -1 || (blokNaVyhodenie != null && blokNaVyhodenie.getNasledovnik() != -1)) {
+			return null;
+		}
+
+		if (blokNaVyhodenie != null) { // ak v druhom bloku nieco bolo, presunieme
+			for (T zaznam : blokNaVyhodenie.getRecords()) {
+				blokNaVymenu.pridaj(zaznam);
+				nodeNaVymenu.zvysPocetRecordov();
+			}
+			blokManazer.dealokujBlok(blokNaVyhodenie.getIndex());
+		}
+		blokManazer.zapisBlokDoSubor(blokNaVymenu, blokNaVymenu.getIndex());
+
+		if (parent == null) { // ak sme v roote
+			nodeNaVymenu.setParent(null);
+			root = nodeNaVymenu;
+			return nodeNaVymenu;
+		}
+
+		nodeNaVymenu.setParent(parent);
+
+		if (parent.getLavySyn() == trieNodeInterny) {
+			parent.setLavySyn(nodeNaVymenu);
+		} else {
+			parent.setPravySyn(nodeNaVymenu);
+		}
+
+		return nodeNaVymenu;
+	}
+
 
 	public String toStringPreplnovaci() {
 		return toStringSubor(blokManazerPreplnovaci);

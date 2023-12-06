@@ -41,7 +41,7 @@ public class BlokManazer<T extends IRecord> {
 			blok.setNasledovnik(-1);
 			blok.setPredchodca(-1);
 			pocetBlokov++;
-			blok.setIndex(index);
+
 
 			zapisBlokDoSubor(blok, index); // musime zapisat
 			return index;
@@ -84,7 +84,7 @@ public class BlokManazer<T extends IRecord> {
 
 		int pocetBlokovNaOdstranenie = 0;
 		var pocetBlokovVSubore = (int) fileManazer.getFileSize()/blok.getSize(blokovaciFaktor);
-		if (indexBloku == pocetBlokovVSubore) {
+		if (indexBloku == pocetBlokovVSubore - 1) {
 			for (int i = pocetBlokovVSubore - 1; i >= 0; i--) {
 				Blok<T> blokNaOdstranenie = citajBlokZoSuboru(i);
 				if (blokNaOdstranenie.getNasledovnik() != -1) {
@@ -99,18 +99,18 @@ public class BlokManazer<T extends IRecord> {
 					zapisBlokDoSubor(predchodca, blokNaOdstranenie.getPredchodca());
 				}
 
-				if (blokNaOdstranenie.getIndex() == prvyVolnyBlokIndex) {
-					prvyVolnyBlokIndex = blokNaOdstranenie.getNasledovnik();
-				}
-
 				if (blokNaOdstranenie.getAktualnyPocetRecordov() == 0) {
+					if (blokNaOdstranenie.getIndex() == prvyVolnyBlokIndex) {
+						prvyVolnyBlokIndex = blokNaOdstranenie.getNasledovnik();
+					}
 					pocetBlokovNaOdstranenie++;
 				} else {
 					break;
 				}
 			}
-			this.fileManazer.skratSubor((pocetBlokovVSubore + 1 - pocetBlokovNaOdstranenie) * blok.getSize(blokovaciFaktor));
+			this.fileManazer.skratSubor((pocetBlokovVSubore - pocetBlokovNaOdstranenie) * blok.getSize(blokovaciFaktor));
 		}
+		pocetBlokov--;
 	}
 
 	public void zapisDoNovehoBloku(T record, TrieNodeExterny<T> currentNodeExterny) {
