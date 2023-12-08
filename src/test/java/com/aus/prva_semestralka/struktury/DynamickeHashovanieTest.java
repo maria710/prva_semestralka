@@ -131,7 +131,7 @@ class DynamickeHashovanieTest {
 
 			if (pravdepodobnost >= 0.5 && !insertnutePozemky.isEmpty()) {
 				Parcela parcela = (Parcela) insertnutePozemky.get(random.nextInt(insertnutePozemky.size()));
-				if (parcela.getSupisneCislo() == 104) {
+				if (parcela.getSupisneCislo() == 183) {
 					System.out.println("ksajf");
 				}
 				System.out.println("odstranovana parcela: " + parcela.getSupisneCislo());

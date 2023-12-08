@@ -18,7 +18,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private final FileManazer fileManazer;
 	private final FileManazer fileManazerPreplnovaci;
 	private int currentBitIndex = -1;
-	private final int pocetBitovVHash = 2;
+	private final int pocetBitovVHash = 3;
 
 	private final BlokManazer<T> blokManazer;
 	private final BlokManazer<T> blokManazerPreplnovaci;
@@ -70,6 +70,11 @@ public class DynamickeHashovanie<T extends IRecord> {
 		TrieNodeExterny<T> currentNodeExterny = najdiExternyNode(bitSet);
 		int indexBlokuNode = currentNodeExterny.getIndexBloku();
 
+
+		if (currentNodeExterny.getIndexBloku() == 0) {
+			System.out.println("Insertujem do node s blokom 0 ");
+		}
+
 		// mam externy vrchol
 		if (indexBlokuNode == -1) { // ak este nemame blok
 			blokManazer.zapisDoNovehoBloku(record, currentNodeExterny);
@@ -102,6 +107,10 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 		BitSet bitSet = getHash(record);
 		TrieNodeExterny<T> externalNode = najdiExternyNode(bitSet);
+
+		if (externalNode.getIndexBloku() == 0) {
+			System.out.println("Deletujem v node s blokom 0");
+		}
 
 		int indexBlokuNode = externalNode.getIndexBloku();
 		if (indexBlokuNode == -1) {

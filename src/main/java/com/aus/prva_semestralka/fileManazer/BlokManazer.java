@@ -42,7 +42,6 @@ public class BlokManazer<T extends IRecord> {
 			blok.setPredchodca(-1);
 			pocetBlokov++;
 
-
 			zapisBlokDoSubor(blok, index); // musime zapisat
 			return index;
 		}
@@ -70,11 +69,12 @@ public class BlokManazer<T extends IRecord> {
 	public void dealokujBlok(int indexBloku) {
 		Blok<T> blok = citajBlokZoSuboru(indexBloku);
 		blok.clear();
-		blok.setNasledovnik(prvyVolnyBlokIndex);
+		blok.setPredchodca(-1);
 
 		if (prvyVolnyBlokIndex != -1) {
 			Blok<T> prvyVolnyBlok = citajBlokZoSuboru(prvyVolnyBlokIndex);
 			prvyVolnyBlok.setPredchodca(indexBloku);
+			blok.setNasledovnik(prvyVolnyBlokIndex);
 			zapisBlokDoSubor(prvyVolnyBlok, prvyVolnyBlokIndex);
 		} else {
 			prvyVolnyBlokIndex = indexBloku;
