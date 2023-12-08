@@ -14,6 +14,7 @@ import java.util.Objects;
 
 public class Parcela implements IPozemok, Serializable, IRecord {
 
+	private Integer identifikacneCislo;
 	private Integer supisneCislo;
 	private String popis;
 	private List<Nehnutelnost> nehnutelnosti;
@@ -41,10 +42,16 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 		return this.nehnutelnosti;
 	}
 
+	public void setNehnutelnosti(List<Nehnutelnost> nehnutelnosti) {
+		this.nehnutelnosti = nehnutelnosti;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("Supisne cislo: ")
 				.append(supisneCislo)
+				.append(", identifikacne cislo: ")
+				.append(identifikacneCislo)
 				.append(", popis: ")
 				.append(popis)
 				.append(", gps pozicie: ")
@@ -72,7 +79,7 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 	}
 
 	public String toStringZoznam() {
-		return "Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
+		return "Identifikacne cislo:" + identifikacneCislo + ", Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
 	}
 
 	@Override
@@ -102,12 +109,21 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 
 	@Override
 	public boolean equals(IRecord o) {
-		return Objects.equals(this.supisneCislo, ((Parcela) o).supisneCislo);
+		return Objects.equals(this.identifikacneCislo, ((Parcela) o).identifikacneCislo);
+	}
+
+	@Override
+	public int getIdetifikacneCislo() {
+		return this.identifikacneCislo;
+	}
+
+	public void setIdentifikacneCislo(Integer identifikacneCislo) {
+		this.identifikacneCislo = identifikacneCislo;
 	}
 
 	@Override
 	public BitSet getHash(int pocetBitov) {
-		int hash = 17 * (31 + 3 * this.supisneCislo);
+		int hash = 17 * (31 + 3 * this.identifikacneCislo);
 
 		BitSet bitSet = new BitSet(pocetBitov);
 		for (int i = 0; i < pocetBitov; i++) {
@@ -119,7 +135,7 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 
 	@Override
 	public int getSize() {
-		return ((Double.SIZE * 4) / 8) + (Integer.SIZE / 8) + (Properties.POCET_PLATNYCH_ZNAKOV * (Character.SIZE / 8)); // kolko bajtov sa bude do suboru zapisovat
+		return ((Double.SIZE * 4) / 8) + (Integer.SIZE / 8) + (Properties.POCET_PLATNYCH_ZNAKOV * (Character.SIZE / 8)) + (5 * (Integer.SIZE / 8)); // kolko bajtov sa bude do suboru zapisovat
 	}
 
 	@Override
@@ -129,12 +145,20 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 
 			String popisNaSerializaciu = convertujString(popis);
 
-			dataOutputStream.writeInt(supisneCislo);
+			dataOutputStream.writeInt(identifikacneCislo);
 			dataOutputStream.writeChars(popisNaSerializaciu); // zapise string ako pole charov, 1 char su 2 bajty - kvoli UTF-16 Character.SIZE=16
 			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getX());
 			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaLavyDolny().getY());
 			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getX());
 			dataOutputStream.writeDouble(gpsPozicie.getSuradnicaPravyHorny().getY());
+
+			for (int i = 0; i < 5; i++) {
+				if (i < nehnutelnosti.size()) {
+					dataOutputStream.writeInt(nehnutelnosti.get(i).getIdetifikacneCislo());
+				} else {
+					dataOutputStream.writeInt(-1);
+				}
+			}
 			return byteArrayOutputStream.toByteArray();
 
 		} catch (IOException e) {
@@ -147,7 +171,7 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 		try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
 			 DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream)) {
 
-			Integer supisneCislo = dataInputStream.readInt();
+			Integer identifikacneCislo = dataInputStream.readInt();
 			StringBuilder popisBuilder = new StringBuilder(Properties.POCET_PLATNYCH_ZNAKOV);
 			for (int i = 0; i < Properties.POCET_PLATNYCH_ZNAKOV; i++) {
 				popisBuilder.append(dataInputStream.readChar());
@@ -159,11 +183,29 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 			double x2 = dataInputStream.readDouble();
 			double y2 = dataInputStream.readDouble();
 
-			return new Parcela(supisneCislo, popis, new Ohranicenie(new GpsPozicia("S", "V", x1, y1), new GpsPozicia("S", "V" , x2, y2)));
+
+			ArrayList<Nehnutelnost> nehnutelnosti = new ArrayList<>();
+			for (int i = 0; i < 5; i++) {
+				int identifikacneCisloNehnutelnosti = dataInputStream.readInt();
+				if (identifikacneCisloNehnutelnosti != -1) {
+					pridajNehnutelnost(identifikacneCisloNehnutelnosti, nehnutelnosti);
+				}
+			}
+
+			var parcela = new Parcela(null, popis, new Ohranicenie(new GpsPozicia("S", "V", x1, y1), new GpsPozicia("S", "V" , x2, y2)));
+			parcela.setNehnutelnosti(nehnutelnosti);
+			parcela.setIdentifikacneCislo(identifikacneCislo);
+			return parcela;
 
 		} catch (IOException e) {
 			throw new RuntimeException("Chyba pri deserializacii triedy Parcela" + e.getMessage());
 		}
+	}
+
+	private void pridajNehnutelnost(int identifikacneCisloNehnutelnosti, ArrayList<Nehnutelnost> nehnutelnosti) {
+		var nehnutelnost = new Nehnutelnost(null, null, null);
+		nehnutelnost.setIdentifikacneCislo(identifikacneCisloNehnutelnosti);
+		nehnutelnosti.add(nehnutelnost);
 	}
 
 	private String convertujString(String povodnyPopis) {

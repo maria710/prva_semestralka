@@ -14,13 +14,18 @@ public class Generator {
 
 	private final Random random = new Random();
 	private final GeneratorKlucov generatorKlucov = new GeneratorKlucov();
+	private final GeneratorKlucov generatorKlucovIdentifikarory = new GeneratorKlucov();
 
 	public IPozemok vygenerujNehnutelnost(int sirka, int dlzka) {
-		return new Nehnutelnost(generatorKlucov.getKluc(), "Nehnutelnost", getRandomOhranicenie(sirka, dlzka));
+		var nehnutelnost = new Nehnutelnost(generatorKlucov.getKluc(), "Nehnutelnost", getRandomOhranicenie(sirka, dlzka));
+		nehnutelnost.setIdentifikacneCislo(generatorKlucovIdentifikarory.getKluc());
+		return nehnutelnost;
 	}
 
 	public IPozemok vygenerujParcelu(int sirka, int dlzka) {
-		return new Parcela(generatorKlucov.getKluc(), "Parcela", getRandomOhranicenie(sirka, dlzka));
+		var parcela =  new Parcela(generatorKlucov.getKluc(), "Parcela", getRandomOhranicenie(sirka, dlzka));
+		parcela.setIdentifikacneCislo(generatorKlucovIdentifikarory.getKluc());
+		return parcela;
 	}
 
 	public List<IPozemok> vygenerujPozemky(int pocet, int sirka, int dlzka, boolean isParcela) {

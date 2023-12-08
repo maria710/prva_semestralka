@@ -48,6 +48,7 @@ class DynamickeHashovanieTest {
 
 		Parcela parcela = new Parcela(99930, "testovacia parcela velka",
 									  new Ohranicenie(new GpsPozicia("S", "V", 0.0, 0.0), new GpsPozicia("J", "Z", 100.0, 100.0)));
+		parcela.setIdentifikacneCislo(99999);
 		assertTrue(hashovanie.insert(parcela));
 		assertNotEquals(parcela, (hashovanie.najdiZaznam(parcela))); // parcela insertnuta ma len 15 znakov, parcela najdena ma 25 znakov, uz sa nerovnaju
 	}
@@ -65,6 +66,7 @@ class DynamickeHashovanieTest {
 		}
 
 		Parcela parcela = new Parcela(99930, "test", null);
+		parcela.setIdentifikacneCislo(99999);
 		assertNull(hashovanie.najdiZaznam(parcela));
 	}
 
