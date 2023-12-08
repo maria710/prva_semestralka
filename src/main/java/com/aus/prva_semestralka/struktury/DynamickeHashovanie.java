@@ -24,8 +24,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private final BlokManazer<T> blokManazerPreplnovaci;
 
 
-	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path, String pathPreplnovaci, int blokovaciFaktorPreplnovaci)
-			throws FileNotFoundException {
+	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path, String pathPreplnovaci, int blokovaciFaktorPreplnovaci) throws FileNotFoundException {
 		root = new TrieNodeExterny<>(null, 0);
 		this.blokovaciFaktor = blokovaciFaktor;
 		this.fileManazer = new FileManazer(path);
@@ -154,6 +153,13 @@ public class DynamickeHashovanie<T extends IRecord> {
 	}
 
 	public boolean edit(T record) {
+
+		var najdeny = najdiZaznam(record);
+		if (najdeny == null) { // musime skontrolovat ci tam uz je, ak nie nema vyznam mazat
+			return false;
+		}
+
+		najdeny.upravParametre(record);
 		return false;
 	}
 

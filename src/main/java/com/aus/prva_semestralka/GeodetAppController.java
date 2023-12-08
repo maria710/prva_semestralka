@@ -3,6 +3,7 @@ package com.aus.prva_semestralka;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -72,6 +73,12 @@ public class GeodetAppController implements Initializable {
 
 	@FXML
 	public TextField zdravieNehnutelnostiField;
+
+	@FXML
+	public CheckBox hlavnySuborCheck;
+
+	@FXML
+	public CheckBox preplnovaciSuborCheck;
 
 	private GeodetAppManazer manazer;
 

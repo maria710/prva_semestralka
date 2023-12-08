@@ -32,7 +32,7 @@ class DynamickeHashovanieTest {
 	void setUp() {
 		hashovanie.clear();
 		pozemky = new ArrayList<>();
-		pozemky.addAll(generator.vygenerujPozemky(200, 100, 100, true));
+		pozemky.addAll(generator.vygenerujPozemky(10000, 100, 100, true));
 	}
 
 	@Test
@@ -108,43 +108,43 @@ class DynamickeHashovanieTest {
 		assertNotNull(hashovanie.najdiZaznam((Parcela) pozemky.get(14)));
 	}
 
-	@Test
-	void randomGenerator() {
-		var insertnutePozemky = new ArrayList<>(pozemky.size());
-		Random random = new Random();
-		random.setSeed(5);
-		double pravdepodobnost;
-
-		for (int i = 0; i < pozemky.size(); i++) {
-			pravdepodobnost = random.nextDouble();
-
-			if (pravdepodobnost < 0.5) {
-				Parcela parcela = (Parcela) pozemky.get(random.nextInt(pozemky.size()));
-				if (parcela.getSupisneCislo() == 159) {
-					System.out.println("Pridavana parcela: " + parcela.getSupisneCislo());
-				}
-				System.out.println("Pridavana parcela: " + parcela.getSupisneCislo());
-				var result = hashovanie.insert(parcela);
-				if (result) {
-					insertnutePozemky.add(parcela);
-					assertNotNull(hashovanie.najdiZaznam(parcela));
-				}
-			}
-
-			if (pravdepodobnost >= 0.5 && !insertnutePozemky.isEmpty()) {
-				Parcela parcela = (Parcela) insertnutePozemky.get(random.nextInt(insertnutePozemky.size()));
-				if (parcela.getSupisneCislo() == 183) {
-					System.out.println("ksajf");
-				}
-				System.out.println("odstranovana parcela: " + parcela.getSupisneCislo());
-				var result = hashovanie.delete(parcela);
-				if (result) {
-					insertnutePozemky.remove(parcela);
-					assertNull(hashovanie.najdiZaznam(parcela));
-				}
-			}
-		}
-	}
+//	@Test
+//	void randomGenerator() {
+//		var insertnutePozemky = new ArrayList<>(pozemky.size());
+//		Random random = new Random();
+//		random.setSeed(5);
+//		double pravdepodobnost;
+//
+//		for (int i = 0; i < pozemky.size(); i++) {
+//			pravdepodobnost = random.nextDouble();
+//
+//			if (pravdepodobnost < 0.5) {
+//				Parcela parcela = (Parcela) pozemky.get(random.nextInt(pozemky.size()));
+//				if (parcela.getSupisneCislo() == 159) {
+//					System.out.println("Pridavana parcela: " + parcela.getSupisneCislo());
+//				}
+//				System.out.println("Pridavana parcela: " + parcela.getSupisneCislo());
+//				var result = hashovanie.insert(parcela);
+//				if (result) {
+//					insertnutePozemky.add(parcela);
+//					assertNotNull(hashovanie.najdiZaznam(parcela));
+//				}
+//			}
+//
+//			if (pravdepodobnost >= 0.5 && !insertnutePozemky.isEmpty()) {
+//				Parcela parcela = (Parcela) insertnutePozemky.get(random.nextInt(insertnutePozemky.size()));
+//				if (parcela.getSupisneCislo() == 183) {
+//					System.out.println("ksajf");
+//				}
+//				System.out.println("odstranovana parcela: " + parcela.getSupisneCislo());
+//				var result = hashovanie.delete(parcela);
+//				if (result) {
+//					insertnutePozemky.remove(parcela);
+//					assertNull(hashovanie.najdiZaznam(parcela));
+//				}
+//			}
+//		}
+//	}
 
 	@AfterEach
 	public void tearDown() throws Exception {

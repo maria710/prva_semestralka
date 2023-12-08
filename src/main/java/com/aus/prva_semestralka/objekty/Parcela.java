@@ -103,6 +103,16 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 	}
 
 	@Override
+	public void upravParametre(IRecord record) {
+		if (record instanceof Parcela parcela) {
+			this.supisneCislo = parcela.supisneCislo;
+			this.popis = parcela.popis;
+			this.gpsPozicie = parcela.gpsPozicie;
+			this.nehnutelnosti = parcela.nehnutelnosti;
+		}
+	}
+
+	@Override
 	public boolean equals(IData<Integer> o) {
 		return Objects.equals(o.getPrimarnyKluc(), this.supisneCislo) && gpsPozicie.equalsOhranicenie(o.getSekundarnyKluc());
 	}
@@ -113,7 +123,7 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 	}
 
 	@Override
-	public int getIdetifikacneCislo() {
+	public Integer getIdetifikacneCislo() {
 		return this.identifikacneCislo;
 	}
 

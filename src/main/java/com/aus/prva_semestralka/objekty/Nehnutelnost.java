@@ -102,6 +102,14 @@ public class Nehnutelnost implements IPozemok {
 			this.parcely = nehnutelnost.parcely;
 		}
 	}
+	@Override
+	public void upravParametre(IRecord record) {
+		if (record instanceof Nehnutelnost nehnutelnost) {
+			this.popis = nehnutelnost.popis;
+			this.gpsPozicie = nehnutelnost.gpsPozicie;
+			this.parcely = nehnutelnost.parcely;
+		}
+	}
 
 	@Override
 	public boolean equals(IData<Integer> o) {
@@ -114,7 +122,7 @@ public class Nehnutelnost implements IPozemok {
 	}
 
 	@Override
-	public int getIdetifikacneCislo() {
+	public Integer getIdetifikacneCislo() {
 		return this.identifikacneCislo;
 	}
 
