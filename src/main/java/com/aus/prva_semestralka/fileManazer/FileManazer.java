@@ -29,10 +29,6 @@ public class FileManazer {
 		}
 	}
 
-	public void write(byte[] data) throws Exception {
-		this.file.write(data);
-	}
-
 	public byte[] read(int size, int offset) {
 		try {
 			file.seek(offset); // presunieme sa na pozadovanu poziciu

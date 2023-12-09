@@ -69,11 +69,6 @@ public class DynamickeHashovanie<T extends IRecord> {
 		TrieNodeExterny<T> currentNodeExterny = najdiExternyNode(bitSet);
 		int indexBlokuNode = currentNodeExterny.getIndexBloku();
 
-
-		if (currentNodeExterny.getIndexBloku() == 0) {
-			System.out.println("Insertujem do node s blokom 0 ");
-		}
-
 		// mam externy vrchol
 		if (indexBlokuNode == -1) { // ak este nemame blok
 			blokManazer.zapisDoNovehoBloku(record, currentNodeExterny);
@@ -107,10 +102,6 @@ public class DynamickeHashovanie<T extends IRecord> {
 		BitSet bitSet = getHash(record);
 		TrieNodeExterny<T> externalNode = najdiExternyNode(bitSet);
 
-		if (externalNode.getIndexBloku() == 0) {
-			System.out.println("Deletujem v node s blokom 0");
-		}
-
 		int indexBlokuNode = externalNode.getIndexBloku();
 		if (indexBlokuNode == -1) {
 			return false;
@@ -123,17 +114,18 @@ public class DynamickeHashovanie<T extends IRecord> {
 			var vymazalSa = blok.vymazRecord(record);
 			if (vymazalSa) {
 				externalNode.znizPocetRecordov();
-				blokManazerCurrent.zapisBlokDoSubor(blok, indexBlokuNode);
+				if (externalNode.getPocetRecordov() == 0 && externalNode.getPocetBlokovVZretazeni() == 0 && externalNode.getIndexBloku() != -1) {
+					blokManazerCurrent.dealokujBlok(indexBlokuNode);
+					externalNode.setIndexBloku(-1);
+				} else {
+					blokManazerCurrent.zapisBlokDoSubor(blok, indexBlokuNode);
+				}
+//				blokManazerCurrent.zapisBlokDoSubor(blok, indexBlokuNode);
 				Blok<T> blokNaStrasenie = dajBlokNaStriasanie(externalNode);
 				if (blokNaStrasenie != null) {
 					blokManazerPreplnovaci.dealokujBlok(blokNaStrasenie.getIndex());
 					externalNode.znizPocetBlokovVZretazeni();
 				}
-//				// dealokujeme blok ak je prazdny a nema nasledovnika
-//				if (blok.getAktualnyPocetRecordov() == 0 && blok.getNasledovnik() == - 1) {
-//					externalNode.setIndexBloku(-1);
-//					blokManazer.dealokujBlok(indexBlokuNode);
-//				}
 
 				var zruseny = zrusInternyNodeAkSaDa((TrieNodeInterny<T>) externalNode.getParent());
 
@@ -329,9 +321,12 @@ public class DynamickeHashovanie<T extends IRecord> {
 			index = blok.getNasledovnik();
 			if (index == -1) {
 				index = blokManazerPreplnovaci.alokujBlok();
+				var blokVPreplnovacomSubore = blokManazerPreplnovaci.citajBlokZoSuboru(index);
 				blok.setNasledovnik(index);
+				blokVPreplnovacomSubore.setPredchodca(blok.getIndex());
 				currentNodeExterny.zvysPocetBlokovVZretazeni();
 				blokManazerPreplnovaci.zapisBlokDoSubor(blok, blok.getIndex());
+				blokManazerPreplnovaci.zapisBlokDoSubor(blokVPreplnovacomSubore, index);
 			}
 		}
 	}
@@ -390,9 +385,10 @@ public class DynamickeHashovanie<T extends IRecord> {
 		if (blokNaVyhodenie != null) { // ak v druhom bloku nieco bolo, presunieme
 			for (T zaznam : blokNaVyhodenie.getRecords()) {
 				blokNaVymenu.pridaj(zaznam);
-				nodeNaVymenu.zvysPocetRecordov();
+				nodeNaVymenu.zvysPocetRecordov(); nodeNaVyhodenie.znizPocetRecordov();
 			}
 			blokManazer.dealokujBlok(blokNaVyhodenie.getIndex());
+			nodeNaVyhodenie.setIndexBloku(-1);
 		}
 		blokManazer.zapisBlokDoSubor(blokNaVymenu, blokNaVymenu.getIndex());
 
@@ -440,6 +436,10 @@ public class DynamickeHashovanie<T extends IRecord> {
 		return record.getHash(pocetBitovVHash); // tu budem prenastavovat pocet bitov
 	}
 
-	public void close() throws Exception {
-		this.fileManazer.close();
+	public void close() {
+		try {
+			this.fileManazer.close();
+		} catch (Exception e) {
+			System.out.println("Nerpodarilo sa zatvorit subory");
+		}
 	}}

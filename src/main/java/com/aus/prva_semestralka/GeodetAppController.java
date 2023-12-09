@@ -2,6 +2,7 @@ package com.aus.prva_semestralka;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -9,7 +10,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -79,6 +83,12 @@ public class GeodetAppController implements Initializable {
 
 	@FXML
 	public CheckBox preplnovaciSuborCheck;
+
+	@FXML
+	public TextField bfHlavnyTextField;
+
+	@FXML
+	public TextField bfPreplnovaciTextField;
 
 	private GeodetAppManazer manazer;
 
@@ -177,6 +187,10 @@ public class GeodetAppController implements Initializable {
 		vypocitatZdravieButton.setDisable(true);
 		zdravieNehnutelnostiField.setDisable(true);
 		zdravieParcelyField.setDisable(true);
+
+		sirkaTextField.setText("100");
+		vyskaTextField.setText("100");
+		hlbkaTextField.setText("10");
 	}
 
 	public void onVytvoritButtonClick() {
@@ -198,6 +212,121 @@ public class GeodetAppController implements Initializable {
 		optimalizovatButton.setDisable(false);
 		zmenitRozmerButton.setDisable(false);
 		vypocitatZdravieButton.setDisable(false);
+
+		int blokovaciHlavny =  Integer.parseInt(bfHlavnyTextField.getText());
+		int blokovaciPreplnovaci = Integer.parseInt(bfPreplnovaciTextField.getText());
+
+		manazer.vytvorSubory(blokovaciHlavny, blokovaciPreplnovaci, "parcely.bin", "nehnutelnosti.bin",
+							 "parcelyPreplnovaci.bin", "nehnutelnostiPreplnovaci.bin");
+		manazer.clearSubory();
+	}
+
+	@FXML
+	public void onSpustiButtonQuadStrom() {
+
+		String akcia = actionChoiceBox.getValue();
+		String pozemok = pozemokChoiceBox.getValue();
+
+		Integer supisneCislo = Integer.parseInt(supisneCisloText.getText());
+		String popis = popisText.getText();
+
+		Double lavaDolnaX = Double.parseDouble(this.lavaDolnaX.getText());
+		Double lavaDolnaY = Double.parseDouble(this.lavaDolnaY.getText());
+		Double pravaHornaX = Double.parseDouble(this.pravaHornaX.getText());
+		Double pravaHornaY = Double.parseDouble(this.pravaHornaY.getText());
+
+		String orientaciaSirkaDolna = this.orientaciaSirkaDolna.getText();
+		String orientaciaVyskaDolna = this.orientaciaVyskaDolna.getText();
+		String orientaciaSirkaHorna = this.orientaciaSirkaHorna.getText();
+		String orientaciaVyskaHorna = this.orientaciaVyskaHorna.getText();
+
+		GpsPozicia gpsPoziciaDolna = new GpsPozicia(orientaciaSirkaDolna, orientaciaVyskaDolna, lavaDolnaX, lavaDolnaY);
+		GpsPozicia gpsPoziciaHorna = new GpsPozicia(orientaciaSirkaHorna, orientaciaVyskaHorna, pravaHornaX, pravaHornaY);
+		Ohranicenie ohranicenie = new Ohranicenie(gpsPoziciaDolna, gpsPoziciaHorna);
+
+		Nehnutelnost nehnutelnost = null;
+		Parcela parcela = null;
+
+		if (Objects.equals(pozemok, "Nehnuteľnosť")) {
+			nehnutelnost = new Nehnutelnost(supisneCislo, popis, ohranicenie);
+		} else if (Objects.equals(pozemok, "Parcela")) {
+			parcela = new Parcela(supisneCislo, popis, ohranicenie);
+		}
+
+		if (!Objects.equals(akcia, "Nájsť") && Objects.equals(pozemok, "Oba")) {
+			resultLabel.setText("Operácia nie je podporovaná pre oba pozemky");
+			return;
+		}
+
+		var result = false;
+		switch (akcia) {
+			case "Pridať" -> {
+				if (pozemok.equals("Nehnuteľnosť")) {
+					result = manazer.pridajNehnutelnost(nehnutelnost);
+				} else if (pozemok.equals("Parcela")) {
+					result = manazer.pridajParcelu(parcela);
+				}
+			}
+			case "Vymazať" -> {
+				if (pozemok.equals("Nehnuteľnosť")) {
+					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
+					labelOfNehnutelnostiListView.setText("Nehnuteľnosti na vymazanie vo zvolenom ohraničení - označ pre odstránenie");
+					refreshNehnutelnostiView(vysledneNehnutelnosti);
+				} else if (pozemok.equals("Parcela")) {
+					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
+					labelOfParcelyListView.setText("Parcely na vymazanie vo zvolenom ohraničení - označ pre odstránenie");
+					parcelyListView.getItems().clear();
+					refreshParcelyView(vysledneParcely);
+				}
+				vymazatButton.setDisable(false);
+			}
+			case "Nájsť" -> {
+				if (pozemok.equals("Nehnuteľnosť")) {
+					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
+					labelOfNehnutelnostiListView.setText("Nájdené nehnuteľnosti vo zvolenom ohraničení");
+					refreshNehnutelnostiView(vysledneNehnutelnosti);
+				} else if (pozemok.equals("Parcela")) {
+					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
+					labelOfParcelyListView.setText("Nájdené parcely vo zvolenom ohraničení");
+					parcelyListView.getItems().clear();
+					refreshParcelyView(vysledneParcely);
+				} else {
+					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
+					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
+					vysledneParcely.addAll(vysledneNehnutelnosti);
+					labelOfParcelyListView.setText("Nájdené parcely a nehnuteľnosti vo zvolenom ohraničení");
+					parcelyListView.getItems().clear();
+					refreshParcelyView(vysledneParcely);
+				}
+			}
+			case "Upraviť" -> {
+				if (pozemok.equals("Nehnuteľnosť")) {
+					result = manazer.upravNehnutelnost(povodnyPozemok, nehnutelnost);
+				} else if (pozemok.equals("Parcela")) {
+					result = manazer.upravParcelu(povodnyPozemok, parcela);
+				}
+			}
+			case "Vypísať" -> {
+				if (pozemok.equals("Nehnuteľnosť")) {
+					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
+					labelOfNehnutelnostiListView.setText("Nájdené nehnuteľnosti vo zvolenom ohraničení");
+					refreshNehnutelnostiView(vysledneNehnutelnosti);
+					nehnutelnostiListView.setOnMouseClicked(event -> fillFieldsWith(nehnutelnostiListView.getSelectionModel().getSelectedItem()));
+				} else if (pozemok.equals("Parcela")) {
+					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
+					labelOfParcelyListView.setText("Nájdené parcely vo zvolenom ohraničení");
+					parcelyListView.getItems().clear();
+					refreshParcelyView(vysledneParcely);
+					parcelyListView.setOnMouseClicked(event -> fillFieldsWith(parcelyListView.getSelectionModel().getSelectedItem()));
+				}
+			}
+		}
+
+		if (result) {
+			resultLabel.setText("Pozemok bol spracovaný");
+		} else {
+			resultLabel.setText("Pozemok sa nepodarilo spracovať");
+		}
 	}
 
 	@FXML
@@ -309,6 +438,15 @@ public class GeodetAppController implements Initializable {
 	}
 
 	public void onVypisNehnutelnostiButton() {
+
+		if (hlavnySuborCheck.isSelected()) {
+			showNehnutelnostiFromSubor(true);
+
+		}
+		if (preplnovaciSuborCheck.isSelected()) {
+			showNehnutelnostiFromSubor(false);
+		}
+
 		setCellFactoryFor(nehnutelnostiListView);
 
 		labelOfNehnutelnostiListView.setText("Nehnuteľnosti");
@@ -317,6 +455,15 @@ public class GeodetAppController implements Initializable {
 	}
 
 	public void onVypisParcelyButton() {
+
+		if (hlavnySuborCheck.isSelected()) {
+			showParcelyFromSubor(true);
+		}
+
+		if (preplnovaciSuborCheck.isSelected()) {
+			showParcelyFromSubor(false);
+		}
+
 		setCellFactoryFor(parcelyListView);
 
 		labelOfParcelyListView.setText("Parcely");
@@ -354,6 +501,65 @@ public class GeodetAppController implements Initializable {
 				}
 			}
 		});
+	}
+
+	private void showNehnutelnostiFromSubor(boolean isHlavny) {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setHeaderText(null);
+		alert.setHeight(500);
+		alert.setWidth(1000);
+
+		TextArea textArea = new TextArea();
+		textArea.setEditable(false);
+		textArea.setWrapText(true);
+		textArea.setPrefHeight(500);
+		textArea.setPrefWidth(1000);
+
+		if (isHlavny) {
+			alert.setTitle("Nehnutelnosti z hlavneho suboru");
+			textArea.setText(manazer.toStringHlavnySuborNehnutelnosti());
+		} else {
+			alert.setTitle("Nehnutelnosti z preplnovacieho suboru");
+			textArea.setText(manazer.toStringPreplnovaciSuborNehnutelnosti());
+		}
+
+		ScrollPane scrollPane = new ScrollPane(textArea);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setPrefHeight(500);
+
+		VBox vbox = new VBox(scrollPane);
+		alert.getDialogPane().setContent(vbox);
+
+		alert.show();
+	}
+
+	private void showParcelyFromSubor(boolean isHlavny) {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setHeaderText(null);
+		alert.setHeight(500);
+		alert.setWidth(1000);
+
+		TextArea textArea = new TextArea();
+		textArea.setEditable(false);
+		textArea.setWrapText(true);
+		textArea.setPrefHeight(500);
+		textArea.setPrefWidth(1000);
+		if (isHlavny) {
+			alert.setTitle("Parcely z hlavneho suboru");
+			textArea.setText(manazer.toStringHlavnySuborParcely());
+		} else {
+			alert.setTitle("Parcely z preplnovacieho suboru");
+			textArea.setText(manazer.toStringPreplnovaciSuborParcely());
+		}
+
+		ScrollPane scrollPane = new ScrollPane(textArea);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setPrefHeight(500);
+
+		VBox vbox = new VBox(scrollPane);
+		alert.getDialogPane().setContent(vbox);
+
+		alert.show();
 	}
 
 	private void refreshNehnutelnostiView(List<IPozemok> nehnutelnosti) {

@@ -20,8 +20,8 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aus.prva_semestralka.GeodetAppController">
-    <MenuBar VBox.vgrow="NEVER">
+<VBox prefHeight="1000.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aus.prva_semestralka.GeodetAppController">
+    <MenuBar prefHeight="25.0" prefWidth="1048.0" VBox.vgrow="NEVER">
         <Menu mnemonicParsing="false" text="Nehnuteľnosti">
             <MenuItem fx:id="nehnutelnostiImportMenuItem" mnemonicParsing="false" onAction="#onNehnutelnostiImportClick" text="Import" />
             <MenuItem fx:id="nehnutelnostiExportMenuItem" mnemonicParsing="false" onAction="#onNehnutelnostiExportClick" text="Export" />
@@ -178,6 +178,32 @@
                            </opaqueInsets>
                         </Label>
                         <TextField fx:id="hlbkaTextField" promptText="Hĺbka" />
+                     </children>
+                     <opaqueInsets>
+                        <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
+                     </opaqueInsets>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
+                     <children>
+                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="93.0" text="BF Hlavný">
+                           <opaqueInsets>
+                              <Insets bottom="20.0" left="20.0" right="10.0" top="50.0" />
+                           </opaqueInsets>
+                        </Label>
+                        <TextField fx:id="bfHlavnyTextField" prefHeight="25.0" prefWidth="107.0" promptText="BF hlavný" />
+                     </children>
+                     <opaqueInsets>
+                        <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
+                     </opaqueInsets>
+                  </HBox>
+                  <HBox alignment="CENTER" layoutX="10.0" layoutY="110.0" prefHeight="48.0" prefWidth="278.0" spacing="20.0">
+                     <children>
+                        <Label alignment="BOTTOM_LEFT" prefHeight="22.0" prefWidth="92.0" text="BF Preplňovací">
+                           <opaqueInsets>
+                              <Insets bottom="20.0" left="20.0" right="10.0" top="50.0" />
+                           </opaqueInsets>
+                        </Label>
+                        <TextField fx:id="bfPreplnovaciTextField" prefHeight="25.0" prefWidth="109.0" promptText="BF preplňpovací" />
                      </children>
                      <opaqueInsets>
                         <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />

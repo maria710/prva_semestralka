@@ -76,9 +76,9 @@ public class BlokManazer<T extends IRecord> {
 			prvyVolnyBlok.setPredchodca(indexBloku);
 			blok.setNasledovnik(prvyVolnyBlokIndex);
 			zapisBlokDoSubor(prvyVolnyBlok, prvyVolnyBlokIndex);
-		} else {
-			prvyVolnyBlokIndex = indexBloku;
 		}
+		prvyVolnyBlokIndex = indexBloku;
+
 
 		zapisBlokDoSubor(blok, indexBloku);
 
@@ -87,19 +87,19 @@ public class BlokManazer<T extends IRecord> {
 		if (indexBloku == pocetBlokovVSubore - 1) {
 			for (int i = pocetBlokovVSubore - 1; i >= 0; i--) {
 				Blok<T> blokNaOdstranenie = citajBlokZoSuboru(i);
-				if (blokNaOdstranenie.getNasledovnik() != -1) {
-					// nastav nasledovnika predchodcovi
-					Blok<T> nasledovnik = citajBlokZoSuboru(blokNaOdstranenie.getNasledovnik());
-					nasledovnik.setPredchodca(blokNaOdstranenie.getPredchodca());
-					zapisBlokDoSubor(nasledovnik, blokNaOdstranenie.getNasledovnik());
-				}
-				if (blokNaOdstranenie.getPredchodca() != -1) {
-					Blok<T> predchodca = citajBlokZoSuboru(blokNaOdstranenie.getPredchodca());
-					predchodca.setNasledovnik(blokNaOdstranenie.getNasledovnik());
-					zapisBlokDoSubor(predchodca, blokNaOdstranenie.getPredchodca());
-				}
 
 				if (blokNaOdstranenie.getAktualnyPocetRecordov() == 0) {
+					if (blokNaOdstranenie.getNasledovnik() != -1) {
+						// nastav nasledovnika predchodcovi
+						Blok<T> nasledovnik = citajBlokZoSuboru(blokNaOdstranenie.getNasledovnik());
+						nasledovnik.setPredchodca(blokNaOdstranenie.getPredchodca());
+						zapisBlokDoSubor(nasledovnik, blokNaOdstranenie.getNasledovnik());
+					}
+					if (blokNaOdstranenie.getPredchodca() != -1) {
+						Blok<T> predchodca = citajBlokZoSuboru(blokNaOdstranenie.getPredchodca());
+						predchodca.setNasledovnik(blokNaOdstranenie.getNasledovnik());
+						zapisBlokDoSubor(predchodca, blokNaOdstranenie.getPredchodca());
+					}
 					if (blokNaOdstranenie.getIndex() == prvyVolnyBlokIndex) {
 						prvyVolnyBlokIndex = blokNaOdstranenie.getNasledovnik();
 					}

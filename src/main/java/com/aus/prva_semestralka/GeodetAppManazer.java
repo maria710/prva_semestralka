@@ -29,11 +29,11 @@ public class GeodetAppManazer {
 		parcely = new QuadTree<>(maxHlbka, sirka, dlzka);
 	}
 
-	public void vytvorSubory(int blokovaciParcely, int blokovaciNehnutelnosti, int blokovaciParcelyPreplnovaci, int blokovaciNehnutelnostiPreplnovaci,
-							 String nazovSuboruParcely, String nazovSuboruNehnutelnosti, String preplnovaciSuborParcely, String preplnovaciSuborNehnutelnosti) {
+	public void vytvorSubory(int blokovaci, int blokovaciPreplnovaci, String nazovSuboruParcely, String nazovSuboruNehnutelnosti,
+							 String preplnovaciSuborParcely, String preplnovaciSuborNehnutelnosti) {
 		try {
 			dynamickeHashovanieManazer = new DynamickeHashovanieManazer();
-			dynamickeHashovanieManazer.vytvorSubory(blokovaciParcely, blokovaciNehnutelnosti, blokovaciParcelyPreplnovaci, blokovaciNehnutelnostiPreplnovaci,
+			dynamickeHashovanieManazer.vytvorSubory(blokovaci, blokovaci, blokovaciPreplnovaci, blokovaciPreplnovaci,
 													nazovSuboruParcely, nazovSuboruNehnutelnosti, preplnovaciSuborParcely, preplnovaciSuborNehnutelnosti);
 		} catch (Exception e) {
 			throw new RuntimeException("Nepodarilo sa vytvorit subory pre dynamicke hashovanie");
@@ -270,5 +270,13 @@ public class GeodetAppManazer {
 
 	public String toStringPreplnovaciSuborNehnutelnosti() {
 		return dynamickeHashovanieManazer.toStringPreplnovaciSuborNehnutelnosti();
+	}
+
+	public void closeSubory() {
+		dynamickeHashovanieManazer.zavriSubory();
+	}
+
+	public void clearSubory() {
+		dynamickeHashovanieManazer.clearSubory();
 	}
 }

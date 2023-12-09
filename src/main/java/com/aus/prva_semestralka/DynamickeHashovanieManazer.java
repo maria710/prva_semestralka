@@ -27,7 +27,7 @@ public class DynamickeHashovanieManazer {
 	}
 
 	public String toStringHlavnySuborParcely() {
-		return hashovanieParcely.toString();
+		return hashovanieParcely.toStringHlavny();
 	}
 
 	public String toStringPreplnovaciSuborParcely() {
@@ -35,7 +35,7 @@ public class DynamickeHashovanieManazer {
 	}
 
 	public String toStringHlavnySuborNehnutelnosti() {
-		return hashovanieNehnutelnosti.toString();
+		return hashovanieNehnutelnosti.toStringHlavny();
 	}
 
 	public String toStringPreplnovaciSuborNehnutelnosti() {
@@ -80,6 +80,16 @@ public class DynamickeHashovanieManazer {
 	public boolean upravNehnutelnost(Nehnutelnost nehnutelnost) {
 		skontrolujIdentifikacneCislo(nehnutelnost);
 		return hashovanieNehnutelnosti.edit(nehnutelnost);
+	}
+
+	public void zavriSubory() {
+		hashovanieParcely.close();
+		hashovanieNehnutelnosti.close();
+	}
+
+	public void clearSubory() {
+		hashovanieParcely.clear();
+		hashovanieNehnutelnosti.clear();
 	}
 
 	private void skontrolujIdentifikacneCislo(IRecord record) {
