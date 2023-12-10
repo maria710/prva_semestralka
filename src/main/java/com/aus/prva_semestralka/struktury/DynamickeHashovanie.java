@@ -146,13 +146,27 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 	public boolean edit(T record) {
 
-		var najdeny = najdiZaznam(record);
-		if (najdeny == null) { // musime skontrolovat ci tam uz je, ak nie nema vyznam mazat
+		BitSet bitSet = getHash(record);
+		TrieNodeExterny<T> externalNode = najdiExternyNode(bitSet);
+
+		int indexBlokuNode = externalNode.getIndexBloku();
+		if (indexBlokuNode == -1) {
 			return false;
 		}
+		Blok<T> blok = blokManazer.citajBlokZoSuboru(indexBlokuNode);
 
-		najdeny.upravParametre(record);
-		return false;
+		while (true) {
+			var zaznam = blok.najdiZaznam(record);
+			if (zaznam != null) {
+				zaznam.upravParametre(record);
+				blokManazer.zapisBlokDoSubor(blok, indexBlokuNode);
+				return true;
+			}
+			if (blok.getNasledovnik() == -1) {
+				return false;
+			}
+			blok = blokManazerPreplnovaci.citajBlokZoSuboru(blok.getNasledovnik());
+		}
 	}
 
 

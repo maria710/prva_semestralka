@@ -23,10 +23,16 @@ public class Nehnutelnost implements IPozemok {
 		this.parcely = new ArrayList<>();
 	}
 
-	public Nehnutelnost(Integer i, String popis, Ohranicenie gpsPozicia1Parcela) {
+	public Nehnutelnost(Integer i, String popis, Ohranicenie gpsPoziciaNehnutelnost) {
 		this.supisneCislo = i;
 		this.popis = popis;
-		this.gpsPozicie = gpsPozicia1Parcela;
+		this.gpsPozicie = gpsPoziciaNehnutelnost;
+		this.parcely = new ArrayList<>();
+	}
+
+	public Nehnutelnost(Integer id,  Ohranicenie gpsPoziciaNehnutelnost) {
+		this.identifikacneCislo = id;
+		this.gpsPozicie = gpsPoziciaNehnutelnost;
 		this.parcely = new ArrayList<>();
 	}
 
@@ -81,7 +87,7 @@ public class Nehnutelnost implements IPozemok {
 
 	@Override
 	public Integer getPrimarnyKluc() {
-		return this.supisneCislo;
+		return this.identifikacneCislo;
 	}
 
 	@Override
@@ -113,7 +119,7 @@ public class Nehnutelnost implements IPozemok {
 
 	@Override
 	public boolean equals(IData<Integer> o) {
-		return Objects.equals(o.getPrimarnyKluc(), this.supisneCislo) && gpsPozicie.equalsOhranicenie(o.getSekundarnyKluc());
+		return Objects.equals(o.getPrimarnyKluc(), this.identifikacneCislo) && gpsPozicie.equalsOhranicenie(o.getSekundarnyKluc());
 	}
 
 	@Override

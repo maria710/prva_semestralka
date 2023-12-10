@@ -33,6 +33,12 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 		this.nehnutelnosti = new ArrayList<>();
 	}
 
+	public Parcela(Integer id, Ohranicenie gpsPozicia1Parcela) {
+		this.identifikacneCislo = id;
+		this.gpsPozicie = gpsPozicia1Parcela;
+		this.nehnutelnosti = new ArrayList<>();
+	}
+
 	@Override
 	public Ohranicenie getGpsSuradnice() {
 		return this.gpsPozicie;
@@ -84,7 +90,7 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 
 	@Override
 	public Integer getPrimarnyKluc() {
-		return this.supisneCislo;
+		return this.identifikacneCislo;
 	}
 
 	@Override
@@ -114,7 +120,7 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 
 	@Override
 	public boolean equals(IData<Integer> o) {
-		return Objects.equals(o.getPrimarnyKluc(), this.supisneCislo) && gpsPozicie.equalsOhranicenie(o.getSekundarnyKluc());
+		return Objects.equals(o.getPrimarnyKluc(), this.identifikacneCislo) && gpsPozicie.equalsOhranicenie(o.getSekundarnyKluc());
 	}
 
 	@Override

@@ -90,6 +90,9 @@ public class GeodetAppController implements Initializable {
 	@FXML
 	public TextField bfPreplnovaciTextField;
 
+	@FXML
+	public TextField identifikacneCisloTextField;
+
 	private GeodetAppManazer manazer;
 
 	@FXML
@@ -377,40 +380,33 @@ public class GeodetAppController implements Initializable {
 			}
 			case "Vymazať" -> {
 				if (pozemok.equals("Nehnuteľnosť")) {
-					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
-					labelOfNehnutelnostiListView.setText("Nehnuteľnosti na vymazanie vo zvolenom ohraničení - označ pre odstránenie");
-					refreshNehnutelnostiView(vysledneNehnutelnosti);
+					nehnutelnost.setIdentifikacneCislo(Integer.parseInt(identifikacneCisloTextField.getText()));
+					result = manazer.vymazNehnutelnost(nehnutelnost);
 				} else if (pozemok.equals("Parcela")) {
-					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
-					labelOfParcelyListView.setText("Parcely na vymazanie vo zvolenom ohraničení - označ pre odstránenie");
-					parcelyListView.getItems().clear();
-					refreshParcelyView(vysledneParcely);
+					parcela.setIdentifikacneCislo(Integer.parseInt(identifikacneCisloTextField.getText()));
+					result = manazer.vymazParcelu(parcela);
 				}
 				vymazatButton.setDisable(false);
 			}
 			case "Nájsť" -> {
 				if (pozemok.equals("Nehnuteľnosť")) {
-					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
-					labelOfNehnutelnostiListView.setText("Nájdené nehnuteľnosti vo zvolenom ohraničení");
-					refreshNehnutelnostiView(vysledneNehnutelnosti);
-				} else if (pozemok.equals("Parcela")) {
-					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
-					labelOfParcelyListView.setText("Nájdené parcely vo zvolenom ohraničení");
-					parcelyListView.getItems().clear();
-					refreshParcelyView(vysledneParcely);
-				} else {
-					var vysledneNehnutelnosti = manazer.najdiNehnutelnostiVOhraniceni(ohranicenie);
-					var vysledneParcely = manazer.najdiParcelyVOhraniceni(ohranicenie);
-					vysledneParcely.addAll(vysledneNehnutelnosti);
-					labelOfParcelyListView.setText("Nájdené parcely a nehnuteľnosti vo zvolenom ohraničení");
-					parcelyListView.getItems().clear();
+					nehnutelnost.setIdentifikacneCislo(Integer.parseInt(identifikacneCisloTextField.getText()));
+					var najdenaNehnutelnost = manazer.najdiNehnutelnostPodlaIdentifikacnehoCisla(nehnutelnost);
+					labelOfParcelyListView.setText("Nájdená nehnuteľnosť");
+					refreshNehnutelnostiView(najdenaNehnutelnost);
+				} else if (pozemok.equals("Parcela")){
+					parcela.setIdentifikacneCislo(Integer.parseInt(identifikacneCisloTextField.getText()));
+					var vysledneParcely = manazer.najdiParceluPodlaIdentifikacnehoCisla(parcela);
+					labelOfParcelyListView.setText("Nájdená parcela");
 					refreshParcelyView(vysledneParcely);
 				}
 			}
 			case "Upraviť" -> {
 				if (pozemok.equals("Nehnuteľnosť")) {
+					nehnutelnost.setIdentifikacneCislo(Integer.parseInt(identifikacneCisloTextField.getText()));
 					result = manazer.upravNehnutelnost(povodnyPozemok, nehnutelnost);
 				} else if (pozemok.equals("Parcela")) {
+					parcela.setIdentifikacneCislo(Integer.parseInt(identifikacneCisloTextField.getText()));
 					result = manazer.upravParcelu(povodnyPozemok, parcela);
 				}
 			}

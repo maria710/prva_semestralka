@@ -44,11 +44,17 @@ public class DynamickeHashovanieManazer {
 
 	public boolean pridajParcelu(Parcela parcela) {
 		parcela.setIdentifikacneCislo(generatorKlucov.getKluc());
+		for (Nehnutelnost iPozemok : parcela.getNehnutelnosti()) {
+			upravNehnutelnost(iPozemok);
+		}
 		return hashovanieParcely.insert(parcela);
 	}
 
 	public boolean pridajNehnutelnost(Nehnutelnost nehnutelnost) {
 		nehnutelnost.setIdentifikacneCislo(generatorKlucov.getKluc());
+		for (Parcela iPozemok : nehnutelnost.getParcely()) {
+			upravParcelu(iPozemok);
+		}
 		return hashovanieNehnutelnosti.insert(nehnutelnost);
 	}
 

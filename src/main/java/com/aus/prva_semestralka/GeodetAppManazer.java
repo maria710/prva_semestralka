@@ -1,5 +1,6 @@
 package com.aus.prva_semestralka;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,12 +52,13 @@ public class GeodetAppManazer {
 	public boolean pridajNehnutelnost(Nehnutelnost nehnutelnost) {
 
 		List<IPozemok> parcelyZoznam = filterAndCastToIPozemok(parcely.getAllData());
-		pridajZavislostiNaPozemkoch(nehnutelnost, parcelyZoznam);
-		if (nehnutelnost.getParcely().size() > 6) {
+		var pridaneUspesne = pridajZavislostiNaPozemkochPreSubor(nehnutelnost, parcelyZoznam);
+		if (nehnutelnost.getParcely().size() > 6 || !pridaneUspesne) {
 			return false;
 		}
 		if (dynamickeHashovanieManazer.pridajNehnutelnost(nehnutelnost)) {
-			return nehnutelnosti.pridaj(nehnutelnost);
+			Nehnutelnost nehnutelnostPreStrom = new Nehnutelnost(nehnutelnost.getIdetifikacneCislo(), nehnutelnost.getGpsSuradnice());
+			return nehnutelnosti.pridaj(nehnutelnostPreStrom);
 		}
 		return false;
 	}
@@ -64,12 +66,13 @@ public class GeodetAppManazer {
 	public boolean pridajParcelu(Parcela parcela) {
 
 		List<IPozemok> nehnutelnostiZoznam = filterAndCastToIPozemok(nehnutelnosti.getAllData());
-		pridajZavislostiNaPozemkoch(parcela, nehnutelnostiZoznam);
-		if (parcela.getNehnutelnosti().size() > 5) {
+		var pridaneUspesne = pridajZavislostiNaPozemkochPreSubor(parcela, nehnutelnostiZoznam);
+		if (parcela.getNehnutelnosti().size() > 5 || !pridaneUspesne) {
 			return false;
 		}
 		if (dynamickeHashovanieManazer.pridajParcelu(parcela)) {
-			return parcely.pridaj(parcela);
+			Parcela parcelaPreStrom = new Parcela(parcela.getIdetifikacneCislo(), parcela.getGpsSuradnice());
+			return parcely.pridaj(parcelaPreStrom);
 		}
 		return false;
 	}
@@ -102,12 +105,12 @@ public class GeodetAppManazer {
 		return filterAndCastToIPozemok(map.getData());
 	}
 
-	public Parcela najdiParceluPodlaIdentifikacnehoCisla(Parcela parcela) {
-		return dynamickeHashovanieManazer.najdiParcelu(parcela);
+	public List<IPozemok> najdiParceluPodlaIdentifikacnehoCisla(Parcela parcela) {
+		return Collections.singletonList(dynamickeHashovanieManazer.najdiParcelu(parcela));
 	}
 
-	public Nehnutelnost najdiNehnutelnostPodlaIdentifikacnehoCisla(Nehnutelnost nehnutelnost) {
-		return dynamickeHashovanieManazer.najdiNehnutelnost(nehnutelnost);
+	public List<IPozemok> najdiNehnutelnostPodlaIdentifikacnehoCisla(Nehnutelnost nehnutelnost) {
+		return Collections.singletonList(dynamickeHashovanieManazer.najdiNehnutelnost(nehnutelnost));
 	}
 
 	private void pridajZavislostiNaPozemkoch(IPozemok pozemok, List<IPozemok> zavislosti) {
@@ -124,6 +127,31 @@ public class GeodetAppManazer {
 				((Nehnutelnost) pozemok1).getParcely().add((Parcela) pozemok);
 			}
 		}
+	}
+
+	private boolean pridajZavislostiNaPozemkochPreSubor(IPozemok pozemok, List<IPozemok> zavislosti) {
+		for (IPozemok pozemok1 : zavislosti) {
+			if (!prelinajuSaPozemky(pozemok1, pozemok)) {
+				continue;
+			}
+			if (pozemok instanceof Nehnutelnost && pozemok1 instanceof Parcela) {
+				var parcela = dynamickeHashovanieManazer.najdiParcelu((Parcela) pozemok1);
+				if (parcela.getNehnutelnosti().size() >= 5) {
+					return false;
+				}
+				parcela.getNehnutelnosti().add((Nehnutelnost) pozemok);
+				((Nehnutelnost) pozemok).getParcely().add(parcela);
+			}
+			if (pozemok instanceof Parcela && pozemok1 instanceof Nehnutelnost) {
+				var nehnutelnost = dynamickeHashovanieManazer.najdiNehnutelnost((Nehnutelnost) pozemok1);
+				if (nehnutelnost.getParcely().size() >= 6) {
+					return false;
+				}
+				((Parcela) pozemok).getNehnutelnosti().add(nehnutelnost);
+				nehnutelnost.getParcely().add((Parcela) pozemok);
+			}
+		}
+		return true;
 	}
 
 	private boolean prelinajuSaPozemky(IPozemok nehnutelnost, IPozemok parcela) {
