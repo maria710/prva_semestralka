@@ -655,6 +655,7 @@ public class GeodetAppController implements Initializable {
 			manazer.importSuborNehnutelnosti(file.getAbsolutePath());
 			manazer.importNehnutelnosti("C:\\Users\\mkuruczova\\projects\\aus2\\nehnutelnosti.csv");
 		}
+		refreshNehnutelnostiView(manazer.getNehnutelnosti());
 	}
 
 	public void onOptimalizovatClick() {
