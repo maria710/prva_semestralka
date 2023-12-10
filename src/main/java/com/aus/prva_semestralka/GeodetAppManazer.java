@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.aus.prva_semestralka.fileManazer.Exporter;
 import com.aus.prva_semestralka.fileManazer.Importer;
+import com.aus.prva_semestralka.fileManazer.ImporterSubor;
 import com.aus.prva_semestralka.generatory.Generator;
 import com.aus.prva_semestralka.objekty.IData;
 import com.aus.prva_semestralka.objekty.IPozemok;
@@ -23,7 +24,11 @@ public class GeodetAppManazer {
 	private QTNode<Integer> aktualnyNodePriVyhladavani;
 
 	private final Generator generator = new Generator();
-	private DynamickeHashovanieManazer dynamickeHashovanieManazer;
+	private final DynamickeHashovanieManazer dynamickeHashovanieManazer;
+
+	public GeodetAppManazer() {
+		dynamickeHashovanieManazer = new DynamickeHashovanieManazer();
+	}
 
 	public void vytvorStromy(int maxHlbka, int sirka, int dlzka) {
 		nehnutelnosti = new QuadTree<>(maxHlbka, sirka, dlzka);
@@ -31,11 +36,11 @@ public class GeodetAppManazer {
 	}
 
 	public void vytvorSubory(int blokovaci, int blokovaciPreplnovaci, String nazovSuboruParcely, String nazovSuboruNehnutelnosti,
-							 String preplnovaciSuborParcely, String preplnovaciSuborNehnutelnosti) {
+							 String preplnovaciSuborParcely, String preplnovaciSuborNehnutelnosti, int pocetBitov) {
 		try {
-			dynamickeHashovanieManazer = new DynamickeHashovanieManazer();
+
 			dynamickeHashovanieManazer.vytvorSubory(blokovaci, blokovaci, blokovaciPreplnovaci, blokovaciPreplnovaci,
-													nazovSuboruParcely, nazovSuboruNehnutelnosti, preplnovaciSuborParcely, preplnovaciSuborNehnutelnosti);
+													nazovSuboruParcely, nazovSuboruNehnutelnosti, preplnovaciSuborParcely, preplnovaciSuborNehnutelnosti, pocetBitov);
 		} catch (Exception e) {
 			throw new RuntimeException("Nepodarilo sa vytvorit subory pre dynamicke hashovanie");
 		}
@@ -75,6 +80,14 @@ public class GeodetAppManazer {
 			return parcely.pridaj(parcelaPreStrom);
 		}
 		return false;
+	}
+
+	public void pridajParceluDoStromu(Parcela parcela) {
+		parcely.pridaj(parcela);
+	}
+
+	public void pridajNehnutelnostDoStromu(Nehnutelnost nehnutelnost) {
+		nehnutelnosti.pridaj(nehnutelnost);
 	}
 
 	public boolean vymazNehnutelnost(Nehnutelnost nehnutelnost) {
@@ -235,25 +248,43 @@ public class GeodetAppManazer {
 	}
 
 	public void importParcely(String absolutePath) {
-		var parcelyImportovane = Importer.importFromCSV(absolutePath, true);
+		var parcelyImportovane = Importer.importFromCSVSimpleObject(absolutePath, true);
 		for (IPozemok pozemok : parcelyImportovane) {
-			pridajParcelu((Parcela) pozemok);
+			pridajParceluDoStromu((Parcela) pozemok);
 		}
 	}
 
 	public void importNehnutelnosti(String absolutePath) {
-		var nehnutelnostiImportovane = Importer.importFromCSV(absolutePath, false);
+		var nehnutelnostiImportovane = Importer.importFromCSVSimpleObject(absolutePath, false);
 		for (IPozemok pozemok : nehnutelnostiImportovane) {
-			pridajNehnutelnost((Nehnutelnost) pozemok);
+			pridajNehnutelnostDoStromu((Nehnutelnost) pozemok);
 		}
 	}
 
 	public void exportParcely(String absolutePath) {
-		Exporter.exportToCSV(parcely.getAllData(), absolutePath);
+		Exporter.exportToCSVSimpleObject(parcely.getAllData(), absolutePath);
 	}
 
 	public void exportNehnutelnosti(String absolutePath) {
-		Exporter.exportToCSV(nehnutelnosti.getAllData(), absolutePath);
+		Exporter.exportToCSVSimpleObject(nehnutelnosti.getAllData(), absolutePath);
+	}
+
+	public void importSuborParcely(String absolutePath) {
+		ImporterSubor importerSubor = new ImporterSubor();
+		dynamickeHashovanieManazer.setHashovanieParcely(importerSubor.importDynamickeHashovanieParcela(absolutePath));
+	}
+
+	public void importSuborNehnutelnosti(String absolutePath) {
+		ImporterSubor importerSubor = new ImporterSubor();
+		dynamickeHashovanieManazer.setHashovanieNehnutelnosti(importerSubor.importDynamickeHashovanieNehnutelnosti(absolutePath));
+	}
+
+	public void exportSuborParcely(String absolutePath) {
+		dynamickeHashovanieManazer.exportSuboruParcela(absolutePath);
+	}
+
+	public void exportSuborNehnutelnosti(String absolutePath) {
+		dynamickeHashovanieManazer.exportSuboruNehnutelnost(absolutePath);
 	}
 
 	public void optimalizuj() {

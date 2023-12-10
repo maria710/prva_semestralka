@@ -12,6 +12,13 @@ public class TrieNodeExterny<T> extends TrieNode<T> {
 		this.pocetRecordov = pocetRecordov;
 	}
 
+	public TrieNodeExterny(int indexBloku, int pocetRecordov, int pocetBlokovVZretazeni) {
+		super(null);
+		this.indexBloku = indexBloku;
+		this.pocetRecordov = pocetRecordov;
+		this.pocetBlokovVZretazeni = pocetBlokovVZretazeni;
+	}
+
 	public int getIndexBloku() {
 		return indexBloku;
 	}

@@ -53,4 +53,43 @@ public class Importer {
 
 		return pozemkyList;
 	}
+
+	public static List<IPozemok> importFromCSVSimpleObject(String csvFilePath, boolean isParcela) {
+		List<IPozemok> pozemkyList = new ArrayList<>();
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+			reader.readLine(); // preskakujeme hlavicku v exceli
+
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] data = line.split(";");
+				if (data.length == 9) { // kontrola ci je riadok v spravnom formate
+					int id = Integer.parseInt(data[0]);
+					String sirka1 = data[1];
+					String dlzka1 = data[2];
+					double x1 = Double.parseDouble(data[3]);
+					double y1 = Double.parseDouble(data[4]);
+					String sirka2 = data[5];
+					String dlzka2 = data[6];
+					double x2 = Double.parseDouble(data[7]);
+					double y2 = Double.parseDouble(data[8]);
+
+					Ohranicenie gpsPozicia = new Ohranicenie(new GpsPozicia(sirka1, dlzka1, x1, y1), new GpsPozicia(sirka2, dlzka2, x2, y2));
+
+					if (isParcela) {
+						Parcela parcela = new Parcela(id, gpsPozicia);
+						pozemkyList.add(parcela);
+
+					} else {
+						Nehnutelnost nehnutelnost = new Nehnutelnost(id, gpsPozicia);
+						pozemkyList.add(nehnutelnost);
+					}
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Chyba pri citani zo suboru: " + csvFilePath);
+		}
+
+		return pozemkyList;
+	}
 }

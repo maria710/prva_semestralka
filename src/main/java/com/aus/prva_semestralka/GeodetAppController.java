@@ -1,5 +1,6 @@
 package com.aus.prva_semestralka;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -15,6 +16,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.net.URL;
@@ -92,6 +94,12 @@ public class GeodetAppController implements Initializable {
 
 	@FXML
 	public TextField identifikacneCisloTextField;
+
+	@FXML
+	public MenuItem nehnutelnostiImportSubor;
+
+	@FXML
+	public MenuItem nehnutelnostiExportSubor;
 
 	private GeodetAppManazer manazer;
 
@@ -216,12 +224,14 @@ public class GeodetAppController implements Initializable {
 		zmenitRozmerButton.setDisable(false);
 		vypocitatZdravieButton.setDisable(false);
 
-		int blokovaciHlavny =  Integer.parseInt(bfHlavnyTextField.getText());
-		int blokovaciPreplnovaci = Integer.parseInt(bfPreplnovaciTextField.getText());
+		if (!Objects.equals(bfHlavnyTextField.getText(), "") && bfPreplnovaciTextField.getText() != null) {
+			int blokovaciHlavny =  Integer.parseInt(bfHlavnyTextField.getText());
+			int blokovaciPreplnovaci = Integer.parseInt(bfPreplnovaciTextField.getText());
 
-		manazer.vytvorSubory(blokovaciHlavny, blokovaciPreplnovaci, "parcely.bin", "nehnutelnosti.bin",
-							 "parcelyPreplnovaci.bin", "nehnutelnostiPreplnovaci.bin");
-		manazer.clearSubory();
+			manazer.vytvorSubory(blokovaciHlavny, blokovaciPreplnovaci, "parcely.bin", "nehnutelnosti.bin",
+								 "parcelyPreplnovaci.bin", "nehnutelnostiPreplnovaci.bin", 3);
+			manazer.clearSubory();
+		}
 	}
 
 	@FXML
@@ -624,6 +634,29 @@ public class GeodetAppController implements Initializable {
 		}
 	}
 
+	public void onParcelyImportSuborClick() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("C:\\Users\\mkuruczova\\projects\\aus2"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		File file = fileChooser.showOpenDialog(null);
+		if (file != null) {
+			manazer.importSuborParcely(file.getAbsolutePath());
+			manazer.importParcely("C:\\Users\\mkuruczova\\projects\\aus2\\parcely.csv");
+		}
+		refreshParcelyView(manazer.getParcely());
+	}
+
+	public void onNehnutelnostiImportSuborClick() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("C:\\Users\\mkuruczova\\projects\\aus2"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		File file = fileChooser.showOpenDialog(null);
+		if (file != null) {
+			manazer.importSuborNehnutelnosti(file.getAbsolutePath());
+			manazer.importNehnutelnosti("C:\\Users\\mkuruczova\\projects\\aus2\\nehnutelnosti.csv");
+		}
+	}
+
 	public void onOptimalizovatClick() {
 		manazer.optimalizuj();
 	}
@@ -654,5 +687,31 @@ public class GeodetAppController implements Initializable {
 
 		zdravieParcelyField.setText(zdravieParcely.toString());
 		zdravieNehnutelnostiField.setText(zdravieNehnutelnosti.toString());
+	}
+
+	public void shutdown() {
+		// Cleanup code for this specific controller
+	}
+
+	@FXML
+	private void onZavrietUlozitButton() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setInitialDirectory(new File("C:\\Users\\mkuruczova\\projects\\aus2"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		File file = fileChooser.showSaveDialog(null);
+		if (file != null) {
+			manazer.exportSuborNehnutelnosti(file.getAbsolutePath());
+			manazer.exportNehnutelnosti("C:\\Users\\mkuruczova\\projects\\aus2\\nehnutelnosti.csv");
+		}
+
+		FileChooser fileChooserParcely = new FileChooser();
+		fileChooserParcely.setInitialDirectory(new File("C:\\Users\\mkuruczova\\projects\\aus2"));
+		fileChooserParcely.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+		File fileParcely = fileChooserParcely.showSaveDialog(null);
+		if (file != null) {
+			manazer.exportSuborParcely(fileParcely.getAbsolutePath());
+			manazer.exportParcely("C:\\Users\\mkuruczova\\projects\\aus2\\parcely.csv");
+		}
+		shutdown();
 	}
 }

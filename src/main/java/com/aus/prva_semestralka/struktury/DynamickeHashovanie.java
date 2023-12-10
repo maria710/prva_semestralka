@@ -3,15 +3,12 @@ package com.aus.prva_semestralka.struktury;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
 import com.aus.prva_semestralka.fileManazer.BlokManazer;
-import com.aus.prva_semestralka.fileManazer.Exporter;
 import com.aus.prva_semestralka.fileManazer.ExporterSubor;
 import com.aus.prva_semestralka.fileManazer.FileManazer;
-import com.aus.prva_semestralka.fileManazer.Importer;
 import com.aus.prva_semestralka.objekty.Blok;
 import com.aus.prva_semestralka.objekty.IRecord;
 import com.aus.prva_semestralka.objekty.TrieNodeMap;
@@ -24,13 +21,13 @@ public class DynamickeHashovanie<T extends IRecord> {
 	private final FileManazer fileManazer;
 	private final FileManazer fileManazerPreplnovaci;
 	private int currentBitIndex = -1;
-	private final int pocetBitovVHash = 3;
+	private final int pocetBitovVHash;
 
 	private final BlokManazer<T> blokManazer;
 	private final BlokManazer<T> blokManazerPreplnovaci;
 
 
-	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path, String pathPreplnovaci, int blokovaciFaktorPreplnovaci) throws FileNotFoundException {
+	public DynamickeHashovanie(Class<T> classType, int blokovaciFaktor, String path, String pathPreplnovaci, int blokovaciFaktorPreplnovaci, int pocetBitovVHash) throws FileNotFoundException {
 		root = new TrieNodeExterny<>(null, 0);
 		this.blokovaciFaktor = blokovaciFaktor;
 		this.fileManazer = new FileManazer(path);
@@ -39,6 +36,11 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 		this.blokManazer = new BlokManazer<>(classType, fileManazer, blokovaciFaktor);
 		this.blokManazerPreplnovaci = new BlokManazer<>(classType, fileManazerPreplnovaci, blokovaciFaktorPreplnovaci);
+		this.pocetBitovVHash = pocetBitovVHash;
+	}
+
+	public TrieNode<T> getRoot() {
+		return root;
 	}
 
 	public IRecord najdiZaznam(T record) {
@@ -126,19 +128,16 @@ public class DynamickeHashovanie<T extends IRecord> {
 				} else {
 					blokManazerCurrent.zapisBlokDoSubor(blok, indexBlokuNode);
 				}
-//				blokManazerCurrent.zapisBlokDoSubor(blok, indexBlokuNode);
 				Blok<T> blokNaStrasenie = dajBlokNaStriasanie(externalNode);
 				if (blokNaStrasenie != null) {
 					blokManazerPreplnovaci.dealokujBlok(blokNaStrasenie.getIndex());
 					externalNode.znizPocetBlokovVZretazeni();
 				}
 
-				var zruseny = zrusInternyNodeAkSaDa((TrieNodeInterny<T>) externalNode.getParent());
-
+				var zruseny = mergeSynovInterneho((TrieNodeInterny<T>) externalNode.getParent());
 				while(zruseny != null) {
-					zruseny = zrusInternyNodeAkSaDa((TrieNodeInterny<T>) zruseny.getParent());
+					zruseny = mergeSynovInterneho((TrieNodeInterny<T>) zruseny.getParent());
 				}
-
 				return true;
 			}
 			if (blok.getNasledovnik() == -1) {
@@ -363,7 +362,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 		return (TrieNodeExterny<T>) currentNode;
 	}
 
-	private TrieNodeInterny<T> vytvorNovyInternyNode(TrieNodeExterny<T> currentNodeExterny) {
+	public TrieNodeInterny<T> vytvorNovyInternyNode(TrieNodeExterny<T> currentNodeExterny) {
 		TrieNodeInterny<T> newTrieNodeInterny = new TrieNodeInterny<>(currentNodeExterny.getParent());
 		TrieNodeInterny<T> parent = (TrieNodeInterny<T>) currentNodeExterny.getParent();
 
@@ -378,7 +377,7 @@ public class DynamickeHashovanie<T extends IRecord> {
 		return newTrieNodeInterny;
 	}
 
-	private TrieNodeExterny<T> zrusInternyNodeAkSaDa(TrieNodeInterny<T> trieNodeInterny) {
+	private TrieNodeExterny<T> mergeSynovInterneho(TrieNodeInterny<T> trieNodeInterny) {
 		if (trieNodeInterny == null || trieNodeInterny.getLavySyn() instanceof TrieNodeInterny<T> || trieNodeInterny.getPravySyn() instanceof TrieNodeInterny<T>) {
 			return null;
 		}
@@ -472,33 +471,20 @@ public class DynamickeHashovanie<T extends IRecord> {
 
 	public List<TrieNodeMap<T>> getExterneNodes() {
 		List<TrieNodeMap<T>> externeNodes = new ArrayList<>();
-		currentBitIndex = 0;
-		BitSet bitovaCesta = new BitSet(pocetBitovVHash);
 
-		Stack<TrieNode<T>> stack = new Stack<>();
-		TrieNode<T> current = root;
+		Stack<TrieNodeMap<T>> stack = new Stack<>();
+		var current = new TrieNodeMap<>("", root);
+		stack.push(current);
 
-		while (current != null || !stack.isEmpty()) {
-			while (current != null) {
-				stack.push(current);
-				if (current instanceof TrieNodeInterny) {
-					current = ((TrieNodeInterny<T>) current).getLavySyn();
-				} else {
-					BitSet novaBitovaCesta = (BitSet) bitovaCesta.clone();
-					externeNodes.add(new TrieNodeMap<>(novaBitovaCesta, (TrieNodeExterny<T>) current));
-					break;
-				}
+		while (!stack.isEmpty()) {
+			if (current.getNode() instanceof TrieNodeInterny<T> interny) {
+				stack.push(new TrieNodeMap<>(current.getKey() + "1", interny.getPravySyn()));
+				stack.push(new TrieNodeMap<>(current.getKey() + "0", interny.getLavySyn()));
+			} else if (current.getNode() instanceof TrieNodeExterny<T> externy) {
+				externeNodes.add(new TrieNodeMap<>(current.getKey(), externy));
 			}
 
 			current = stack.pop();
-
-			if (current instanceof TrieNodeInterny) {
-				currentBitIndex--;
-				bitovaCesta.set(currentBitIndex);
-				current = ((TrieNodeInterny<T>) current).getPravySyn();
-			} else {
-				current = null;
-			}
 		}
 		return externeNodes;
 	}

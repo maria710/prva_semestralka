@@ -19,12 +19,20 @@ public class DynamickeHashovanieManazer {
 	public DynamickeHashovanieManazer() {
 	}
 
+	public void setHashovanieParcely(DynamickeHashovanie<Parcela> hashovanieParcely) {
+		this.hashovanieParcely = hashovanieParcely;
+	}
+
+	public void setHashovanieNehnutelnosti(DynamickeHashovanie<Nehnutelnost> hashovanieNehnutelnosti) {
+		this.hashovanieNehnutelnosti = hashovanieNehnutelnosti;
+	}
+
 
 	public void vytvorSubory(int blokovaciParcely, int blokovaciNehnutelnosti, int blokovaciParcelyPreplnovaci, int blokovaciNehnutelnostiPreplnovaci,
-							 String nazovSuboruParcely, String nazovSuboruNehnutelnosti, String preplnovaciSuborParcely, String preplnovaciSuborNehnutelnosti) throws FileNotFoundException {
+							 String nazovSuboruParcely, String nazovSuboruNehnutelnosti, String preplnovaciSuborParcely, String preplnovaciSuborNehnutelnosti, int pocetBitov) throws FileNotFoundException {
 
-		hashovanieParcely = new DynamickeHashovanie<>(Parcela.class, blokovaciParcely, nazovSuboruParcely, preplnovaciSuborParcely, blokovaciParcelyPreplnovaci);
-		hashovanieNehnutelnosti = new DynamickeHashovanie<>(Nehnutelnost.class, blokovaciNehnutelnosti, nazovSuboruNehnutelnosti, preplnovaciSuborNehnutelnosti, blokovaciNehnutelnostiPreplnovaci);
+		hashovanieParcely = new DynamickeHashovanie<>(Parcela.class, blokovaciParcely, nazovSuboruParcely, preplnovaciSuborParcely, blokovaciParcelyPreplnovaci, pocetBitov);
+		hashovanieNehnutelnosti = new DynamickeHashovanie<>(Nehnutelnost.class, blokovaciNehnutelnosti, nazovSuboruNehnutelnosti, preplnovaciSuborNehnutelnosti, blokovaciNehnutelnostiPreplnovaci, pocetBitov);
 	}
 
 	public String toStringHlavnySuborParcely() {
@@ -104,15 +112,7 @@ public class DynamickeHashovanieManazer {
 	}
 
 	public void exportSuboruNehnutelnost(String nazovSuboruNehnutelnost) {
-		hashovanieParcely.exportDoSuboru(nazovSuboruNehnutelnost);
-	}
-
-	public DynamickeHashovanie<Parcela> importSuboruParcela(String nazovSuboruParcela) {
-		return Importer.importZoSuboruParcely(nazovSuboruParcela);
-	}
-
-	public DynamickeHashovanie<Nehnutelnost> importSuboruNehnutelnost(String nazovSuboruNehnutelnost) {
-		return Importer.importZoSuboruNehnutelnosti(nazovSuboruNehnutelnost);
+		hashovanieNehnutelnosti.exportDoSuboru(nazovSuboruNehnutelnost);
 	}
 
 	private void skontrolujIdentifikacneCislo(IRecord record) {

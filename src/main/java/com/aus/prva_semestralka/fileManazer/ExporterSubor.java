@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.aus.prva_semestralka.objekty.TrieNodeMap;
+import com.aus.prva_semestralka.struktury.TrieNodeExterny;
 
 public class ExporterSubor<T> {
 
@@ -15,22 +16,17 @@ public class ExporterSubor<T> {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
 			writer.write("BFHlavny;BFPreplnovaci;CestaHlavny;CestaPreplnujuci;PocetBitov\n"); // prvy riadok v exceli
 
-			writer.write(blokovaciFaktor + ";" + blokovaciFaktorPreplnovaci + ";" + pathHlavny + ";" + pathPreplnovaci + ";" + pocetBitov + "\n");
+			writer.write(blokovaciFaktor + ";" + blokovaciFaktorPreplnovaci + ";" + "C:\\Users\\mkuruczova\\projects\\aus2\\prva_semestralka\\" + pathHlavny + ";"
+								 + "C:\\Users\\mkuruczova\\projects\\aus2\\prva_semestralka\\" + pathPreplnovaci + ";" + pocetBitov + "\n");
 
 			trieNodes.forEach(node -> {
-				try {
-					for (int i = 0; i < pocetBitov; i++) {
-						if (node.getKey().get(i)) {
-							writer.write("1;");
-						} else {
-							writer.write("0;");
-						}
-
+				if (node.getNode() instanceof TrieNodeExterny<T> externy) {
+					try {
+						writer.write(node.getKey() + ";");
+						writer.write(externy.getIndexBloku() + ";" + externy.getPocetRecordov() + ";" + externy.getPocetBlokovVZretazeni() + "\n");
+					} catch (IOException e) {
+						throw new RuntimeException("Chyba pri zapisovani do suboru: " + path);
 					}
-					writer.write("\n");
-					writer.write(node.getNode().getIndexBloku() + ";" + node.getNode().getPocetRecordov() + ";" + node.getNode().getPocetBlokovVZretazeni() + "\n");
-				} catch (IOException e) {
-					throw new RuntimeException("Chyba pri zapisovani do suboru: " + path);
 				}
 			});
 

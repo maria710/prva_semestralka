@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DynamickeHashovanieTest {
 
-	DynamickeHashovanie<Parcela> hashovanie = new DynamickeHashovanie<>(Parcela.class, 2,  "subor.bin", "preplnovaciSubor.bin", 3);
+	DynamickeHashovanie<Parcela> hashovanie = new DynamickeHashovanie<>(Parcela.class, 2,  "subor.bin", "preplnovaciSubor.bin", 3, 3);
 	private ArrayList<IRecord> pozemky;
 	private final Generator generator = new Generator();
 

@@ -25,10 +25,12 @@
         <Menu mnemonicParsing="false" text="Nehnuteľnosti">
             <MenuItem fx:id="nehnutelnostiImportMenuItem" mnemonicParsing="false" onAction="#onNehnutelnostiImportClick" text="Import" />
             <MenuItem fx:id="nehnutelnostiExportMenuItem" mnemonicParsing="false" onAction="#onNehnutelnostiExportClick" text="Export" />
+         <MenuItem fx:id="nehnutelnostiImportSubor" mnemonicParsing="false" onAction="#onNehnutelnostiImportSuborClick" text="Import súbor" />
         </Menu>
         <Menu mnemonicParsing="false" text="Parcely">
             <MenuItem fx:id="parcelaImportMenuItem" mnemonicParsing="false" onAction="#onParcelyImportClick" text="Import" />
             <MenuItem fx:id="parcelyExportMenuItem" mnemonicParsing="false" onAction="#onParcelyExportClick" text="Export" />
+         <MenuItem fx:id="parcelyImportSubor" mnemonicParsing="false" onAction="#onParcelyImportSuborClick" text="Import súbor" />
         </Menu>
     </MenuBar>
     <SplitPane dividerPositions="0.2505567928730512, 0.7505567928730512" focusTraversable="true" VBox.vgrow="ALWAYS">
@@ -142,6 +144,11 @@
             <HBox layoutX="14.0" layoutY="632.0" prefHeight="45.0" prefWidth="463.0">
                <children>
                   <Button fx:id="vymazatButton" alignment="TOP_CENTER" contentDisplay="TOP" mnemonicParsing="false" onAction="#onVymazatButton" text="Vymazať" />
+                  <Button fx:id="vymazatButton1" alignment="TOP_CENTER" contentDisplay="TOP" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#onZavrietUlozitButton" text="Zavrieť a uložiť">
+                     <HBox.margin>
+                        <Insets left="20.0" />
+                     </HBox.margin>
+                  </Button>
                </children>
             </HBox>
             </AnchorPane>
