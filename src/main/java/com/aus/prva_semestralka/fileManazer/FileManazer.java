@@ -11,9 +11,15 @@ public class FileManazer {
 
 	private final RandomAccessFile file;
 	private final Logger logger = Logger.getLogger(FileManazer.class.getName());
+	private final String path;
 
 	public FileManazer(String path) throws FileNotFoundException {
+		this.path = path;
 		this.file = new RandomAccessFile(path, "rw");
+	}
+
+	public String getPath() {
+		return this.path;
 	}
 
 	public void close() throws Exception {

@@ -3,12 +3,18 @@ package com.aus.prva_semestralka.struktury;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 import com.aus.prva_semestralka.fileManazer.BlokManazer;
+import com.aus.prva_semestralka.fileManazer.Exporter;
+import com.aus.prva_semestralka.fileManazer.ExporterSubor;
 import com.aus.prva_semestralka.fileManazer.FileManazer;
+import com.aus.prva_semestralka.fileManazer.Importer;
 import com.aus.prva_semestralka.objekty.Blok;
 import com.aus.prva_semestralka.objekty.IRecord;
+import com.aus.prva_semestralka.objekty.TrieNodeMap;
 
 public class DynamickeHashovanie<T extends IRecord> {
 
@@ -456,4 +462,44 @@ public class DynamickeHashovanie<T extends IRecord> {
 		} catch (Exception e) {
 			System.out.println("Nerpodarilo sa zatvorit subory");
 		}
-	}}
+	}
+
+	public void exportDoSuboru(String path) {
+		ExporterSubor<T> exporter = new ExporterSubor<>();
+		exporter.exportDynamickeHashovanie(blokovaciFaktor, blokovaciFaktorPreplnovaci, fileManazer.getPath(), fileManazerPreplnovaci.getPath(), path,
+										   pocetBitovVHash, getExterneNodes());
+	}
+
+	public List<TrieNodeMap<T>> getExterneNodes() {
+		List<TrieNodeMap<T>> externeNodes = new ArrayList<>();
+		currentBitIndex = 0;
+		BitSet bitovaCesta = new BitSet(pocetBitovVHash);
+
+		Stack<TrieNode<T>> stack = new Stack<>();
+		TrieNode<T> current = root;
+
+		while (current != null || !stack.isEmpty()) {
+			while (current != null) {
+				stack.push(current);
+				if (current instanceof TrieNodeInterny) {
+					current = ((TrieNodeInterny<T>) current).getLavySyn();
+				} else {
+					BitSet novaBitovaCesta = (BitSet) bitovaCesta.clone();
+					externeNodes.add(new TrieNodeMap<>(novaBitovaCesta, (TrieNodeExterny<T>) current));
+					break;
+				}
+			}
+
+			current = stack.pop();
+
+			if (current instanceof TrieNodeInterny) {
+				currentBitIndex--;
+				bitovaCesta.set(currentBitIndex);
+				current = ((TrieNodeInterny<T>) current).getPravySyn();
+			} else {
+				current = null;
+			}
+		}
+		return externeNodes;
+	}
+}

@@ -2,6 +2,7 @@ package com.aus.prva_semestralka;
 
 import java.io.FileNotFoundException;
 
+import com.aus.prva_semestralka.fileManazer.Importer;
 import com.aus.prva_semestralka.generatory.GeneratorKlucov;
 import com.aus.prva_semestralka.objekty.IRecord;
 import com.aus.prva_semestralka.objekty.Nehnutelnost;
@@ -96,6 +97,22 @@ public class DynamickeHashovanieManazer {
 	public void clearSubory() {
 		hashovanieParcely.clear();
 		hashovanieNehnutelnosti.clear();
+	}
+
+	public void exportSuboruParcela(String nazovSuboruParcela) {
+		hashovanieParcely.exportDoSuboru(nazovSuboruParcela);
+	}
+
+	public void exportSuboruNehnutelnost(String nazovSuboruNehnutelnost) {
+		hashovanieParcely.exportDoSuboru(nazovSuboruNehnutelnost);
+	}
+
+	public DynamickeHashovanie<Parcela> importSuboruParcela(String nazovSuboruParcela) {
+		return Importer.importZoSuboruParcely(nazovSuboruParcela);
+	}
+
+	public DynamickeHashovanie<Nehnutelnost> importSuboruNehnutelnost(String nazovSuboruNehnutelnost) {
+		return Importer.importZoSuboruNehnutelnosti(nazovSuboruNehnutelnost);
 	}
 
 	private void skontrolujIdentifikacneCislo(IRecord record) {
