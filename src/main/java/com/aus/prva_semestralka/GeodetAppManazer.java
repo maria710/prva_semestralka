@@ -78,16 +78,27 @@ public class GeodetAppManazer {
 	}
 
 	public boolean vymazNehnutelnost(Nehnutelnost nehnutelnost) {
-		nehnutelnost.getParcely().forEach(parcela -> parcela.getNehnutelnosti().remove(nehnutelnost));
-		if (dynamickeHashovanieManazer.vymazNehnutelnost(nehnutelnost)) {
+		var nehnutelnostNajdena = dynamickeHashovanieManazer.najdiNehnutelnost(nehnutelnost);
+		nehnutelnostNajdena.getParcely().forEach(parcela -> {
+			var parcelaNajdena = dynamickeHashovanieManazer.najdiParcelu(parcela);
+			parcelaNajdena.odstranNehnutelnost(nehnutelnostNajdena);
+			dynamickeHashovanieManazer.upravParcelu(parcelaNajdena);
+		});
+
+		if (dynamickeHashovanieManazer.vymazNehnutelnost(nehnutelnostNajdena)) {
 			return nehnutelnosti.deleteDataFromNode(nehnutelnost, aktualnyNodePriVyhladavani);
 		}
 		return false;
 	}
 
 	public boolean vymazParcelu(Parcela parcela) {
-		parcela.getNehnutelnosti().forEach(nehnutelnost -> nehnutelnost.getParcely().remove(parcela));
-		if (dynamickeHashovanieManazer.vymazParcelu(parcela)) {
+		var najdenaParcela = dynamickeHashovanieManazer.najdiParcelu(parcela);
+		najdenaParcela.getNehnutelnosti().forEach(nehnutelnost -> {
+			var nehnutelnostNajdena = dynamickeHashovanieManazer.najdiNehnutelnost(nehnutelnost);
+			nehnutelnostNajdena.odstranParcelu(najdenaParcela);
+			dynamickeHashovanieManazer.upravNehnutelnost(nehnutelnostNajdena);
+		});
+		if (dynamickeHashovanieManazer.vymazParcelu(najdenaParcela)) {
 			return parcely.deleteDataFromNode(parcela, aktualnyNodePriVyhladavani);
 		}
 		return false;

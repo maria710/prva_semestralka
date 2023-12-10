@@ -85,7 +85,7 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 	}
 
 	public String toStringZoznam() {
-		return "Identifikacne cislo:" + identifikacneCislo + ", Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
+		return "\n\tIdentifikacne cislo:" + identifikacneCislo + ", Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
 	}
 
 	@Override
@@ -230,5 +230,9 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 		} else {
 			return String.format("%-" + Properties.POCET_PLATNYCH_ZNAKOV + "s", povodnyPopis); // pridame medzery na koniec
 		}
+	}
+
+	public void odstranNehnutelnost(Nehnutelnost nehnutelnostNajdena) {
+		nehnutelnosti.removeIf(nehnutelnost -> nehnutelnost.getIdetifikacneCislo().equals(nehnutelnostNajdena.getIdetifikacneCislo()));
 	}
 }

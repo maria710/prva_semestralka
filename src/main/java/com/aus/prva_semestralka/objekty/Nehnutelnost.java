@@ -82,7 +82,7 @@ public class Nehnutelnost implements IPozemok {
 	}
 
 	public String toStringZoznam() {
-		return "Identifikacne cislo:" + identifikacneCislo +  ", Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
+		return "\n\tIdentifikacne cislo:" + identifikacneCislo +  ", Supisne cislo: " + supisneCislo + ", popis: " + popis + ", gps pozicie: " + gpsPozicie;
 	}
 
 	@Override
@@ -226,5 +226,10 @@ public class Nehnutelnost implements IPozemok {
 		} else {
 			return String.format("%-" + Properties.POCET_PLATNYCH_ZNAKOV + "s", povodnyPopis); // pridame medzery na koniec
 		}
+	}
+
+	public void odstranParcelu(Parcela najdenaParcela) {
+		parcely.removeIf(p -> Objects.equals(p.getIdetifikacneCislo(), najdenaParcela.getIdetifikacneCislo()));
+
 	}
 }
