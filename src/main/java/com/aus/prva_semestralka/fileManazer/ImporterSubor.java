@@ -37,17 +37,25 @@ public class ImporterSubor {
 
 				TrieNodeExterny<Parcela> trieNodeExterny = new TrieNodeExterny<>(indexBloku, pocetRecordov, pocetBlokovVZretazeni);
 				TrieNode<Parcela> currentNode = dynamickeHashovanie.getRoot();
-				for (int i = 0; i < key.length(); i++) {
-					if ( key.length() - 1 == i && currentNode instanceof TrieNodeInterny<Parcela> interny) {
-						if (key.charAt(i) == '0') {
-							interny.setLavySyn(trieNodeExterny);
-							trieNodeExterny.setParent(interny);
+				for (int i = 0; i <= key.length(); i++) {
+					if ( key.length() == i) {
+						TrieNodeInterny<Parcela> parent = (TrieNodeInterny<Parcela>) currentNode.getParent();
+						if (key.charAt(i - 1) == '0') {
+							parent.setLavySyn(trieNodeExterny);
+							trieNodeExterny.setParent(parent);
+							break;
 						} else {
-							interny.setPravySyn(trieNodeExterny);
-							trieNodeExterny.setParent(interny);
+							parent.setPravySyn(trieNodeExterny);
+							trieNodeExterny.setParent(parent);
+							break;
 						}
 					} else if (currentNode instanceof TrieNodeExterny<Parcela> externy){
 						currentNode = dynamickeHashovanie.vytvorNovyInternyNode(externy);
+					}
+					if (key.charAt(i) == '0') {
+						currentNode = ((TrieNodeInterny<Parcela>) currentNode).getLavySyn();
+					} else {
+						currentNode = ((TrieNodeInterny<Parcela>) currentNode).getPravySyn();
 					}
 				}
 			}
@@ -55,8 +63,8 @@ public class ImporterSubor {
 		} catch (IOException e) {
 			throw new RuntimeException("Chyba pri citani zo suboru: " + path);
 		}
-
 	}
+
 
 	public DynamickeHashovanie<Nehnutelnost> importDynamickeHashovanieNehnutelnosti(String path) {
 		try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
@@ -108,6 +116,5 @@ public class ImporterSubor {
 		} catch (IOException e) {
 			throw new RuntimeException("Chyba pri citani zo suboru: " + path);
 		}
-
 	}
 }
