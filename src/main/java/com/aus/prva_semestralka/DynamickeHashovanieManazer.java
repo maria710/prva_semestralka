@@ -108,11 +108,11 @@ public class DynamickeHashovanieManazer {
 	}
 
 	public void exportSuboruParcela(String nazovSuboruParcela) {
-		hashovanieParcely.exportDoSuboru(nazovSuboruParcela);
+		hashovanieParcely.exportDoSuboru(nazovSuboruParcela, GeneratorKlucov.getKluc());
 	}
 
 	public void exportSuboruNehnutelnost(String nazovSuboruNehnutelnost) {
-		hashovanieNehnutelnosti.exportDoSuboru(nazovSuboruNehnutelnost);
+		hashovanieNehnutelnosti.exportDoSuboru(nazovSuboruNehnutelnost, GeneratorKlucov.getKluc());
 	}
 
 	private void skontrolujIdentifikacneCislo(IRecord record) {

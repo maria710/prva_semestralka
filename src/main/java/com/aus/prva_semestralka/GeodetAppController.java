@@ -229,7 +229,7 @@ public class GeodetAppController implements Initializable {
 			int blokovaciPreplnovaci = Integer.parseInt(bfPreplnovaciTextField.getText());
 
 			manazer.vytvorSubory(blokovaciHlavny, blokovaciPreplnovaci, "parcely.bin", "nehnutelnosti.bin",
-								 "parcelyPreplnovaci.bin", "nehnutelnostiPreplnovaci.bin", 3);
+								 "parcelyPreplnovaci.bin", "nehnutelnostiPreplnovaci.bin", 2);
 			manazer.clearSubory();
 		}
 	}

@@ -11,13 +11,13 @@ import com.aus.prva_semestralka.struktury.TrieNodeExterny;
 public class ExporterSubor<T> {
 
 	public void exportDynamickeHashovanie(int blokovaciFaktor, int blokovaciFaktorPreplnovaci, String pathHlavny, String pathPreplnovaci, String path,
-												 int pocetBitov, List<TrieNodeMap<T>> trieNodes) {
+												 int pocetBitov, List<TrieNodeMap<T>> trieNodes, int dalsiPlatnyKluc) {
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
-			writer.write("BFHlavny;BFPreplnovaci;CestaHlavny;CestaPreplnujuci;PocetBitov\n"); // prvy riadok v exceli
+			writer.write("BFHlavny;BFPreplnovaci;CestaHlavny;CestaPreplnujuci;PocetBitov;poslednyPlatny\n"); // prvy riadok v exceli
 
 			writer.write(blokovaciFaktor + ";" + blokovaciFaktorPreplnovaci + ";" + "C:\\Users\\mkuruczova\\projects\\aus2\\prva_semestralka\\" + pathHlavny + ";"
-								 + "C:\\Users\\mkuruczova\\projects\\aus2\\prva_semestralka\\" + pathPreplnovaci + ";" + pocetBitov + "\n");
+								 + "C:\\Users\\mkuruczova\\projects\\aus2\\prva_semestralka\\" + pathPreplnovaci + ";" + pocetBitov + ";" + dalsiPlatnyKluc + "\n");
 
 			trieNodes.forEach(node -> {
 				if (node.getNode() instanceof TrieNodeExterny<T> externy) {

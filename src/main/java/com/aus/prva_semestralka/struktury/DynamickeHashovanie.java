@@ -465,10 +465,10 @@ public class DynamickeHashovanie<T extends IRecord> {
 		}
 	}
 
-	public void exportDoSuboru(String path) {
+	public void exportDoSuboru(String path, int dalsiPlatnyKluc) {
 		ExporterSubor<T> exporter = new ExporterSubor<>();
 		exporter.exportDynamickeHashovanie(blokovaciFaktor, blokovaciFaktorPreplnovaci, fileManazer.getPath(), fileManazerPreplnovaci.getPath(), path,
-										   pocetBitovVHash, getExterneNodes());
+										   pocetBitovVHash, getExterneNodes(), dalsiPlatnyKluc);
 	}
 
 	public List<TrieNodeMap<T>> getExterneNodes() {

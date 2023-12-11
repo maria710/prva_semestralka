@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import com.aus.prva_semestralka.generatory.GeneratorKlucov;
 import com.aus.prva_semestralka.objekty.Nehnutelnost;
 import com.aus.prva_semestralka.objekty.Parcela;
 import com.aus.prva_semestralka.struktury.DynamickeHashovanie;
@@ -25,7 +26,9 @@ public class ImporterSubor {
 			String pathHlavny = data[2];
 			String pathPreplnovaci = data[3];
 			int pocetBitov = Integer.parseInt(data[4]);
+			int dalsiPlatny = Integer.parseInt(data[5]);
 
+			GeneratorKlucov.setKluc(dalsiPlatny);
 			DynamickeHashovanie<Parcela> dynamickeHashovanie = new DynamickeHashovanie<>(Parcela.class, blokovaciFaktor, pathHlavny, pathPreplnovaci, blokovaciFaktorPreplnovaci, pocetBitov);
 
 			while ((line = reader.readLine()) != null) {
@@ -78,7 +81,9 @@ public class ImporterSubor {
 			String pathHlavny = data[2];
 			String pathPreplnovaci = data[3];
 			int pocetBitov = Integer.parseInt(data[4]);
+			int dalsiPlatny = Integer.parseInt(data[5]);
 
+			GeneratorKlucov.setKluc(dalsiPlatny);
 			DynamickeHashovanie<Nehnutelnost> dynamickeHashovanie = new DynamickeHashovanie<>(Nehnutelnost.class, blokovaciFaktor, pathHlavny, pathPreplnovaci, blokovaciFaktorPreplnovaci, pocetBitov);
 
 			while ((line = reader.readLine()) != null) {
