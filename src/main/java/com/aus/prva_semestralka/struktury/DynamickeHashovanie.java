@@ -159,18 +159,20 @@ public class DynamickeHashovanie<T extends IRecord> {
 			return false;
 		}
 		Blok<T> blok = blokManazer.citajBlokZoSuboru(indexBlokuNode);
+		var manazer = blokManazer;
 
 		while (true) {
 			var zaznam = blok.najdiZaznam(record);
 			if (zaznam != null) {
 				zaznam.upravParametre(record);
-				blokManazer.zapisBlokDoSubor(blok, indexBlokuNode);
+				manazer.zapisBlokDoSubor(blok, indexBlokuNode);
 				return true;
 			}
 			if (blok.getNasledovnik() == -1) {
 				return false;
 			}
 			blok = blokManazerPreplnovaci.citajBlokZoSuboru(blok.getNasledovnik());
+			manazer = blokManazerPreplnovaci;
 		}
 	}
 

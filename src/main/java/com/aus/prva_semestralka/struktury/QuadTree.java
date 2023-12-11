@@ -204,8 +204,12 @@ public class QuadTree<T> {
 			}
 
 			// ak ma synov, tak vymazeme data z aktualneho node
-			if (currentNode.getData().contains(data)) {
-				result = currentNode.getData().remove(data);
+			for (int i = 0; i < currentNode.getData().size(); i++) {
+				if (currentNode.getData().get(i).getPrimarnyKluc().equals(data.getPrimarnyKluc())) {
+					currentNode.getData().remove(i);
+					result = true;
+					break;
+				}
 			}
 
 			if (result) { // nemozeme vratit negativny vysledok, mozno sa najde este v dalsich synoch

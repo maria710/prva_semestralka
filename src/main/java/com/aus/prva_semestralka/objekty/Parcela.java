@@ -111,7 +111,6 @@ public class Parcela implements IPozemok, Serializable, IRecord {
 	@Override
 	public void upravParametre(IRecord record) {
 		if (record instanceof Parcela parcela) {
-			this.supisneCislo = parcela.supisneCislo;
 			this.popis = parcela.popis;
 			this.gpsPozicie = parcela.gpsPozicie;
 			this.nehnutelnosti = parcela.nehnutelnosti;

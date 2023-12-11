@@ -45,8 +45,8 @@ public class Generator {
 	public Ohranicenie getRandomOhranicenie(int sirka, int dlzka) {
 		double suradnicaX1 = vygenerujVOhraniceni(0, sirka);
 		double suradnicaY1 = vygenerujVOhraniceni(0, dlzka);
-		double suradnicaX2 = suradnicaX1 + 0.001;
-		double suradnicaY2 = suradnicaX2 + 0.001;
+		double suradnicaX2 = suradnicaX1 + 0.02;
+		double suradnicaY2 = suradnicaX2 + 0.02;
 
 		var randCislo = Math.random();
 		if (randCislo < 0.9 && randCislo > 0.4) {

@@ -690,10 +690,6 @@ public class GeodetAppController implements Initializable {
 		zdravieNehnutelnostiField.setText(zdravieNehnutelnosti.toString());
 	}
 
-	public void shutdown() {
-		// Cleanup code for this specific controller
-	}
-
 	@FXML
 	private void onZavrietUlozitButton() {
 		FileChooser fileChooser = new FileChooser();
@@ -713,6 +709,7 @@ public class GeodetAppController implements Initializable {
 			manazer.exportSuborParcely(fileParcely.getAbsolutePath());
 			manazer.exportParcely("C:\\Users\\mkuruczova\\projects\\aus2\\parcely.csv");
 		}
-		shutdown();
+
+		this.manazer.closeSubory();
 	}
 }
